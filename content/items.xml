@@ -1,0 +1,9 @@
+<items gfxroot="gfx/items/" deathanm2="gfx/death_items.anm2" version="1">
+    <passive id="1" name="Golden Apple" gfx="golden_apple.png" description="The Lord Returns" quality="2" cache="damage" tags="angel"/>
+    <passive id="2" name="Holy Smokes!" gfx="holy_smokes.png" description="Return of the Torch" quality="2" tags="angel"/>
+    <active id="3" name="Nehemiah's Hammer" gfx="nehemiahs_hammer.png" description="I'm Gonna Wreck It!" quality="3" maxcharges="0" chargetype="normal" />
+    <active id="4" name="Book of Ezra" gfx="book_of_ezra.png" description="Ab Ipso Ferro" quality="4" maxcharges="6" chargetype="normal" />
+
+</items>
+
+<!-- Cache flags: damage, firedelay, shotspeed, range, speed, tearflag, tearcolor, flying, weapon, familiars, luck, size, color, all  -->
