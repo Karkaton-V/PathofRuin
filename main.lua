@@ -32,7 +32,8 @@ local ONE_INTERVAL_OF_POISON = 20       -- This variable and the one before are 
 -- Functions
 
 --  -- Characters
----@param player EntityPlayer       -- establishes that player referencses an EntityPlayer
+
+--- @param player EntityPlayer       -- establishes that player referencses an EntityPlayer
 function POR:NehemiahInit(player)
     if player:GetPlayerType() ~= NEHEMIAH_TYPE then
         return -- If not Nehemiah, exits
@@ -110,6 +111,25 @@ function POR:NehemiahHammerUse(item)
     }
 end
 
+function POR:BookofEzraUse(_, _, player)
+    local spawnPos = player.Position
+    Isaac.GetItemConfig():GetNullItem(CollectibleType.COLLECTIBLE_LUNA)
+
+    return true
+end
+
+function POR:PostRender()
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        local pos = Isaac.WorldToScreen(entity.Position)
+        Isaac.RenderText(
+            tostring(entity.Type) .. "." .. tostring(entity.Variant) .. "." .. tostring(entity.SubType),
+            pos.X,
+            pos.Y,
+            1,1,1,1)
+    end
+end
+POR:AddCallback(ModCallbacks.MC_POST_RENDER, POR.PostRender)
+
 -------------------------------------------------------------------------------------------------------------------------------
 -- Callbacks
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, POR.NehemiahInit)
@@ -117,6 +137,7 @@ POR:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, POR.TaintedNehemiahInit)
 POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, POR.GoldenAppleCache)
 POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, POR.HolySmokesNewRoom)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM, POR.NehemiahHammerUse, NEHEMIAHSHAMMER_ITEM_ID)
+POR:AddCallback(ModCallbacks.MC_USE_ITEM, POR.BookofEzraUse, BOOKOFEZRA_ITEM_ID)
 
 -------------------------------------------------------------------------------------------------------------------------------
 --Compat
