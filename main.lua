@@ -112,13 +112,15 @@ function POR:NehemiahHammerUse(item)
 end
 
 function POR:BookofEzraUse(_, _, player)
-    local spawnPos = player.Position
-    Isaac.GetItemConfig():GetNullItem(CollectibleType.COLLECTIBLE_LUNA)
+    local room = game:GetRoom()
+    Isaac.Spawn(EntityType.ENTITY_EFFECT, Isaac.GetEntityVariantByName("Ezra's Moonlight") , 1, room:GetCenterPos(), Vector.Zero, nil) 
+
 
     return true
 end
 
-function POR:PostRender()
+--[[
+function mod:PostRender()
     for _, entity in ipairs(Isaac.GetRoomEntities()) do
         local pos = Isaac.WorldToScreen(entity.Position)
         Isaac.RenderText(
@@ -128,7 +130,8 @@ function POR:PostRender()
             1,1,1,1)
     end
 end
-POR:AddCallback(ModCallbacks.MC_POST_RENDER, POR.PostRender)
+mod:AddCallback(ModCallbacks.MC_POST_RENDER, mod.PostRender)
+]]--
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Callbacks
