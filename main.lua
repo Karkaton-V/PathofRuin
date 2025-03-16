@@ -4,23 +4,28 @@
 -- Setup
 if not REPENTANCE then end
 local POR = RegisterMod("Path of Ruin", 1)
-local game = Game()
+local game = POR.Game()
 
 
 -- Named Variables
 
 --  -- Declaring Characters
-local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)                                  -- Nehemiah
+local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)                      -- Tainted Nehemiah
 
-local NEHEMIAH_BEARD_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiah_beard.anm2")
+local NEHEMIAH_BEARD_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiah_beard.anm2")       -- Nehemiah's Costume
 
 
 --  -- Declaring Items
-local GOLDENAPPLE_ITEM_ID = Isaac.GetItemIdByName("Golden Apple")
-local HOLYSMOKES_ITEM_ID = Isaac.GetItemIdByName("Holy Smokes!")
-local NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")
-local BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra")
+local GOLDENAPPLE_ITEM_ID = Isaac.GetItemIdByName("Golden Apple")               -- item id of Golden Apple
+local HOLYSMOKES_ITEM_ID = Isaac.GetItemIdByName("Holy Smokes!")                -- item id of Holy Smokes
+local NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")      -- item id of Nehemiah's Hammer
+local BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra")                -- item id of Book of Ezra
+
+
+-- -- Declaring Effects
+local HAMMEREFFECT = Isaac.GetEntityTypeByName("Nehemiah's Hammer")     -- effect id of the hammer
+local MOONLIGHTEFFECT = Isaac.GetEntityTypeByName("Ezra's Moonlight")   -- effect id of the book's light
 
 --  -- Stuff Needed Around
 local GOLDEN_DAMAGE = 1
