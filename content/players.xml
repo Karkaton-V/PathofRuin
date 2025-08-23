@@ -10,12 +10,12 @@
 	/>
 
 	<player name="The Condemned"
-	skin="character_nehemiah_b.png"
-	nameimage="playername_nehemiah_b.png" 
+	skin="characterb_nehemiah.png"
+	nameimage="playernameb_nehemiah.png" 
 	hp="4" 
 	armor="2" 
 	keys="1"  
-	portrait="playerportrait_nehemiah_b.png"  
+	portrait="playerportraitb_nehemiah.png"  
 	skinColor="-1"
 	birthright="Putting Rumors to Rest"
 

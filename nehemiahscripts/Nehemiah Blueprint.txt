@@ -1,0 +1,142 @@
+Nehemiah
+Starts with: Nehemiah’s Hammer (PA) (Latent), Shiny Rock
+Also: Nehemiah’s Hammer can be used in a shop (if the secret room has not been found) to turn it into a Secret Room, and using it in a Super Secret Room turns it into a Secret Shop
+-When Nehemiah holds his hammer, instead of pickups, rocks drop chunks that can be thrown at enemies, but when carved a second time, the rock is destroyed and drops 1-2 pickups or rock spiders
+
+
+Mom - Radiant Cards! //unlock
+“Long Live the Divines!”
+— Unlocks Radiant Cards
+
+Mom’s Heart ✡️ - The Masons //familliar
+“Your Personal Wrecking Crew”
+— Spawns a familiar that changes every floor, can be: A tiny Nehemiah that shoots nail tears, A tiny mason that shoots brick tears, A tiny buff mason that bounces around the room and shoots a tiny spike ball at nearby enemies, and an old man that shoots rock tears at nearby enemies that split into more tears.
+
+Isaac - Happy Hour - 1 //active
+“Benefits of Nobility”
+— For the current room, gives Isaac an All Stats Up (+10%) and a random worm trinket effect.
+
+Satan - Golden Apple //passive
+“The Lord Returns”
+— Extra Life (x1); Respawn with 10 seconds of invincibility and 10 seconds of Midas’ touch
+
+??? - Holy Smokes! //passive
+“Return of the Torch”
+— Gives Isaac a small Orange aura that burns enemies inside; +20% Angel Chance
+
+The Lamb - Woolen Blanket //passive
+“The Lord Comforts”
+— The first damage taken in a room is reduced to half a heart of damage, and after being hit Isaac has extra long invincibility; Luck Up (+2)
+
+Mega Satan - Nehemiah’s Hammer //active
+“I’m Gonna Wreck It!”
+— Works similarly to Notched Axe, but instead of breaking rocks, carves them into a funny shape with a chance to drop a goodie or two; Using this item on a carved rock will destroy it, which yields a greater chance to drop goodies.
+— Tinted Rocks are guaranteed to drop a pickup when carved, and tinted rock spiders upon destruction
+— The Hammer can open any doors that would normally require bombs to enter, such as Secret Rooms, Paneled Doors, and the entrance to the Mines
+— — Picking up Iron Bar will fully recharge this item
+
+Boss Rush - Dumb Luck //trinket
+“Foolish Wishes” //Windflower
+— When Isaac stands still for one second, he gets a tear-repellant aura, similar to I - The Magician?
+
+Hush - Oily Branch //trinket
+“Smells like Olives”
+— Isaac’s tears have a chance to charm enemies
+
+Delirium - The Memoir //passive
+“Take a Deep Breath”
+— Damage Down (-0.4)
+— Tears Down (-0.4)
+— 3 Random Stats Up (+15%)
+— Isaac gains a permanent tear-repelling aura, similar to I - The Magician?
+
+Mother - Butterfly Wings (52 pattern) //trinket
+“I Feel Good!”
+— Higher Chance for a room to contain a tinted rock; The chance of this happening is based on your luck stat.
+— (Making a 52 pattern in pixel art is gonna be pretty difficult. I have something but it doesn’t exactly look pretty)
+
+The Beast - Old Brick //passive
+“Feel the Vengeance”
+— Range Down (-1.5)
+— You fire Bricks out of your eyes that split into rock tears upon contact
+
+Ultra Greed 🪙 - Gold Brick - 2 //active
+“Feel the Mercy”
+— Upon use, gives Isaac a golden brick that deals 3x damage and fires 8 midas rock tears upon impact.
+
+Ultra Greedier 🪙 - Graceful Charity //card
+“You Win Some, You Lose Some”
+— Destroys 2 random items you possess, and spawns 3 items from the current room’s item pool
+
+All Marks ✡️ - Cement Hearts //pickup
+“Definitely bad for you”
+— Cement Hearts act as heart armor, like golden hearts, except they cover your left-most heart and take 4 damage to destroy. They are also immediately destroyed when Isaac takes explosion damage
+
+
+Tainted Closet 🔓 - The Condemned
+— Unlocks Tainted Nehemiah
+
+
+Birthright - “Strong Arm”
+Nehemiah’s Hammer now breaks rocks instantly, dropping larger chunks, which deal more damage, and release 0-2 friendly Rock Spiders
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+T. Nehemiah
+Starts with: Book of Ezra (PA) (Latent), Buried Secret Rooms
+Also: When playing as T. Nehemiah, Walls connecting a Room with a Secret Room will stand out in some way, but will also take 2 Bombs to open
+-When T. Nehemiah uses Book of Ezra, it reveals all secret rooms of the most common type (which still has not been found) on the map.
+
+
+Isaac, ???, Satan, Lamb - Signet Ring //passive
+“House of Xerxes”
+— Isaac has a chance to shoot a Wax tear (which gives enemies Waxed); increases with luck (80% at 25 Luck)
+
+Mega Satan - Foiled King of Clubs //card
+“Destroy all who oppose you”
+— Deletes all pickups in the room; each pickup has a 20% chance to turn into a Giga Bomb instead.
+
+Hush, Boss Rush - Soul of Nehemiah //rune
+“Rise From the Rubble”
+— Breaks all rocks in the room, spawning rock chunks, pickups, and perma-charmed rock spiders (upon breakage, the spiders are replaced with blue spiders).
+
+Ultra Greedier 🪙 - Disgraceful Charity //card
+“You Lose Some, You Win Some”
+— If you have less pickups then when you entered the current floor, the difference is returned to you.
+
+Delirium - Book of Ezra - 6 //active
+“Ab Ipso Ferro”
+— When used, summons a ray of light in the middle of the current room; when Isaac enters this light he gains a temporary all stats up that slowly fades (can stack).
+
+** Book of Nehemiah - 6 //active **
+“Ab Ordine Libertas”
+— When used, activates the Crack the Sky effect that summons beams of light in the room, followed by a ray of light in the center that dissipates any 1 curse on the floor if stepped into
+
+Mother - I - The Magician! //card
+“May your goal never escape you”
+— Isaac gains Coninuum tears for the room
+— Isaac’s Range doubles for the room
+
+The Beast - Pistanthrophobia //passive
+“Serious Trust Issues”
+— Isaac gets a damage up which scales with how many enemies are in the current room, getting a +0.5 damage up for each one; when an enemy is killed, his damage continues to scale, going back -0.5.
+
+
+Birthright - “Putting Rumors to Rest”
+— Plays an animation of the Book of Ezra being unchained, turning it into the Book of Nehemiah.
+
+
+
+
+
+
+
+
+
+If lucky enough
+
+Tarnished Breakdown 🔓 - Crusade
+When T. Nehemiah uses Book of Ezra in the Basement I Super Secret Room and bombs the ray of light, the room will shake, dropping the body of a keeper and the trinket “Royal Summons” 
+(this trinket gives the active item of the same name, and as a pocket active if picked up by Tainted Nehemiah; this will replace Book of Ezra); 
+if Tainted Nehemiah takes this item all the way to Mausoleum 2 and beats boss rush, then King Artaxerxes will spawn in the room on his throne. 
+Giving this item to him will cause him to read it, and then open a door to Tarnished Nehemiah’s room.
