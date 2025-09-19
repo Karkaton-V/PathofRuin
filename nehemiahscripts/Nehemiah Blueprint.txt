@@ -26,7 +26,7 @@ Satan - Golden Apple //passive
 
 The Lamb - Woolen Blanket //passive
 “The Lord Comforts”
-— The first damage taken in a room is reduced to half a heart of damage, and after being hit Isaac has extra long invincibility; Luck Up (+2)
+— The first damage taken on a floor is reduced to half a heart of damage, and after being hit Isaac has extra long invincibility; Luck Up (+2)
 
 Mega Satan - Nehemiah’s Hammer //active
 “I’m Gonna Wreck It!”
