@@ -1,6 +1,6 @@
 <costumes anm2root="gfx/characters/">
-	<costume anm2path="nehemiah_extra.anm2" type="none" priority="100" />
-	<costume anm2path="nehemiahb_extra.anm2" type="none" priority="100" />
+	<costume anm2path="nehemiah_addon.anm2" type="none" priority="100" />
+	<costume anm2path="nehemiahb_addon.anm2" type="none" priority="100" />
 	
 	<costume id="1" anm2path="golden_apple_item.anm2" type="passive" priority="0" />
 </costumes>

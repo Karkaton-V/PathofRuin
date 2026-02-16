@@ -1,27 +1,26 @@
 ---- Path of Ruin ---
 -- By Team Ruin
 
--- Includes
--- -- Nehemiah
--- -- -- Characters
-include("nehemiahscripts.characters.nehemiah.lua")
-
--- -- -- Compat
-include("nehemiahscripts.compat.eid.lua")
-
--- -- -- Entities
-include("nehemiahscripts.entities.ezras_moonlight.lua")
-include("nehemiahscripts.entities.nehemiahs_hammer.lua")
-
--- -- -- Items
-include("nehemiahscripts.items.book_of_ezra.lua")
-include("nehemiahscripts.items.nehemiahs_hammer.lua")
-
-
 -- Setup
 if not REPENTANCE then end
 POR = RegisterMod("Path of Ruin", 1)
-local game = POR.Game()
+local game = Game()
+
+-- Includes
+-- -- Nehemiah
+-- -- -- Characters
+local NehemiahCharacter = require("nehemiahscripts.characters.nehemiah")
+
+-- -- -- Compat
+local NehemiahCompat = require("nehemiahscripts.compat.eid.lua")
+
+-- -- -- Entities
+local MoonlightEntity = require("nehemiahscripts.entities.ezras_moonlight.lua")
+local HammerEntity = require("nehemiahscripts.entities.nehemiahs_hammer.lua")
+
+-- -- -- Items
+local BookofEzra = require("nehemiahscripts.items.book_of_ezra.lua")
+local NehemiahsHammer = require("nehemiahscripts.items.nehemiahs_hammer.lua")
 
 
 --  -- Stuff Needed Around

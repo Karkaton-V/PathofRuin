@@ -1,8 +1,8 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="12/11/2023 11:10:18 AM" Version="7" Fps="30"/>
+	<Info CreatedBy="trtv" CreatedOn="2/16/2026 11:14:30 AM" Version="8" Fps="30"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="coop menu.png" Id="0"/>
+			<Spritesheet Path="coop icon.png" Id="0"/>
 			<Spritesheet Path="baby_select.png" Id="1"/>
 		</Spritesheets>
 		<Layers>

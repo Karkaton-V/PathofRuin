@@ -1,4 +1,4 @@
-local game = POR.Game()
+local game = Game()
 
 BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra")        -- item id of Book of Ezra
 EZRASMOONLIGHTEFFECT = Isaac.GetEntityTypeByName("Ezra's Moonlight")   -- effect id of the book's light

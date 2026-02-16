@@ -1,4 +1,5 @@
-local game = POR.Game()
+-- local _ = require("main.lua")
+local game = Game()
 
 local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)                              -- Nehemiah
 local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)                  -- T. Nehemiah
@@ -20,14 +21,18 @@ function POR:NehemiahInit(player)
     pool:RemoveCollectible(NEHEMIAHSHAMMER_ITEM_ID)
 
 end
-function POR:TaintedNehemiahInit(player)
-   if player:GetPlayerType() ~= TAINTED_NEHEMIAH_TYPE then
-      return -- If not Tainted Nehemiah, exits
-   end
-   player:AddNullCostume(NEHEMIAHB_COSTUME)
-    player:SetPocketActiveItem(BOOKOFEZRA_ITEM_ID, ActiveSlot.SLOT_POCKET, true)
 
+function POR:TaintedNehemiahInit(player)
+    if player:GetPlayerType() ~= TAINTED_NEHEMIAH_TYPE then
+        return -- If not Tainted Nehemiah, exits
+    end
+    local sprite = player:GetSprite()
     local pool = game:GetItemPool()
+
+    sprite:Load("gfx/characters/nehemiahb.anm2", true)
+    player:AddNullCostume(NEHEMIAHB_COSTUME)
+
+    player:SetPocketActiveItem(BOOKOFEZRA_ITEM_ID, ActiveSlot.SLOT_POCKET, true)
     pool:RemoveCollectible(BOOKOFEZRA_ITEM_ID)
 
 end
