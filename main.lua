@@ -4,18 +4,18 @@
 -- Includes
 -- -- Nehemiah
 -- -- -- Characters
-include("nehemiahscripts.characters.nehemiah")
+include("nehemiahscripts.characters.nehemiah.lua")
 
 -- -- -- Compat
-include("nehemiahscripts.compat.eid")
+include("nehemiahscripts.compat.eid.lua")
 
 -- -- -- Entities
-include("nehemiahscripts.entities.ezras_moonlight")
-include("nehemiahscripts.entities.nehemiahs_hammer")
+include("nehemiahscripts.entities.ezras_moonlight.lua")
+include("nehemiahscripts.entities.nehemiahs_hammer.lua")
 
 -- -- -- Items
-include("nehemiahscripts.items.book_of_ezra")
-include("nehemiahscripts.items.nehemiahs_hammer")
+include("nehemiahscripts.items.book_of_ezra.lua")
+include("nehemiahscripts.items.nehemiahs_hammer.lua")
 
 
 -- Setup

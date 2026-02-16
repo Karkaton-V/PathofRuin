@@ -2,8 +2,8 @@ local game = POR.Game()
 
 local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)                              -- Nehemiah
 local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)                  -- T. Nehemiah
-local NEHEMIAH_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiah_extra.anm2")         -- Nehemiah's Costume
-local NEHEMIAHB_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiahb_extra.anm2")        -- T. Nehemiah's Costume
+local NEHEMIAH_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiah_addon.anm2")         -- Nehemiah's Costume
+local NEHEMIAHB_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiahb_addon.anm2")       -- T. Nehemiah's Costume
 local NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")                      -- Item Id of Nehemiah's Hammer
 local BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra")                                -- Item Id of Book of Ezra
 
