@@ -1,4 +1,3 @@
--- local _ = require("main.lua")
 local game = Game()
 
 local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)                              -- Nehemiah
