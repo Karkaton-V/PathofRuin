@@ -1,9 +1,0 @@
-local game = Game()
-
-local NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")  -- item id of Nehemiah's Hammer
-
-
--- Hammer's charge is timed to refill every 90s
-
-
-

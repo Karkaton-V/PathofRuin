@@ -2,7 +2,9 @@
 -- By Team Ruin
 
 -- Setup
-if not REPENTANCE then end
+if not REPENTOGON then
+    error("This Mod Requires REPENTAGON!!")
+end
 POR = RegisterMod("Path of Ruin", 1)
 local game = Game()
 
@@ -12,15 +14,14 @@ local game = Game()
 local NehemiahCharacter = require("nehemiahscripts.characters.nehemiah")
 
 -- -- -- Compat
-local NehemiahCompat = require("nehemiahscripts.compat.eid.lua")
+local NehemiahCompat = require("nehemiahscripts.compat.eid")
 
 -- -- -- Entities
-local MoonlightEntity = require("nehemiahscripts.entities.ezras_moonlight.lua")
-local HammerEntity = require("nehemiahscripts.entities.nehemiahs_hammer.lua")
+local MoonlightEntity = require("nehemiahscripts.entities.ezras_moonlight")
 
 -- -- -- Items
-local BookofEzra = require("nehemiahscripts.items.book_of_ezra.lua")
-local NehemiahsHammer = require("nehemiahscripts.items.nehemiahs_hammer.lua")
+local BookofEzra = require("nehemiahscripts.items.book_of_ezra")
+local NehemiahsHammer = require("nehemiahscripts.items.nehemiahs_hammer")
 
 
 --  -- Stuff Needed Around

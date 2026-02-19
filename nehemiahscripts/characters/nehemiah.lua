@@ -15,6 +15,7 @@ function POR:NehemiahInit(player)
     player:AddNullCostume(NEHEMIAH_COSTUME)
     -- "KeepinPools?" is bugged, so if set to false, game will always crash when trying to continue a run
     player:SetPocketActiveItem(NEHEMIAHSHAMMER_ITEM_ID, ActiveSlot.SLOT_POCKET, true)
+    player:AddTrinket(62, true)     -- 62 is TrinketType: SHINY_ROCK
 
     local pool = game:GetItemPool()
     pool:RemoveCollectible(NEHEMIAHSHAMMER_ITEM_ID)
