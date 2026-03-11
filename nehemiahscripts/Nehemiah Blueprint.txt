@@ -1,7 +1,7 @@
 Nehemiah
 Starts with: Nehemiah’s Hammer (PA) (Latent), Shiny Rock
 Also: Nehemiah’s Hammer can be used in a shop (if the secret room has not been found) to turn it into a Secret Room, and using it in a Super Secret Room turns it into a Secret Shop
--When Nehemiah holds his hammer, instead of pickups, rocks drop chunks that can be thrown at enemies, but when carved a second time, the rock is destroyed and drops 1-2 pickups or rock spiders
+-When Nehemiah holds his hammer, instead of pickups, rocks drop chunks that can be thrown at enemies, but when carved a second time, the rock drops rock spiders
 
 
 Mom - Radiant Cards! //unlock
@@ -30,10 +30,10 @@ The Lamb - Woolen Blanket //passive
 
 Mega Satan - Nehemiah’s Hammer //active
 “I’m Gonna Wreck It!”
-— Works similarly to Notched Axe, but instead of breaking rocks, carves them into a funny shape with a chance to drop a goodie or two; Using this item on a carved rock will destroy it, which yields a greater chance to drop goodies.
+— Works similarly to Notched Axe, but instead of breaking rocks, carves them into a funny shape with a chance to drop a goodie; Using this item on a carved rock will destroy it, which drops 1 rock chunk.
 — Tinted Rocks are guaranteed to drop a pickup when carved, and tinted rock spiders upon destruction
 — The Hammer can open any doors that would normally require bombs to enter, such as Secret Rooms, Paneled Doors, and the entrance to the Mines
-— — Picking up Iron Bar will fully recharge this item
+— — Picking up "The Small Rock" or "Rock Bottom" will fully recharge this item
 
 Boss Rush - Dumb Luck //trinket
 “Foolish Wishes” //Windflower
