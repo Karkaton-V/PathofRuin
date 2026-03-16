@@ -18,10 +18,9 @@ local NehemiahCompat = require("nehemiahscripts.compat.eid")
 
 -- -- -- Entities
 local MoonlightEntity = require("nehemiahscripts.entities.ezras_moonlight")
-local NehemiahBoulder = require("nehemiahscripts.entities.nehemiahs_boulder")
 
 -- -- -- Items
-local BookofEzra     = require("nehemiahscripts.items.book_of_ezra")
+local BookofEzra = require("nehemiahscripts.items.book_of_ezra")
 local NehemiahsHammer = require("nehemiahscripts.items.nehemiahs_hammer")
 
 

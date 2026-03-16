@@ -1,6 +1,6 @@
 <items gfxroot="gfx/items/" deathanm2="gfx/death_items.anm2" version="1">
     <active id="1" name="Happy Hour" gfx="happy_hour.png" description="Benefits of Nobility" quality="1" maxcharges="3" chargetype="normal" cache="all" />
-    <active id="2" name="Nehemiah's Hammer" gfx="nehemiahs_hammer.png" description="I'm Gonna Wreck It!" quality="3" maxcharges="180" chargetype="timed" cache="weapon" />
+    <active id="2" name="Nehemiah's Hammer" gfx="nehemiahs_hammer.png" description="I'm Gonna Wreck It!" quality="3" maxcharges="90" chargetype="timed" cache="weapon" />
     <active id="3" name="Gold Brick" gfx="gold_brick.png" description="Feel the Mercy" quality="2" maxcharges="3" chargetype="normal" cache="tearflag, tearcolor" />
     <active id="4" name="Book of Ezra" gfx="book_of_ezra.png" description="Ab Ipso Ferro" quality="4" maxcharges="6" chargetype="normal" cache="all" />
     <active id="5" name="Book of Nehemiah" gfx="book_of_nehemiah.png" description="Ab Ordine Libertas" quality="0" maxcharges="6" chargetype="normal" cache="all" hidden="true" />

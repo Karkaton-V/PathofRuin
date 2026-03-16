@@ -1,8 +1,7 @@
 <entities anm2root="gfx/" version="5">
 	
 	<!-- Effects -->
-    <entity name="Ezra's Moonlight" anm2path="ezras_moonlight.anm2" id="1000" variant="3555" />
-    <entity name="Nehemiah Throwing Boulder" anm2path="nehemiahs_boulder.anm2" id="1000" variant="3556" />
-    <entity name="Nehemiah Holding Boulder" anm2path="nehemiahs_boulder.anm2" id="1000" variant="3557" />
+	<entity name="Nehemiah's Hammer" anm2path="nehemiahs_hammer.anm2" id="1000" variant="3555" collisionRadius="1"/>
+    <entity name="Ezra's Moonlight" anm2path="ezras_moonlight.anm2" id="1000" variant="3556" />
     
 </entities>
