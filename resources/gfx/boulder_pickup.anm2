@@ -1,8 +1,8 @@
 <AnimatedActor>
-	<Info CreatedBy="catinsurance" CreatedOn="29/04/2023 12:27:21" Version="147" Fps="30"/>
+	<Info CreatedBy="catinsurance" CreatedOn="3/29/2026 5:15:00 PM" Version="148" Fps="30"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="boulder_variation_1.png" Id="0"/>
+			<Spritesheet Path="effects\boulder_variation_1.png" Id="0"/>
 		</Spritesheets>
 		<Layers>
 			<Layer Name="body" Id="0" SpritesheetId="0"/>

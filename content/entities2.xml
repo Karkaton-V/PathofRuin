@@ -14,7 +14,7 @@
         <gibs amount="3" rock="3" />
     </entity>
 	<entity name="Nehemiah Traveling Rock"
-		id="2" anm2path="misc/boulder_tear.anm2" friction="1" collisionMass="40" collisionRadius="16" numGridCollisionPoints="8" shadowSize="8">
+		id="2" anm2path="boulder_tear.anm2" friction="1" collisionMass="40" collisionRadius="16" numGridCollisionPoints="8" shadowSize="8">
     </entity>
     
 </entities>
