@@ -3,5 +3,18 @@
 	<!-- Effects -->
 	<entity name="Nehemiah's Hammer" anm2path="nehemiahs_hammer.anm2" id="1000" variant="3555" collisionRadius="1"/>
     <entity name="Ezra's Moonlight" anm2path="ezras_moonlight.anm2" id="1000" variant="3556" />
+	<entity name="Nehemiah ReRoll Rock"
+		id="1000" variant="3557" anm2path="boulder_pickup.anm2" friction="0.8"s
+		collisionMass="20" collisionRadius="16" numGridCollisionPoints="24" shadowSize="20">
+        <gibs amount="3" rock="3" />
+    </entity>
+	<entity name="Nehemiah Holding Rock"
+		id="1000" variant="3558" anm2path="boulder_pickup.anm2" friction="0.8"
+		collisionMass="20" collisionRadius="16" numGridCollisionPoints="24" shadowSize="20" stageHP="0">
+        <gibs amount="3" rock="3" />
+    </entity>
+	<entity name="Nehemiah Traveling Rock"
+		id="2" anm2path="misc/boulder_tear.anm2" friction="1" collisionMass="40" collisionRadius="16" numGridCollisionPoints="8" shadowSize="8">
+    </entity>
     
 </entities>
