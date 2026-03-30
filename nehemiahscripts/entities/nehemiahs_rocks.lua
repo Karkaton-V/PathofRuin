@@ -1,6 +1,7 @@
 local game = POR.game
 
 local NEHEMIAH = Isaac.GetPlayerTypeByName("Nehemiah", false)
+local NEHEMIAH_INCLUDE = include("characters.nehemiah")
 local ROCKTABLE = {}
 
 -- ROCKTABLE pickup is actually an effect because of all pickup rerolling items (d20 or ace cards)
@@ -15,7 +16,7 @@ ROCKTABLE.TEAR_VARIANT = Isaac.GetEntityVariantByName("Nehemiah Traveling Rock")
 local ROCK_TEAR_VARIANT = ROCKTABLE.TEAR_VARIANT
 
 -- For Gravity Sections (aka the beast)
-local ROCK_FALL_SPEED = 8
+local ROCK_FALL_SPEED_BEAST = 8
 
 -- variants for the rock sprites based on which floor nehemiah is on
 ROCKTABLE.SPRITE_VARIANTS = {
@@ -281,4 +282,230 @@ function ROCKTABLE:BedSleptCheck(bed, collider)
 	end
 end
 
-POR:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, ROCKTABLE.BedSleptCheck, PickupVariant.PICKUP_BED)
+---@param entity EntityEffect | EntityTear
+---@param sender EntityPlayer
+---@param forceSheet string?
+---@function
+function ROCKTABLE:RockInit(entity, sender, forceSheet, forceAnm2, dontUpdate)
+	local variant = POR.GENERIC_RNG:RandomInt(3) + 1
+	local save = POR:RunSave()
+	local sprite = entity:GetSprite()
+	local stage = ROCKTABLE:GetStageId()
+	local roomType = POR.Room():GetType()
+
+	-- do a check to see if it's HomeB since there's no stage variant for it
+	local homeB = (save.MomBedSlept and stage == 35) and ROCKTABLE.SPRITE_VARIANTS.HomeB
+	local stageVariant = ROCKTABLE.ROOMTYPE_TO_VARIANT[roomType] or homeB or ROCKTABLE.STAGE_TO_VARIANT[stage]
+		or ROCKTABLE.SPRITE_VARIANTS.Basement
+	local tag = entity:GetData().POR_RockTag
+	local replaceSheet = POR:FireExtraCallback(POR.ExtraCallbacks.NEHEMIAH_PRE_ROCK_SPRITE_INIT, sender, variant, tag, entity)
+
+	if sender:GetData().POR_EnemyRockSprite then
+		cloneSprite(sprite, sender:GetData().POR_EnemyRockSprite)
+	end
+
+	local newSheet
+	if forceSheet then
+		newSheet = forceSheet
+	elseif replaceSheet then
+		if replaceSheet.Anm2 then
+			sprite:Reset()
+			sprite:Load(replaceSheet.Anm2, false)
+		end
+
+		if replaceSheet.Sprite then
+			cloneSprite(sprite, replaceSheet.Sprite)
+			entity:GetData().POR_ThrownRockSprite = sprite
+		end
+
+		if replaceSheet.ThrownAnm2 then
+			entity:GetData().POR_RockAnm2 = replaceSheet.ThrownAnm2
+		end
+
+		newSheet = replaceSheet.Spritesheet
+		entity:GetData().POR_HoldingRockDontUpdate = replaceSheet.DontUpdate
+		entity:GetData().POR_HoldingRockIsSpecial = true -- this means it shouldnt use the stage to determine the frame of the animation
+	else
+		newSheet = ("gfx/misc/rock_variation_" .. tostring(variant) .. ".png")
+	end
+
+	if not entity:GetData().POR_HoldingRockDontUpdate and not dontUpdate then
+		if forceAnm2 then
+			sprite:Load(forceAnm2, false)
+		end
+
+		sprite:ReplaceSpritesheet(0, newSheet)
+		sprite:LoadGraphics()
+	end
+
+	entity:GetData().POR_RockSheet = newSheet
+
+	if not entity:GetData().POR_HoldingRockDontUpdate and not dontUpdate then
+		if entity.Type == EntityType.ENTITY_EFFECT then
+			-- play appear anim
+			sprite:Play("Appear" .. tostring(stageVariant), true)
+		else -- play idle
+			sprite:Play("Idle" .. tostring(stageVariant), true)
+		end
+	end
+
+	if entity:GetData().POR_RockFallingBeast then
+		sprite:Stop() -- stop the falling animation for beast
+	end
+
+	return newSheet
+end
+
+-- The game only allows collision with pickups in their appear animation
+-- There are multiple animations on the rock pickup because of the different sprite variants
+-- After one of them is done playing, we switch to a still appear animation that has a frame for each variant
+---@param rock EntityEffect
+---@function
+---@scope Epiphany
+function POR:ManageRockPickupSprite(rock)
+	local sprite = rock:GetSprite()
+	local stage = ROCKTABLE:GetStageId()
+	local save = POR:RunSave()
+	local roomType = POR.Room():GetType()
+	-- do a check to see if it's HomeB since there's no stage variant for it
+	local homeB = (save.MomBedSlept and stage == 35) and ROCKTABLE.SPRITE_VARIANTS.HomeB
+	local stageVariant = ROCKTABLE.ROOMTYPE_TO_VARIANT[roomType] or homeB or ROCKTABLE.STAGE_TO_VARIANT[stage]
+		or ROCKTABLE.SPRITE_VARIANTS.Basement
+
+	if not rock:GetData().POR_HoldingRockDontUpdate then
+		if not sprite:IsPlaying("Appear" .. tostring(stageVariant)) or rock:GetData().POR_RockFallingBeast then
+			sprite:SetFrame("Appear", stageVariant - 1)
+		end
+	end
+end
+
+---@param rock EntityEffect
+---@function
+---@scope Epiphany
+function POR:RockBeastFalling(rock)
+	if rock:GetData().POR_RockFallingBeast then
+		rock.Position = rock.Position + Vector(0, ROCK_FALL_SPEED_BEAST)
+
+		if rock.Position.Y > POR.Room():GetBottomRightPos().Y then
+			rock:Remove() -- remove if out of bounds
+		end
+	end
+end
+
+---Makes the player stop holding a rock if they are holding one
+---@param player EntityPlayer
+---@param playHideAnim boolean?
+---@function
+function ROCKTABLE:StopHolding(player, playHideAnim)
+	local pData = player:GetData()
+	if pData.POR_HoldingRock then
+		if playHideAnim then
+			player:AnimatePickup(Sprite(), false, "HideItem")
+		else
+			player:StopExtraAnimation()
+		end
+		pData.POR_HoldingRock = false
+		pData.POR_RockFrameCount = 0
+	end
+end
+
+---@param player EntityPlayer
+---@function
+function ROCKTABLE:PostPlayerUpdate(player)
+	local pData = player:GetData()
+	if not pData.POR_RockFrameCount then
+		pData.POR_RockFrameCount = 0
+	end
+	if pData.POR_HoldingRock then
+		if POR:IsShooting(NEHEMIAH) then
+			if pData.POR_RockFrameCount > 9 then
+				local aimDirection = POR:GetAttackDirection(player)
+				ROCKTABLE:FireRock(player, aimDirection)
+
+				player:AnimatePickup(Sprite(), false, "HideItem") -- play HideItem with invisible sprite
+				pData.POR_HoldingRock = false
+				pData.POR_RockFrameCount = 0
+			end
+		else
+			for _, chest in ipairs(Isaac.FindInRadius(player.Position, 10, EntityPartition.PICKUP)) do
+				if chest.Variant == PickupVariant.PICKUP_BIGCHEST then
+					pData.POR_HoldingRock = false
+				end
+			end
+			if player:IsExtraAnimationFinished() then
+				local stage = ROCKTABLE:GetStageId()
+				local stageVariant = pData.POR_HoldingRockIsSpecial and 1 or ROCKTABLE.STAGE_TO_VARIANT[stage]
+					or ROCKTABLE.SPRITE_VARIANTS.Basement
+
+				if not pData.POR_HoldingRockDontUpdate then
+					local RockSprite = Sprite()
+					RockSprite:Load("gfx/misc/rock_pickup.anm2", false)
+					RockSprite:ReplaceSpritesheet(0, pData.POR_HoldingRockSprite)
+					RockSprite:SetFrame("Appear", stageVariant - 1)
+					RockSprite:LoadGraphics()
+					player:AnimatePickup(RockSprite, false, "LiftItem")
+				else
+					if pData.POR_EnemyRockSprite then
+						local sprite = Sprite()
+						cloneSprite(sprite, pData.POR_EnemyRockSprite)
+						player:AnimatePickup(sprite, false, "LiftItem")
+					end
+				end
+
+				pData.POR_RockFrameCount = 1
+			end
+		end
+		pData.POR_RockFrameCount = pData.POR_RockFrameCount + 1
+	end
+end
+
+---@param pickup EntityEffect
+---@param player EntityPlayer
+---@function
+function ROCKTABLE:PickupEffectCollision(pickup, player)
+	local pData = player:GetData()
+	if not pData.POR_HoldingBoulder then
+		if player:GetPlayerType() ~= NEHEMIAH then
+			player:AnimatePickup(pickup:GetSprite(), false, "LiftItem")
+			pData.POR_HoldingBoulder = true
+			pData.POR_HoldingBoulderSprite = pickup:GetData().POR_BoulderSheet
+			pData.POR_HoldingBoulderAnm2 = pickup:GetData().POR_BoulderAnm2
+			pData.POR_HoldingBoulderIsSpecial = pickup:GetData().POR_HoldingBoulderIsSpecial
+			pData.POR_HoldingBoulderDontUpdate = pickup:GetData().POR_HoldingBoulderDontUpdate
+
+			-- BB
+			pData.POR_EnemyBoulderSprite = pickup:GetData().POR_EnemyBoulderSprite
+
+			pickup:Remove()
+			return true -- indicate that we picked up the boulder
+		end
+	end
+end
+
+---Runs pickup collision for rocks
+---@function
+function ROCKTABLE:OnUpdate()
+	POR.iforeach(Isaac.FindByType(EntityType.ENTITY_EFFECT, ROCK_VARIANT), function(ent)
+		local rock = ent:ToEffect() ---@cast rock EntityEffect
+		-- AppearXY is actual appear animation,
+		-- Appear is idle animation
+		if rock:GetSprite():GetAnimation():match("Appear.+") then
+			return
+		end
+
+		local collidingPlayers = Isaac.FindInRadius(rock.Position, rock.Size, EntityPartition.PLAYER)
+		for _, entPlayer in ipairs(collidingPlayers) do
+			local player = entPlayer:ToPlayer() ---@cast player EntityPlayer
+			if player.Variant == 0
+				and player:IsExtraAnimationFinished()
+				and not player:IsCoopGhost()
+			then
+				if ROCKTABLE:PickupEffectCollision(rock, player) then
+					break
+				end
+			end
+		end
+	end)
+end
+
+
