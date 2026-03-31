@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="2/16/2026 11:14:30 AM" Version="8" Fps="30"/>
+	<Info CreatedBy="trtv" CreatedOn="3/30/2026 7:57:13 PM" Version="10" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="coop icon.png" Id="0"/>
@@ -20,7 +20,7 @@
 			</RootAnimation>
 			<LayerAnimations>
 				<LayerAnimation LayerId="0" Visible="true">
-					<Frame XPosition="-2" YPosition="-2" XPivot="16" YPivot="16" XCrop="1" YCrop="-2" Width="33" Height="33" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
+					<Frame XPosition="-2" YPosition="-2" XPivot="16" YPivot="16" XCrop="0" YCrop="0" Width="33" Height="33" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
 				</LayerAnimation>
 				<LayerAnimation LayerId="1" Visible="true">
 					<Frame XPosition="0" YPosition="0" XPivot="16" YPivot="16" XCrop="0" YCrop="0" Width="32" Height="32" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>

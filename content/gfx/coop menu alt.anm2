@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="2/16/2026 11:16:21 AM" Version="9" Fps="30"/>
+	<Info CreatedBy="trtv" CreatedOn="3/30/2026 7:57:50 PM" Version="10" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="coop icon.png" Id="0"/>
