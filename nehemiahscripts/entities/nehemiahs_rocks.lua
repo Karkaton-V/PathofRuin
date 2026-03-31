@@ -1,25 +1,23 @@
-local game = POR.game
-
 local NEHEMIAH = Isaac.GetPlayerTypeByName("Nehemiah", false)
-local NEHEMIAH_INCLUDE = include("characters.nehemiah")
-local ROCKTABLE = {}
+
+POR.ROCKTABLE = {}
 
 -- ROCKTABLE pickup is actually an effect because of all pickup rerolling items (d20 or ace cards)
-ROCKTABLE.PICKUP_EFFECT_VARIANT = Isaac.GetEntityVariantByName("Nehemiah ReRoll Rock")
-local ROCK_VARIANT = ROCKTABLE.PICKUP_EFFECT_VARIANT
+POR.ROCKTABLE.PICKUP_EFFECT_VARIANT = Isaac.GetEntityVariantByName("Nehemiah ReRoll Rock")
+POR.ROCK_VARIANT = POR.ROCKTABLE.PICKUP_EFFECT_VARIANT
 
 -- used for the sprite of the rock that nehemiah is holding up
-ROCKTABLE.HOLDING_ROCKTABLE_VARIANT = Isaac.GetEntityVariantByName("Nehemiah Holding Rock")
-ROCKTABLE.HOLDING_ROCKTABLE_OFFSET = Vector(0, -20)
+POR.ROCKTABLE.HOLDING_ROCKTABLE_VARIANT = Isaac.GetEntityVariantByName("Nehemiah Holding Rock")
+POR.ROCKTABLE.HOLDING_ROCKTABLE_OFFSET = Vector(0, -20)
 
-ROCKTABLE.TEAR_VARIANT = Isaac.GetEntityVariantByName("Nehemiah Traveling Rock")
-local ROCK_TEAR_VARIANT = ROCKTABLE.TEAR_VARIANT
+POR.ROCKTABLE.TEAR_VARIANT = Isaac.GetEntityVariantByName("Nehemiah Traveling Rock")
+POR.ROCK_TEAR_VARIANT = POR.ROCKTABLE.TEAR_VARIANT
 
 -- For Gravity Sections (aka the beast)
 local ROCK_FALL_SPEED_BEAST = 8
 
 -- variants for the rock sprites based on which floor nehemiah is on
-ROCKTABLE.SPRITE_VARIANTS = {
+POR.ROCKTABLE.SPRITE_VARIANTS = {
 	Basement = 1,
 	Cellar = 2,
 	BurningBasement = 3,
@@ -50,50 +48,50 @@ ROCKTABLE.SPRITE_VARIANTS = {
 
 -- No official enums for this, sadly
 -- https://wofsauge.github.io/IsaacDocs/rep/Room.html?h=stage#getroomconfigstage
-ROCKTABLE.STAGE_TO_VARIANT = {
-	[1] = ROCKTABLE.SPRITE_VARIANTS.Basement,
-	[2] = ROCKTABLE.SPRITE_VARIANTS.Cellar,
-	[3] = ROCKTABLE.SPRITE_VARIANTS.BurningBasement,
-	[27] = ROCKTABLE.SPRITE_VARIANTS.Downpour,
-	[28] = ROCKTABLE.SPRITE_VARIANTS.Dross,
+POR.ROCKTABLE.STAGE_TO_VARIANT = {
+	[1] = POR.ROCKTABLE.SPRITE_VARIANTS.Basement,
+	[2] = POR.ROCKTABLE.SPRITE_VARIANTS.Cellar,
+	[3] = POR.ROCKTABLE.SPRITE_VARIANTS.BurningBasement,
+	[27] = POR.ROCKTABLE.SPRITE_VARIANTS.Downpour,
+	[28] = POR.ROCKTABLE.SPRITE_VARIANTS.Dross,
 
-	[4] = ROCKTABLE.SPRITE_VARIANTS.Caves,
-	[5] = ROCKTABLE.SPRITE_VARIANTS.Catacombs,
-	[6] = ROCKTABLE.SPRITE_VARIANTS.FloodedCaves,
-	[29] = ROCKTABLE.SPRITE_VARIANTS.Mines,
-	[30] = ROCKTABLE.SPRITE_VARIANTS.Ashpit,
+	[4] = POR.ROCKTABLE.SPRITE_VARIANTS.Caves,
+	[5] = POR.ROCKTABLE.SPRITE_VARIANTS.Catacombs,
+	[6] = POR.ROCKTABLE.SPRITE_VARIANTS.FloodedCaves,
+	[29] = POR.ROCKTABLE.SPRITE_VARIANTS.Mines,
+	[30] = POR.ROCKTABLE.SPRITE_VARIANTS.Ashpit,
 
-	[7] = ROCKTABLE.SPRITE_VARIANTS.Depths,
-	[8] = ROCKTABLE.SPRITE_VARIANTS.Necropolis,
-	[9] = ROCKTABLE.SPRITE_VARIANTS.DankDepths,
-	[31] = ROCKTABLE.SPRITE_VARIANTS.Mausoleum,
-	[32] = ROCKTABLE.SPRITE_VARIANTS.Gehenna,
+	[7] = POR.ROCKTABLE.SPRITE_VARIANTS.Depths,
+	[8] = POR.ROCKTABLE.SPRITE_VARIANTS.Necropolis,
+	[9] = POR.ROCKTABLE.SPRITE_VARIANTS.DankDepths,
+	[31] = POR.ROCKTABLE.SPRITE_VARIANTS.Mausoleum,
+	[32] = POR.ROCKTABLE.SPRITE_VARIANTS.Gehenna,
 
-	[10] = ROCKTABLE.SPRITE_VARIANTS.Womb,
-	[11] = ROCKTABLE.SPRITE_VARIANTS.Utero,
-	[12] = ROCKTABLE.SPRITE_VARIANTS.ScarredWomb,
-	[33] = ROCKTABLE.SPRITE_VARIANTS.Corpse,
+	[10] = POR.ROCKTABLE.SPRITE_VARIANTS.Womb,
+	[11] = POR.ROCKTABLE.SPRITE_VARIANTS.Utero,
+	[12] = POR.ROCKTABLE.SPRITE_VARIANTS.ScarredWomb,
+	[33] = POR.ROCKTABLE.SPRITE_VARIANTS.Corpse,
 
-	[13] = ROCKTABLE.SPRITE_VARIANTS.BlueWomb,
+	[13] = POR.ROCKTABLE.SPRITE_VARIANTS.BlueWomb,
 
-	[14] = ROCKTABLE.SPRITE_VARIANTS.Sheol,
-	[15] = ROCKTABLE.SPRITE_VARIANTS.Cathedral,
+	[14] = POR.ROCKTABLE.SPRITE_VARIANTS.Sheol,
+	[15] = POR.ROCKTABLE.SPRITE_VARIANTS.Cathedral,
 
-	[16] = ROCKTABLE.SPRITE_VARIANTS.DarkRoom,
-	[17] = ROCKTABLE.SPRITE_VARIANTS.Chest,
+	[16] = POR.ROCKTABLE.SPRITE_VARIANTS.DarkRoom,
+	[17] = POR.ROCKTABLE.SPRITE_VARIANTS.Chest,
 
 	-- Shop and Ultra Greed destroy the API lol
 
-	[35] = ROCKTABLE.SPRITE_VARIANTS.Home,
+	[35] = POR.ROCKTABLE.SPRITE_VARIANTS.Home,
 }
 
-ROCKTABLE.ROOMTYPE_TO_VARIANT = {
-	[RoomType.ROOM_DEVIL] = ROCKTABLE.SPRITE_VARIANTS.Sheol,
-	[RoomType.ROOM_ANGEL] = ROCKTABLE.SPRITE_VARIANTS.Cathedral,
-	[RoomType.ROOM_CHEST] = ROCKTABLE.SPRITE_VARIANTS.Chest,
-	[RoomType.ROOM_BLUE] = ROCKTABLE.SPRITE_VARIANTS.BlueWomb,
-	[RoomType.ROOM_ISAACS] = ROCKTABLE.SPRITE_VARIANTS.Home,
-	[RoomType.ROOM_BARREN] = ROCKTABLE.SPRITE_VARIANTS.Home,
+POR.ROCKTABLE.ROOMTYPE_TO_VARIANT = {
+	[RoomType.ROOM_DEVIL] = POR.ROCKTABLE.SPRITE_VARIANTS.Sheol,
+	[RoomType.ROOM_ANGEL] = POR.ROCKTABLE.SPRITE_VARIANTS.Cathedral,
+	[RoomType.ROOM_CHEST] = POR.ROCKTABLE.SPRITE_VARIANTS.Chest,
+	[RoomType.ROOM_BLUE] = POR.ROCKTABLE.SPRITE_VARIANTS.BlueWomb,
+	[RoomType.ROOM_ISAACS] = POR.ROCKTABLE.SPRITE_VARIANTS.Home,
+	[RoomType.ROOM_BARREN] = POR.ROCKTABLE.SPRITE_VARIANTS.Home,
 }
 
 ---@class RockSpriteModifier
@@ -102,7 +100,7 @@ ROCKTABLE.ROOMTYPE_TO_VARIANT = {
 ---@field Spritesheet string
 ---@field Priority number
 
-ROCKTABLE.ForbiddenTearFlags =
+POR.ROCKTABLE.ForbiddenTearFlags =
 	TearFlags.TEAR_ABSORB |
 	TearFlags.TEAR_SPLIT |
 	TearFlags.TEAR_SHIELDED |
@@ -129,7 +127,7 @@ end
 ---@param damage? number
 ---@param tags? table @An array of "tags" to add to the rock. Tags are just extra data that get stored in the rock's data table under `POR_RockTags`.
 ---@function
-function ROCKTABLE:FireRock(player, direction, damage, tags)
+function POR.ROCKTABLE:FireRock(player, direction, damage, tags)
 	direction = direction:Normalized()
 	damage = damage or (player.Damage * 2)
 
@@ -138,11 +136,11 @@ function ROCKTABLE:FireRock(player, direction, damage, tags)
 
 	local rock = player:FireTear(player.Position, vel, true, false, true, player)
 	rock.Position = player.Position -- override the position set by FireTear
-	rock:ChangeVariant(ROCK_TEAR_VARIANT)
+	rock:ChangeVariant(POR.ROCK_TEAR_VARIANT)
 	rock.CollisionDamage = damage
-	rock:ClearTearFlags(ROCKTABLE.ForbiddenTearFlags)
+	rock:ClearTearFlags(POR.ROCKTABLE.ForbiddenTearFlags)
 
-	ROCKTABLE:rockInit(rock, player, player:GetData().POR_HoldingRockSprite, player:GetData()
+	POR.ROCKTABLE:rockInit(rock, player, player:GetData().POR_HoldingRockSprite, player:GetData()
 		.POR_HoldingRockAnm2, player:GetData().POR_HoldingRockDontUpdate)
 	rock:GetData().POR_RockTags = {}
 
@@ -164,7 +162,7 @@ end
 -- See ROCK.STAGE_TO_VARIANT for information about what the numbers mean.
 -- No enum moment.
 ---@function
-function ROCKTABLE:GetStageId()
+function POR.ROCKTABLE:GetStageId()
 	local level = POR.Level()
 	local stage = level:GetAbsoluteStage()
 	local isAlt = level:IsAltStage()
@@ -274,10 +272,10 @@ function ROCKTABLE:GetStageId()
 end
 
 -- for checkign if the floor is homeb
-function ROCKTABLE:BedSleptCheck(bed, collider)
+function POR.ROCKTABLE:BedSleptCheck(bed, collider)
 	-- mom's bed, the enum is wrong
 	if bed.SubType == 10 and collider:ToPlayer() then
-		local save = POR:RunSave()
+		local save = POR.SaveCompiler.RunSave()
 		save.MomBedSlept = true
 	end
 end
@@ -286,17 +284,17 @@ end
 ---@param sender EntityPlayer
 ---@param forceSheet string?
 ---@function
-function ROCKTABLE:RockInit(entity, sender, forceSheet, forceAnm2, dontUpdate)
+function POR.ROCKTABLE:RockInit(entity, sender, forceSheet, forceAnm2, dontUpdate)
 	local variant = POR.GENERIC_RNG:RandomInt(3) + 1
 	local save = POR:RunSave()
 	local sprite = entity:GetSprite()
-	local stage = ROCKTABLE:GetStageId()
+	local stage = POR.ROCKTABLE:GetStageId()
 	local roomType = POR.Room():GetType()
 
 	-- do a check to see if it's HomeB since there's no stage variant for it
-	local homeB = (save.MomBedSlept and stage == 35) and ROCKTABLE.SPRITE_VARIANTS.HomeB
-	local stageVariant = ROCKTABLE.ROOMTYPE_TO_VARIANT[roomType] or homeB or ROCKTABLE.STAGE_TO_VARIANT[stage]
-		or ROCKTABLE.SPRITE_VARIANTS.Basement
+	local homeB = (save.MomBedSlept and stage == 35) and POR.ROCKTABLE.SPRITE_VARIANTS.HomeB
+	local stageVariant = POR.ROCKTABLE.ROOMTYPE_TO_VARIANT[roomType] or homeB or POR.ROCKTABLE.STAGE_TO_VARIANT[stage]
+		or POR.ROCKTABLE.SPRITE_VARIANTS.Basement
 	local tag = entity:GetData().POR_RockTag
 	local replaceSheet = POR:FireExtraCallback(POR.ExtraCallbacks.NEHEMIAH_PRE_ROCK_SPRITE_INIT, sender, variant, tag, entity)
 
@@ -364,13 +362,13 @@ end
 ---@scope Epiphany
 function POR:ManageRockPickupSprite(rock)
 	local sprite = rock:GetSprite()
-	local stage = ROCKTABLE:GetStageId()
+	local stage = POR.ROCKTABLE:GetStageId()
 	local save = POR:RunSave()
 	local roomType = POR.Room():GetType()
 	-- do a check to see if it's HomeB since there's no stage variant for it
-	local homeB = (save.MomBedSlept and stage == 35) and ROCKTABLE.SPRITE_VARIANTS.HomeB
-	local stageVariant = ROCKTABLE.ROOMTYPE_TO_VARIANT[roomType] or homeB or ROCKTABLE.STAGE_TO_VARIANT[stage]
-		or ROCKTABLE.SPRITE_VARIANTS.Basement
+	local homeB = (save.MomBedSlept and stage == 35) and POR.ROCKTABLE.SPRITE_VARIANTS.HomeB
+	local stageVariant = POR.ROCKTABLE.ROOMTYPE_TO_VARIANT[roomType] or homeB or POR.ROCKTABLE.STAGE_TO_VARIANT[stage]
+		or POR.ROCKTABLE.SPRITE_VARIANTS.Basement
 
 	if not rock:GetData().POR_HoldingRockDontUpdate then
 		if not sprite:IsPlaying("Appear" .. tostring(stageVariant)) or rock:GetData().POR_RockFallingBeast then
@@ -396,7 +394,7 @@ end
 ---@param player EntityPlayer
 ---@param playHideAnim boolean?
 ---@function
-function ROCKTABLE:StopHolding(player, playHideAnim)
+function POR.ROCKTABLE:StopHolding(player, playHideAnim)
 	local pData = player:GetData()
 	if pData.POR_HoldingRock then
 		if playHideAnim then
@@ -411,7 +409,7 @@ end
 
 ---@param player EntityPlayer
 ---@function
-function ROCKTABLE:PostPlayerUpdate(player)
+function POR.ROCKTABLE:PostPlayerUpdate(player)
 	local pData = player:GetData()
 	if not pData.POR_RockFrameCount then
 		pData.POR_RockFrameCount = 0
@@ -420,7 +418,7 @@ function ROCKTABLE:PostPlayerUpdate(player)
 		if POR:IsShooting(NEHEMIAH) then
 			if pData.POR_RockFrameCount > 9 then
 				local aimDirection = POR:GetAttackDirection(player)
-				ROCKTABLE:FireRock(player, aimDirection)
+				POR.ROCKTABLE:FireRock(player, aimDirection)
 
 				player:AnimatePickup(Sprite(), false, "HideItem") -- play HideItem with invisible sprite
 				pData.POR_HoldingRock = false
@@ -433,9 +431,9 @@ function ROCKTABLE:PostPlayerUpdate(player)
 				end
 			end
 			if player:IsExtraAnimationFinished() then
-				local stage = ROCKTABLE:GetStageId()
-				local stageVariant = pData.POR_HoldingRockIsSpecial and 1 or ROCKTABLE.STAGE_TO_VARIANT[stage]
-					or ROCKTABLE.SPRITE_VARIANTS.Basement
+				local stage = POR.ROCKTABLE:GetStageId()
+				local stageVariant = pData.POR_HoldingRockIsSpecial and 1 or POR.ROCKTABLE.STAGE_TO_VARIANT[stage]
+					or POR.ROCKTABLE.SPRITE_VARIANTS.Basement
 
 				if not pData.POR_HoldingRockDontUpdate then
 					local RockSprite = Sprite()
@@ -462,30 +460,30 @@ end
 ---@param pickup EntityEffect
 ---@param player EntityPlayer
 ---@function
-function ROCKTABLE:PickupEffectCollision(pickup, player)
+function POR.ROCKTABLE:PickupEffectCollision(pickup, player)
 	local pData = player:GetData()
-	if not pData.POR_HoldingBoulder then
+	if not pData.POR_HoldingRock then
 		if player:GetPlayerType() ~= NEHEMIAH then
 			player:AnimatePickup(pickup:GetSprite(), false, "LiftItem")
-			pData.POR_HoldingBoulder = true
-			pData.POR_HoldingBoulderSprite = pickup:GetData().POR_BoulderSheet
-			pData.POR_HoldingBoulderAnm2 = pickup:GetData().POR_BoulderAnm2
-			pData.POR_HoldingBoulderIsSpecial = pickup:GetData().POR_HoldingBoulderIsSpecial
-			pData.POR_HoldingBoulderDontUpdate = pickup:GetData().POR_HoldingBoulderDontUpdate
+			pData.POR_HoldingRock = true
+			pData.POR_HoldingRockSprite = pickup:GetData().POR_RockSheet
+			pData.POR_HoldingRockAnm2 = pickup:GetData().POR_RockAnm2
+			pData.POR_HoldingRockIsSpecial = pickup:GetData().POR_HoldingRockIsSpecial
+			pData.POR_HoldingRockDontUpdate = pickup:GetData().POR_HoldingRockDontUpdate
 
 			-- BB
-			pData.POR_EnemyBoulderSprite = pickup:GetData().POR_EnemyBoulderSprite
+			pData.POR_EnemyRockSprite = pickup:GetData().POR_EnemyRockSprite
 
 			pickup:Remove()
-			return true -- indicate that we picked up the boulder
+			return true -- indicate that we picked up the rock
 		end
 	end
 end
 
 ---Runs pickup collision for rocks
 ---@function
-function ROCKTABLE:OnUpdate()
-	POR.iforeach(Isaac.FindByType(EntityType.ENTITY_EFFECT, ROCK_VARIANT), function(ent)
+function POR.ROCKTABLE:OnUpdate()
+	POR.iforeach(Isaac.FindByType(EntityType.ENTITY_EFFECT, POR.ROCK_VARIANTT), function(ent)
 		local rock = ent:ToEffect() ---@cast rock EntityEffect
 		-- AppearXY is actual appear animation,
 		-- Appear is idle animation
@@ -500,7 +498,7 @@ function ROCKTABLE:OnUpdate()
 				and player:IsExtraAnimationFinished()
 				and not player:IsCoopGhost()
 			then
-				if ROCKTABLE:PickupEffectCollision(rock, player) then
+				if POR.ROCKTABLE:PickupEffectCollision(rock, player) then
 					break
 				end
 			end
@@ -508,4 +506,103 @@ function ROCKTABLE:OnUpdate()
 	end)
 end
 
+---@param rock EntityTear
+---@param player EntityPlayer
+---@param hitWall boolean
+---@function
+function POR.ROCKTABLE:OnRockDeath(rock, player, hitWall)
+	SFXManager():Play(SoundEffect.SOUND_HELLBOSS_GROUNDPOUND)
+	for _ = 1, 5 do
+		local pos = rock.Position - rock.Velocity * 1.5
 
+		local velAngle
+		if hitWall then
+			-- angle small rocks away from the direction Rock was going in, since they'll just hit a wall
+			velAngle = (pos - rock.Position):GetAngleDegrees() + POR:RandomFloatRange(180) - 90
+		else
+			velAngle = POR:RandomFloatRange(360)
+		end
+
+		local vel = Vector.FromAngle(velAngle) * (POR:RandomFloatRange(10) + 6)
+		local newTear = player:FireTear(pos, vel)
+
+		newTear.CollisionDamage = player.Damage * 0.75
+		newTear:ChangeVariant(TearVariant.ROCK)
+		newTear.FallingSpeed = -8 * (POR:RandomFloatRange(2) - 0.5)
+		newTear.FallingAcceleration = 2 + POR:RandomFloatRange(2)
+	end
+
+	if hitWall then
+		rock:Die() -- https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXBtOWNjanRpNDg0eHBlMm5peXltcTY5bGE4dXBtN3preG9hcTNyZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/e37rJnOap14aUrqtTB/giphy.gif
+		rock.Visible = false
+	end
+end
+
+---@param tear EntityTear
+---@function
+function POR.ROCKTABLE:RockUpdate(tear)
+	local player = POR:TryGetPlayer(tear.SpawnerEntity)
+	local collidingNormally = tear:CollidesWithGrid()
+		and not tear:HasTearFlags(TearFlags.TEAR_HYDROBOUNCE | TearFlags.TEAR_BOUNCE)
+
+	local collidingWithWall = not tear:HasTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_BOUNCE_WALLSONLY)
+		and tear.Position:Distance(POR.Room():GetClampedPosition(tear.Position, tear.Size)) > 1e-6
+
+	if tear:GetData().POR_RockSheet == nil then
+		POR.ROCKTABLE:RockInit(tear, player or Isaac.GetPlayer(0))
+	end
+
+	if not player then return end
+
+	if tear:IsDead() or tear:CollidesWithGrid() then
+		POR.ROCKTABLE:OnRockDeath(tear, player, collidingNormally or collidingWithWall)
+		POR:FireExtraCallback(POR.ExtraCallbacks.NEHEMIAH_ROCK_DEAD, player, tear, nil)
+	end
+end
+
+---@param tear EntityTear
+---@param collider Entity
+---@function
+function POR.ROCKTABLE:RockCollide(tear, collider)
+	local player = POR:TryGetPlayer(tear.SpawnerEntity)
+
+	if player then
+		-- check if the Rock is dead on next frame
+		POR_ScrumMaster.Schedule(1, function(tearRef)
+			local futureTear = tearRef.Entity ---@type Entity
+			if futureTear and futureTear:IsDead() then
+				POR.ROCKTABLE:OnRockDeath(tear, player, false)
+				POR:FireExtraCallback(POR.ExtraCallbacks.NEHEMIAH_ROCK_DEAD, player, tear, collider)
+			end
+		end, { EntityRef(tear) })
+	end
+end
+
+-- Handle items that make you hold stuff above your head.
+
+function POR:stopHoldingRock(_, _, _, player)
+	POR.ROCKTABLE:StopHolding(player)
+end
+
+function POR:stopHoldingHideAnim(_, _, _, player)
+	POR.ROCKTABLE:StopHolding(player, true)
+end
+
+-- handle trapdoors and co-op
+function POR.ROCKTABLE:HideRocksOnTrapdoor()
+	local enteringTrapdoor = false
+
+	POR:ForEachPlayer(function(player)
+		if (player:GetSprite():IsPlaying("Trapdoor") or player:GetSprite():IsPlaying("LightTravel"))
+			and player.ControlsEnabled == false
+		then -- entering trapdoor
+			enteringTrapdoor = true
+		end
+	end)
+
+	if enteringTrapdoor then
+		POR:ForEachPlayer(function(player)
+			POR.ROCKTABLE:StopHolding(player, true)
+		end)
+	end
+end
