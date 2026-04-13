@@ -62,7 +62,7 @@ local lastUsedHourglassSlot = "1"
 POR.SaveCompiler.Utility.ERROR_MESSAGE_FORMAT = "[IsaacSaveCompiler:%s] ERROR: %s (%s)\n"
 POR.SaveCompiler.Utility.WARNING_MESSAGE_FORMAT = "[IsaacSaveCompiler:%s] WARNING: %s (%s)\n"
 POR.SaveCompiler.Utility.ErrorMessages = {
-	NOT_INITIALIZED = "The save manager cannot be used without initializing it first!",
+	NOT_INITIALIZED = "The save compiler cannot be used without initializing it first!",
 	DATA_NOT_LOADED = "An attempt to use save data was made before it was loaded!",
 	BAD_DATA = "An attempt to save invalid data was made!",
 	BAD_DATA_WARNING = "Data type saved with warning!",
@@ -350,7 +350,9 @@ function POR.SaveCompiler.Utility.GetSaveIndex(ent, allowSoulSave)
 				if laz and laz:ToPlayer() then
 					player = laz:ToPlayer()
 				end
-				identifier = tostring(player:GetCollectibleRNG(id):GetSeed())
+				if player ~= nil then
+					identifier = tostring(player:GetCollectibleRNG(id):GetSeed())
+				end
 			end
 		elseif ent.Type == EntityType.ENTITY_PICKUP then
 			identifier = GetPtrHash(ent)

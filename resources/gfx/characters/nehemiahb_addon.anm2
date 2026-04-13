@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="2/16/2026 11:28:17 AM" Version="114" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="4/2/2026 4:25:07 PM" Version="115" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="costumes\characterb_nehemiah_extra.png" Id="0"/>

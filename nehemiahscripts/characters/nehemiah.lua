@@ -6,7 +6,9 @@ local NEHEMIAH_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiah_addon
 local NEHEMIAHB_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiahb_addon.anm2")       -- T. Nehemiah's Costume
 local NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")                      -- Item Id of Nehemiah's Hammer
 local BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra")                                -- Item Id of Book of Ezra
+local LargeRooms = {}
 
+-- Character Inits
 --- @param player EntityPlayer       -- establishes that player references an EntityPlayer
 function POR:NehemiahInit(player)
     if player:GetPlayerType() ~= NEHEMIAH_TYPE then
@@ -89,9 +91,135 @@ end
 
 ---Returns true if player's aim direction vector length is greater than 0
 function POR:IsShooting(player)
+
 	if Isaac.GetPlayer():HasCollectible(Isaac.GetItemIdByName("COLLECTIBLE_KIDNEY_STONE")) then
 		return true
 	end
 
-	return POR:GetAimDirection(player):Length() > 1e-3
+	if POR:GetAimDirection(player):Length() == nil then return else return POR:GetAimDirection(player):Length() > 1e-3 end
 end
+
+
+---@function
+function POR:GetMaxRocksInRoom()
+	local shape = game:GetRoom():GetRoomShape()
+	local rockCount = Isaac.CountEntities(nil, EntityType.ENTITY_PLAYER, -1, NEHEMIAH_TYPE)
+
+	if POR:Set({ RoomShape.ROOMSHAPE_2x2, RoomShape.ROOMSHAPE_LBL, RoomShape.ROOMSHAPE_LBR, RoomShape.ROOMSHAPE_LTL, RoomShape.ROOMSHAPE_LTR }) ~= nil then
+		LargeRooms = POR:Set({ RoomShape.ROOMSHAPE_2x2, RoomShape.ROOMSHAPE_LBL, RoomShape.ROOMSHAPE_LBR, RoomShape.ROOMSHAPE_LTL, RoomShape.ROOMSHAPE_LTR })
+	end
+	if LargeRooms[shape] then
+		return 9 + 3 * (rockCount - 1)
+	else
+		return 6 + 2 * (rockCount - 1)
+	end
+end
+
+---@param pos Vector
+---@function
+function POR:FindFreeRockPosition(pos)
+	local room = game:GetRoom()
+	local newPos = room:FindFreePickupSpawnPosition(pos)
+
+	for _, effect in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_EFFECT_VARIANT)) do
+		if effect.Position:Distance(newPos) < 20 then
+			return room:FindFreePickupSpawnPosition(pos, 40) -- try again
+		end
+	end
+
+	POR:ForEachPlayer(function(player)
+		if player.Position:Distance(newPos) < 20 then
+			return room:FindFreePickupSpawnPosition(pos, 40) -- try again
+		end
+	end)
+
+	return newPos
+end
+
+--- Spawn a rock, but not more than the allowed maximum
+---@param player EntityPlayer
+---@param position? Vector
+---@param close? boolean Should the rocks spawn close to the position?
+---@param tag? string What extra data should be attached to the rock?
+---@function
+function POR:DropRocks(player, position, close, tag)
+	local rockCount = Isaac.CountEntities(nil, EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_EFFECT_VARIANT)
+	local rocksToSpawn = math.min(2, POR:GetMaxRocksInRoom() - rockCount)
+	local room = game:GetRoom()
+	local rng = player:GetCollectibleRNG(NEHEMIAHSHAMMER_ITEM_ID)
+
+	if rocksToSpawn == 0 then
+		local spawnedRocks = 0
+		-- FindByType returns entities sorted by FrameCount
+		local rocks = Isaac.FindByType(EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_EFFECT_VARIANT)
+		POR_Incrementor.inverseiforeach(rocks, function(rock)
+			if spawnedRocks == 1 then return end
+
+			rock:Remove()
+			Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, rock.Position, Vector.Zero, nil)
+			spawnedRocks = spawnedRocks + 1
+		end)
+
+		SFXManager():Play(SoundEffect.SOUND_ROCK_CRUMBLE)
+		rocksToSpawn = 1
+	end
+
+	if not position then
+		position = player.Position
+	end
+
+	for _ = 1, rocksToSpawn do
+		local pos
+		-- don't spawn rocks too far from the player
+		for _ = 1, 10 do
+			pos = room:FindFreeTilePosition(position, 40)
+			pos = POR:FindFreeRockPosition(pos)
+			local rockDist = (pos - position):Length()
+
+			if rockDist > 150 then
+				pos = nil
+				break
+			end
+
+			if pos then
+				break
+			end
+		end
+
+		if (not pos) and (not close) then -- Continue regular calculations
+			pos = position + Vector(rng:RandomFloat() * 400 - 200, rng:RandomFloat() * 400 - 200)
+			pos = POR:FindFreeRockPosition(pos)
+		elseif close then -- Overwrite previous calculations with "close" calculations
+			pos = position + Vector(rng:RandomFloat() * 150 - 75, rng:RandomFloat() * 150 - 75)
+			pos = POR:FindFreeRockPosition(pos)
+		end
+
+		local gravityExists = POR:RoomHasGravity()
+		local isBeastFight = POR.Level():GetStage() == LevelStage.STAGE8 and gravityExists
+		if gravityExists and not isBeastFight then
+			local bottomPos = room:GetBottomRightPos().Y
+			for y = pos.Y, bottomPos, 15 do -- 15 is how much it moves between each check.
+				local collision = room:GetGridCollisionAtPos(Vector(pos.X, y))
+				if collision ~= GridCollisionClass.COLLISION_NONE then
+					pos = Vector(pos.X, y - 15) -- 15 is an offset to make it look like the rock is on the ground and not in the ground
+					break
+				end
+			end
+		elseif isBeastFight then
+			pos = Vector(pos.X, room:GetTopLeftPos().Y + 5) -- 5 is an arbitrary offset so that it doesn't spawn in the ceiling
+		end
+
+		local rockPickup = Isaac.Spawn(EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_EFFECT_VARIANT, 0, pos, Vector.Zero,
+			player):ToEffect()
+		---@cast rockPickup EntityEffect
+		rockPickup:GetData().POR_RockFallingBeast = isBeastFight
+		rockPickup:GetData().POR_RockTag = tag
+
+		POR.ROCKTABLE:RockInit(rockPickup, player)
+
+		local frame = rng:RandomInt(10)
+		rockPickup:GetSprite():SetFrame(frame)
+	end
+end
+
+

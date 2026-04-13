@@ -1,8 +1,16 @@
+local game = POR.game
+local player = Isaac.GetPlayer()
+local seeds = game:GetSeeds()
+local startSeed = seeds:GetStartSeed()
+local rng = RNG()
+rng:SetSeed(startSeed + 1, 35) -- reccomended RNG shift
+
 local swingActive = false
 local swingOwner = nil
 local swingAnimating = false
 local swingEndDelay = 0
 local lastNumFired = 0
+
 
 NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")
 
@@ -60,6 +68,12 @@ POR:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
         sprite:Play("SwingHammer", true)
         swingAnimating = true
         lastNumFired = currentNumFired
+        local randInt = rng:RandomInt()
+        local rockChance = math.max(0.80, 0.80 + (player.Luck / 100))
+        if randInt < rockChance and Isaac.GetPlayer() == Isaac.GetPlayerTypeByName("Nehemiah", false) then
+            POR_NehemiahCharacter:DropRocks()
+        end
+
     end
 
     if swingAnimating and not sprite:IsPlaying("SwingHammer") then

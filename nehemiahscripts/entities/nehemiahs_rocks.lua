@@ -463,7 +463,7 @@ end
 function POR.ROCKTABLE:PickupEffectCollision(pickup, player)
 	local pData = player:GetData()
 	if not pData.POR_HoldingRock then
-		if player:GetPlayerType() ~= NEHEMIAH then
+		if player:GetPlayerType() == NEHEMIAH then
 			player:AnimatePickup(pickup:GetSprite(), false, "LiftItem")
 			pData.POR_HoldingRock = true
 			pData.POR_HoldingRockSprite = pickup:GetData().POR_RockSheet
@@ -476,6 +476,8 @@ function POR.ROCKTABLE:PickupEffectCollision(pickup, player)
 
 			pickup:Remove()
 			return true -- indicate that we picked up the rock
+		else
+			return
 		end
 	end
 end
@@ -483,8 +485,9 @@ end
 ---Runs pickup collision for rocks
 ---@function
 function POR.ROCKTABLE:OnUpdate()
-	POR.iforeach(Isaac.FindByType(EntityType.ENTITY_EFFECT, POR.ROCK_VARIANTT), function(ent)
+	POR_Incrementor.iforeach(Isaac.FindByType(EntityType.ENTITY_EFFECT, POR.ROCK_VARIANTT), function(ent)
 		local rock = ent:ToEffect() ---@cast rock EntityEffect
+		if rock == nil then return end
 		-- AppearXY is actual appear animation,
 		-- Appear is idle animation
 		if rock:GetSprite():GetAnimation():match("Appear.+") then

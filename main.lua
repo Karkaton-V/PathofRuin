@@ -10,26 +10,40 @@ POR.game = Game()
 
 -- Includes
 -- -- Base Case
--- -- -- Save Managers
-POR_CustomSaveCompiler = require("custom_save_compiler")
-POR_CustomSaveCreator = require("custom_save_creator")
-POR_ScrumMaster = require("custom_scrum_master_schedule")
+-- -- -- Helpers
+POR_CustomSaveCompiler = include("nehemiahscripts.custom_save_compiler")
+POR.SaveCompiler.Init(POR)
+POR.SaveCallbacks = POR.SaveCompiler.SaveCallbacks
+POR_CustomSaveCreator = include("nehemiahscripts.custom_save_creator")
+POR_ScrumMaster = include("nehemiahscripts.custom_scrum_master_schedule")
+POR_Incrementor = include("nehemiahscripts.custom_incrementor")
+
 -- -- Nehemiah
 -- -- -- Characters
-POR_NehemiahCharacter = require("nehemiahscripts.characters.nehemiah")
+POR_NehemiahCharacter = include("nehemiahscripts.characters.nehemiah")
 
 -- -- -- Compat
-POR_NehemiahCompat = require("nehemiahscripts.compat.eid")
+POR_NehemiahCompat = include("nehemiahscripts.compat.eid")
 
 -- -- -- Entities
-POR_MoonlightEntity = require("nehemiahscripts.entities.ezras_moonlight")
-POR_NehemiahRockEntity = require("nehemiahscripts.entities.nehemiahs_rocks")
+POR_MoonlightEntity = include("nehemiahscripts.entities.ezras_moonlight")
+POR_NehemiahRockEntity = include("nehemiahscripts.entities.nehemiahs_rocks")
 
 -- -- -- Items
-POR_BookofEzra = require("nehemiahscripts.items.book_of_ezra")
-POR_NehemiahsHammer = require("nehemiahscripts.items.nehemiahs_hammer")
+POR_BookofEzra = include("nehemiahscripts.items.book_of_ezra")
+POR_NehemiahsHammer = include("nehemiahscripts.items.nehemiahs_hammer")
 
+-------------------------------------------------------------------------------------------------------------------------------
+---Initializes Save Handler
+function POR:Init(folder, table)
+	for _, string in ipairs(table) do
+		include("nehemiahscripts/" .. folder .. "." .. string)
+	end
+end
 
+POR.SaveCompiler:Init()
+POR.scrum_master_schedule:Init()
+-------------------------------------------------------------------------------------------------------------------------------
 --  -- Stuff Needed Around
 
 --[[
@@ -46,93 +60,6 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, mod.PostRender)
 ]]--
 
--------------------------------------------------------------------------------------------------------------------------------
---Custom Incrementors
----@diagnostic disable: param-type-mismatch, inject-field
----@param ent Entity
-local function doCast(ent)
-	if ent.Type == EntityType.ENTITY_PLAYER then
-		return ent:ToPlayer()
-	elseif ent.Type == EntityType.ENTITY_TEAR then
-		return ent:ToTear()
-	elseif ent.Type == EntityType.ENTITY_FAMILIAR then
-		return ent:ToFamiliar()
-	elseif ent.Type == EntityType.ENTITY_BOMB then
-		return ent:ToBomb()
-	elseif ent.Type == EntityType.ENTITY_PICKUP then
-		return ent:ToPickup()
-	elseif ent.Type == EntityType.ENTITY_SLOT then
-		return ent:ToSlot()
-	elseif ent.Type == EntityType.ENTITY_LASER then
-		return ent:ToLaser()
-	elseif ent.Type == EntityType.ENTITY_KNIFE then
-		return ent:ToKnife()
-	elseif ent.Type == EntityType.ENTITY_PROJECTILE then
-		return ent:ToProjectile()
-	elseif ent.Type == EntityType.ENTITY_EFFECT then
-		return ent:ToEffect()
-	else
-		return ent:ToNPC()
-	end
-end
-
----@class SearchParams
----@field Inverse boolean?
----@field ShouldCache boolean?
-
----@class DebugSearchParams
----@field NPCOnly boolean?
----@field EntityOnly boolean?
-
----@class AllowEnemySearchParams: SearchParams
----@field UseEnemySearchParams boolean?
----@field Dead boolean?
----@field Friendly boolean?
----@field NoCollision boolean?
----@field CantShutDoors boolean?
----@field Invincible boolean?
-
----@param ent Entity?
----@param searchParams AllowEnemySearchParams
-local function isValidEnemyTarget(ent, searchParams)
-	return ent
-	and ent:ToNPC()
-	and ent:IsActiveEnemy(searchParams and searchParams.Dead or false)
-	and (ent:IsVulnerableEnemy() or searchParams and searchParams.Invincible)
-	and (not ent:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) or searchParams and searchParams.Friendly)
-	and (ent.EntityCollisionClass ~= EntityCollisionClass.ENTCOLL_NONE or searchParams and searchParams.NoCollision)
-	and (ent:ToNPC().CanShutDoors or ent.Type == EntityType.ENTITY_DUMMY or searchParams and searchParams.CantShutDoors)
-end
-
-local function varSubtypeCheck(ent, variant, subtype)
-	local entSubtype = ent:ToPlayer() and ent:ToPlayer():GetPlayerType() or ent.SubType
-	return (not variant or ent.Variant == variant) and (not subtype or entSubtype == subtype)
-end
-
-local function forEach(ent, i, func, searchParams, variant, subtype)
-	if varSubtypeCheck(ent, variant, subtype) then
-		local castEnt = searchParams and searchParams.EntityOnly and ent or doCast(ent)
-		if searchParams and searchParams.NPCOnly and not ent:ToNPC() then
-			castEnt = nil
-		end
-		if castEnt and (not searchParams or not searchParams.UseEnemySearchParams or isValidEnemyTarget(castEnt, searchParams)) then
-			local index = REPENTOGON and castEnt:ToPlayer() and castEnt:GetPlayerIndex() or i
-			local result = func(castEnt, index)
-			if result ~= nil then
-				return result
-			end
-		end
-	end
-end
-
-local function iforeach(loopTable, func, searchParams, variant, subtype)
-	for i, ent in ipairs(loopTable) do
-		local result = forEach(ent, i, func, searchParams, variant, subtype)
-		if result ~= nil then
-			return result
-		end
-	end
-end
 -------------------------------------------------------------------------------------------------------------------------------
 -- Callbacks
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, POR.NehemiahInit)
@@ -157,6 +84,53 @@ POR:AddCallback(ModCallbacks.MC_USE_ITEM, POR.stopHoldingHideAnim, CollectibleTy
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Custom Callbacks
+
+
+---@param id string
+---@param priority integer
+---@param func function
+---@param ... any
+function POR.SaveCompiler.Callbacks.AddPriorityCallback(id, priority, func, ...)
+	local callbacks = POR.SaveCompiler.Callbacks.RegisteredCallbacks[id]
+	local callback = {
+		Priority = priority,
+		Function = func,
+		Args = { ... },
+	}
+
+	if #callbacks == 0 then
+		callbacks[#callbacks + 1] = callback
+	else
+		for i = #callbacks, 1, -1 do
+			if callbacks[i].Priority <= priority then
+				table.insert(callbacks, i + 1, callback)
+				return
+			end
+		end
+		table.insert(callbacks, 1, callback)
+	end
+end
+
+
+---@param id string
+---@param func function
+---@param ... any
+function POR.SaveCompiler.Callbacks.AddCallback(id, func, ...)
+	POR.SaveCompiler.Callbacks.AddPriorityCallback(id, POR.SaveCompiler.CallbackPriority.NORMAL, func, ...)
+end
+
+---@param id string
+---@param func function
+function POR.SaveCompiler.Callbacks.RemoveCallback(id, func)
+	local callbacks = POR.SaveCompiler.Callbacks.RegisteredCallbacks[id]
+	for i = #callbacks, 1, -1 do
+		if callbacks[i].Function == func then
+			table.remove(callbacks, i)
+		end
+	end
+end
+
+
 ---@class ExtraCallback
 ---@field func fun(...: any)
 ---@field priority ExtraCallbackPriority
@@ -285,6 +259,18 @@ POR.ExtraCallbackPriority = {
 	LATE = 3,
 	LATEST = 4,
 }
+
+--- Returns a transposed table with keys equal to given table's values and values set to true
+---@param list any[]
+---@return {[any]: boolean?}
+---@function
+function POR:Set(list)
+	local set = {}
+	for _, l in ipairs(list) do
+		set[l] = true
+	end
+	return set
+end
 
 
 -------------------------------------------------------------------------------------------------------------------------------
