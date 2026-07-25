@@ -131,6 +131,68 @@ POR.SaveCompiler.Utility.CallbackPriority = {
 	LATE = 1000
 }
 
+---@enum ExtraCallbackPriority
+POR.SaveCompiler.CallbackPriority = {
+	EARLIEST = 0,
+	EARLY = 1,
+	NORMAL = 2,
+	LATE = 3,
+	LATEST = 4,
+}
+
+POR.SaveCompiler.Callbacks = {
+	RegisteredCallbacks = setmetatable({}, {
+		__index = function(t, k)
+			local new = {}
+			rawset(t, k, new)
+			return new
+		end
+	})
+}
+
+---@param id string
+---@param priority integer
+---@param func function
+---@param ... any
+function POR.SaveCompiler.Callbacks.AddPriorityCallback(id, priority, func, ...)
+	local callbacks = POR.SaveCompiler.Callbacks.RegisteredCallbacks[id]
+	local callback = {
+		Priority = priority,
+		Function = func,
+		Args = { ... },
+	}
+
+	if #callbacks == 0 then
+		callbacks[#callbacks + 1] = callback
+	else
+		for i = #callbacks, 1, -1 do
+			if callbacks[i].Priority <= priority then
+				table.insert(callbacks, i + 1, callback)
+				return
+			end
+		end
+		table.insert(callbacks, 1, callback)
+	end
+end
+
+---@param id string
+---@param func function
+---@param ... any
+function POR.SaveCompiler.Callbacks.AddCallback(id, func, ...)
+	POR.SaveCompiler.Callbacks.AddPriorityCallback(id, POR.SaveCompiler.CallbackPriority.NORMAL, func, ...)
+end
+
+---@param id string
+---@param func function
+function POR.SaveCompiler.Callbacks.RemoveCallback(id, func)
+	local callbacks = POR.SaveCompiler.Callbacks.RegisteredCallbacks[id]
+	for i = #callbacks, 1, -1 do
+		if callbacks[i].Function == func then
+			table.remove(callbacks, i)
+		end
+	end
+end
+
 POR.SaveCompiler.Utility.ValidityState = {
 	VALID = 0,
 	VALID_WITH_WARNING = 1,
