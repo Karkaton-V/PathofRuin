@@ -20,8 +20,7 @@ POR_Incrementor        = include("nehemiahscripts.custom_incrementor")
 
 -- -- Nehemiah
 -- -- -- Characters
--- NOTE: nehemiah.lua must load before all other scripts; it sets NEHEMIAH_TYPE, TAINTED_NEHEMIAH_TYPE,
---       NEHEMIAHSHAMMER_ITEM_ID, and BOOKOFEZRA_ITEM_ID which are used by callbacks below
+-- NOTE: nehemiah.lua must load before all other scripts; it sets NEHEMIAH_TYPE, TAINTED_NEHEMIAH_TYPE, NEHEMIAHSHAMMER_ITEM_ID, and BOOKOFEZRA_ITEM_ID used by callbacks below
 POR_NehemiahCharacter  = include("nehemiahscripts.characters.nehemiah")
 
 -- -- -- Compat
@@ -29,8 +28,7 @@ POR_NehemiahCompat     = include("nehemiahscripts.compat.eid")
 
 -- -- -- Entities
 POR_MoonlightEntity    = include("nehemiahscripts.entities.ezras_moonlight")
--- NOTE: nehemiahs_boulder.lua sets POR.ROCKTABLE, POR.ROCK_VARIANT, POR.ROCK_TEAR_VARIANT,
---       POR.ManageRockPickupSprite, POR.RockBeastFalling, POR.stopHoldingRock, POR.stopHoldingHideAnim
+-- NOTE: nehemiahs_boulder.lua sets POR.ROCKTABLE, POR.ROCK_VARIANT, POR.ROCK_PROJECTILE_VARIANT, POR.stopHoldingRock, and POR.stopHoldingHideAnim
 POR_NehemiahRockEntity = include("nehemiahscripts.entities.nehemiahs_boulder")
 
 -- -- -- Items
@@ -139,8 +137,7 @@ POR.ExtraCallbacks = {
         end
     },
 
-    -- Called before a rock sprite is initialized; return a RockSpriteModifier or nil to use default
-    -- RockSpriteModifier fields: Anm2, ThrownAnm2, Spritesheet, Priority, DontUpdate
+    -- Called before a rock sprite is initialized; return a RockSpriteModifier (Anm2, ThrownAnm2, Spritesheet, Priority, DontUpdate) or nil to use default
     NEHEMIAH_PRE_ROCK_SPRITE_INIT = {
         Name = "NEHEMIAH_PRE_ROCK_SPRITE_INIT",
         Functions = {},
@@ -175,38 +172,3 @@ function POR:Set(list)
     for _, l in ipairs(list) do set[l] = true end
     return set
 end
-
--------------------------------------------------------------------------------------------------------------------------------
-
---[[
-local GOLDEN_DAMAGE = 1
-function POR:GoldenAppleCache(player, cacheFlags)
-    if cacheFlags & CacheFlag.CACHE_DAMAGE == CacheFlag.CACHE_DAMAGE then
-        local itemcount  = player:GetCollectibleNum(GOLDENAPPLE_ITEM_ID)
-        player.Damage    = player.Damage + (GOLDEN_DAMAGE * itemcount)
-    end
-end
-
-local HS_POISON_CHANCE       = 0.4
-local HS_POISON_LENGTH       = 3
-local ONE_INTERVAL_OF_POISON = 20   -- poison ticks at frame 3, then every 20 frames after
-
-function POR:HolySmokesNewRoom()
-    local playerCount = game:GetNumPlayers()
-    for playerIndex = 0, playerCount - 1 do
-        local player    = Isaac.GetPlayer(playerIndex)
-        local copyCount = player:GetCollectibleNum(HOLYSMOKES_ITEM_ID)
-        if copyCount > 0 then
-            local rng      = player:GetCollectibleRNG(HOLYSMOKES_ITEM_ID)
-            local entities = Isaac.GetRoomEntities()
-            for _, entity in ipairs(entities) do
-                if entity:IsActiveEnemy() and entity:IsVulnerableEnemy() then
-                    if rng:RandomFloat() < HS_POISON_CHANCE then
-                        entity:AddPoison(EntityRef(player), HS_POISON_LENGTH + (ONE_INTERVAL_OF_POISON * copyCount), player.Damage)
-                    end
-                end
-            end
-        end
-    end
-end
---]]

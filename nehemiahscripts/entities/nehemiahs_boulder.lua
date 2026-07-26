@@ -1,6 +1,4 @@
--- Boulder entity logic for Nehemiah's Hammer, adapted from Epiphany (TR Samson) by Team Epiphany
--- "Holding Boulder" (rock_tear.anm2) is the ground pickup: falls from sky, idles, gets collected
--- "Throwing Boulder" (rock_pickup.anm2) is the thrown projectile: flies, hits, fragments
+-- Boulder entity logic for Nehemiah's Hammer; pickup uses "Throwing Boulder"/rock_pickup.anm2, thrown projectile uses "Holding Boulder"/rock_tear.anm2
 
 local game = Game()
 
@@ -17,7 +15,8 @@ POR.ROCK_PROJECTILE_VARIANT = BOULDER.PROJECTILE_VARIANT
 local PROJECTILE_DAMAGE = 40
 local PROJECTILE_FRAGMENTS = 3 -- fragments spawned on impact; ordinary tears, no splitting callback attached
 local BOULDER_FALL_SPEED_BEAST = 8
-local BOULDER_PICKUP_RADIUS = 20
+local BOULDER_HITBOX_MULT = 2
+local HORIZONTAL_THROW_HEIGHT_OFFSET = -10 -- raises the spawn point when thrown mostly left/right
 
 local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)
 local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
@@ -91,10 +90,7 @@ BOULDER.ROOMTYPE_TO_VARIANT = {
     [RoomType.ROOM_BARREN] = BOULDER.SPRITE_VARIANTS.Home,
 }
 
--- ================================================================================
 -- GetStageId — returns a stage config id used to pick the sprite variant, or nil if unrecognized
--- ================================================================================
-
 ---@function
 function BOULDER:GetStageId()
     local level = game:GetLevel()
@@ -166,10 +162,7 @@ local function randomRockSheet()
     return "gfx/effects/rock_variation_" .. tostring(math.random(1, 3)) .. ".png"
 end
 
--- ================================================================================
 -- PickupInit — sets up a freshly spawned ground boulder pickup
--- ================================================================================
-
 ---@param effect EntityEffect
 ---@function
 function BOULDER:PickupInit(effect)
@@ -179,19 +172,14 @@ function BOULDER:PickupInit(effect)
     data.POR_BoulderSheet = randomRockSheet()
     data.POR_SpriteVariant = BOULDER:GetSpriteVariant()
 
-    Isaac.DebugString("[BoulderDebug] PickupInit: variant=" .. tostring(data.POR_SpriteVariant) .. " sheet=" .. tostring(data.POR_BoulderSheet) .. " roomType=" .. tostring(game:GetRoom():GetType()) .. " stageId=" .. tostring(BOULDER:GetStageId()))
-
     sprite:ReplaceSpritesheet(0, data.POR_BoulderSheet)
     sprite:LoadGraphics()
     sprite:Play("Appear" .. data.POR_SpriteVariant, true)
 
-    Isaac.DebugString("[BoulderDebug] PickupInit: requested Appear" .. tostring(data.POR_SpriteVariant) .. ", sprite now actually playing: " .. tostring(sprite:GetAnimation()) .. " filename: " .. tostring(sprite:GetFilename()))
+    effect.Size = effect.Size * BOULDER_HITBOX_MULT
 end
 
--- ================================================================================
 -- SpawnBoulder — spawns a boulder pickup effect at a given position
--- ================================================================================
-
 ---@param position Vector
 ---@param player EntityPlayer
 ---@function
@@ -203,11 +191,7 @@ function BOULDER:SpawnBoulder(position, player)
     return boulder
 end
 
--- ================================================================================
--- PickupUpdate — runs every frame on ground boulder pickups
--- Handles the fall -> idle -> collect state machine, and Beast/Crawlspace gravity fall
--- ================================================================================
-
+-- PickupUpdate — runs every frame on ground boulder pickups; handles fall -> idle -> collect, and Beast/Crawlspace gravity fall
 ---@param effect EntityEffect
 ---@function
 function BOULDER:PickupUpdate(effect)
@@ -224,23 +208,16 @@ function BOULDER:PickupUpdate(effect)
 
     local appearAnim = "Appear" .. data.POR_SpriteVariant
     local idleAnim = "Idle" .. data.POR_SpriteVariant
-    if effect.FrameCount % 30 == 0 then
-        Isaac.DebugString("[BoulderDebug] PickupUpdate: frame=" .. tostring(effect.FrameCount) .. " currentAnim=" .. tostring(sprite:GetAnimation()) .. " isPlaying(" .. appearAnim .. ")=" .. tostring(sprite:IsPlaying(appearAnim)))
-    end
     if sprite:IsPlaying(appearAnim) then
         if sprite:IsFinished(appearAnim) then
-            Isaac.DebugString("[BoulderDebug] PickupUpdate: " .. appearAnim .. " finished, switching to " .. idleAnim)
             sprite:Play(idleAnim, true)
         end
         return -- can't be collected while still falling
     end
 
-    for _, ent in ipairs(Isaac.FindInRadius(effect.Position, BOULDER_PICKUP_RADIUS, EntityPartition.PLAYER)) do
+    for _, ent in ipairs(Isaac.FindInRadius(effect.Position, effect.Size, EntityPartition.PLAYER)) do
         local player = ent:ToPlayer()
         local playerType = player and player:GetPlayerType()
-        if effect.FrameCount % 30 == 0 then
-            Isaac.DebugString("[BoulderDebug] PickupUpdate: nearby player, type=" .. tostring(playerType) .. " NEHEMIAH_TYPE=" .. tostring(NEHEMIAH_TYPE) .. " dist=" .. tostring(player and (player.Position - effect.Position):Length()) .. " holdingBoulder=" .. tostring(player and player:GetData().POR_HoldingBoulder))
-        end
         if player
             and (playerType == NEHEMIAH_TYPE or playerType == TAINTED_NEHEMIAH_TYPE)
             and player.Variant == 0
@@ -248,7 +225,6 @@ function BOULDER:PickupUpdate(effect)
             and not player:IsCoopGhost()
             and not player:GetData().POR_HoldingBoulder
         then
-            Isaac.DebugString("[BoulderDebug] PickupUpdate: granting boulder to player")
             local pData = player:GetData()
             pData.POR_HoldingBoulder = true
             pData.POR_HoldingBoulderSheet = data.POR_BoulderSheet
@@ -259,10 +235,7 @@ function BOULDER:PickupUpdate(effect)
     end
 end
 
--- ================================================================================
 -- ThrowBoulder — spawns and launches the thrown projectile
--- ================================================================================
-
 ---@param player EntityPlayer
 ---@param direction Vector
 ---@function
@@ -271,15 +244,19 @@ function BOULDER:ThrowBoulder(player, direction)
     local vel = direction * player.ShotSpeed * 10 * 2.5 -- 10 is the standard tear base speed; 2.5 is boulder-specific weight
     vel = vel + player:GetTearMovementInheritance(vel) * player.ShotSpeed * 1.1
 
-    local boulder = Isaac.Spawn(EntityType.ENTITY_EFFECT, BOULDER.PROJECTILE_VARIANT, 0, player.Position, Vector.Zero, player):ToEffect()
+    local spawnPos = player.Position
+    if math.abs(direction.X) > math.abs(direction.Y) then
+        spawnPos = spawnPos + Vector(0, HORIZONTAL_THROW_HEIGHT_OFFSET) -- raise it so it isn't centered on the floor when thrown sideways
+    end
+
+    local boulder = Isaac.Spawn(EntityType.ENTITY_EFFECT, BOULDER.PROJECTILE_VARIANT, 0, spawnPos, Vector.Zero, player):ToEffect()
     boulder.Velocity = Vector.Zero -- movement is fully manual (see ProjectileUpdate); prevents the engine's own physics/friction from fighting it
+    boulder.Size = boulder.Size * BOULDER_HITBOX_MULT
 
     local data = boulder:GetData()
     data.POR_Velocity = vel
     data.POR_BoulderSpawner = EntityRef(player)
     data.POR_SpriteVariant = BOULDER:GetSpriteVariant()
-
-    Isaac.DebugString("[BoulderDebug] ThrowBoulder: spawned=" .. tostring(boulder ~= nil) .. " pos=" .. tostring(boulder.Position) .. " vel=" .. tostring(vel) .. " variant=" .. tostring(boulder.Variant) .. " expectedVariant=" .. tostring(BOULDER.PROJECTILE_VARIANT))
 
     local sheet = player:GetData().POR_HoldingBoulderSheet or randomRockSheet()
     local sprite = boulder:GetSprite()
@@ -292,10 +269,7 @@ function BOULDER:ThrowBoulder(player, direction)
     return boulder
 end
 
--- ================================================================================
 -- burstBoulder — spawns 3 plain, non-recursing rock fragments and removes the boulder
--- ================================================================================
-
 ---@param boulder EntityEffect
 ---@param player EntityPlayer?
 ---@function
@@ -318,10 +292,7 @@ local function burstBoulder(boulder, player)
     boulder:Remove()
 end
 
--- ================================================================================
 -- ProjectileUpdate — runs every frame on thrown boulders; manual movement and collision
--- ================================================================================
-
 ---@param boulder EntityEffect
 ---@function
 function BOULDER:ProjectileUpdate(boulder)
@@ -334,17 +305,13 @@ function BOULDER:ProjectileUpdate(boulder)
     local vel = data.POR_Velocity or Vector.Zero
     local newPos = boulder.Position + vel
 
-    Isaac.DebugString("[BoulderDebug] ProjectileUpdate: frame=" .. tostring(boulder.FrameCount) .. " pos=" .. tostring(boulder.Position) .. " vel=" .. tostring(vel) .. " newPos=" .. tostring(newPos))
-
     if room:GetGridCollisionAtPos(newPos) ~= GridCollisionClass.COLLISION_NONE then
-        Isaac.DebugString("[BoulderDebug] ProjectileUpdate: hit grid collision, bursting")
         burstBoulder(boulder, player)
         return
     end
 
     for _, ent in ipairs(Isaac.FindInRadius(newPos, boulder.Size, EntityPartition.ENEMY)) do
         if ent:IsActiveEnemy() and ent:IsVulnerableEnemy() then
-            Isaac.DebugString("[BoulderDebug] ProjectileUpdate: hit enemy, bursting")
             ent:TakeDamage(PROJECTILE_DAMAGE, 0, EntityRef(player), 0)
             burstBoulder(boulder, player)
             return
@@ -354,10 +321,7 @@ function BOULDER:ProjectileUpdate(boulder)
     boulder.Position = newPos
 end
 
--- ================================================================================
 -- PostPlayerUpdate — handles throw-on-shoot and re-playing the carry animation
--- ================================================================================
-
 ---@param player EntityPlayer
 ---@function
 function BOULDER:PostPlayerUpdate(player)
@@ -399,10 +363,7 @@ function BOULDER:PostPlayerUpdate(player)
     end
 end
 
--- ================================================================================
 -- StopHolding — makes the player drop their held boulder
--- ================================================================================
-
 ---@param player EntityPlayer
 ---@param playHideAnim boolean?  if true, also plays the HideItem animation
 ---@function
@@ -423,10 +384,7 @@ end
 POR.stopHoldingRock = function(_, _, _, player) BOULDER:StopHolding(player) end
 POR.stopHoldingHideAnim = function(_, _, _, player) BOULDER:StopHolding(player, true) end
 
--- ================================================================================
 -- HideRocksOnTrapdoor — drops all held boulders when any player enters a trapdoor
--- ================================================================================
-
 ---@function
 function BOULDER:HideRocksOnTrapdoor()
     local enteringTrapdoor = false
@@ -447,10 +405,7 @@ function BOULDER:HideRocksOnTrapdoor()
     end
 end
 
--- ================================================================================
 -- BedSleptCheck — reserved for future home-stage sprite reset logic
--- ================================================================================
-
 ---@function
 function BOULDER:BedSleptCheck(bed, player)
 end

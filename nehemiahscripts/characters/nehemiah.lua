@@ -39,8 +39,7 @@ function POR:TaintedNehemiahInit(player)
 
 end
 
--- Custom implementation of GetAimDirection that doesn't reset between rooms.
--- Also accounts for Marked.
+-- Custom GetAimDirection that doesn't reset between rooms and also accounts for Marked
 ---@param player EntityPlayer
 ---@return Vector
 ---@function
@@ -144,17 +143,31 @@ function POR:FindFreeRockPosition(pos)
 	return newPos
 end
 
+---Finds a random walkable tile somewhere in the current room
+---@function
+function POR:GetRandomRoomTile()
+	local room = game:GetRoom()
+	for _ = 1, 20 do
+		local gridIndex = math.random(0, room:GetGridSize() - 1)
+		if room:GetGridCollision(gridIndex) == GridCollisionClass.COLLISION_NONE then
+			local pos = room:GetGridPosition(gridIndex)
+			if room:IsPositionInRoom(pos, 0) then
+				return pos
+			end
+		end
+	end
+	return room:GetCenterPos() -- fallback if no free tile was found after 20 tries
+end
+
 --- Spawn a rock, but not more than the allowed maximum
 ---@param player EntityPlayer
----@param position? Vector
----@param close? boolean Should the rocks spawn close to the position?
+---@param position? Vector @If given, spawns at this position instead of a random room tile
 ---@param tag? string What extra data should be attached to the rock?
 ---@function
-function POR:DropRocks(player, position, close, tag)
+function POR:DropRocks(player, position, tag)
 	local rockCount = Isaac.CountEntities(nil, EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_VARIANT)
 	local rocksToSpawn = math.min(2, POR:GetMaxRocksInRoom() - rockCount)
 	local room = game:GetRoom()
-	local rng = player:GetCollectibleRNG(NEHEMIAHSHAMMER_ITEM_ID)
 
 	if rocksToSpawn == 0 then
 		local spawnedRocks = 0
@@ -172,35 +185,9 @@ function POR:DropRocks(player, position, close, tag)
 		rocksToSpawn = 1
 	end
 
-	if not position then
-		position = player.Position
-	end
-
 	for _ = 1, rocksToSpawn do
-		local pos
-		-- don't spawn rocks too far from the player
-		for _ = 1, 10 do
-			pos = room:FindFreeTilePosition(position, 40)
-			pos = POR:FindFreeRockPosition(pos)
-			local rockDist = (pos - position):Length()
-
-			if rockDist > 150 then
-				pos = nil
-				break
-			end
-
-			if pos then
-				break
-			end
-		end
-
-		if (not pos) and (not close) then -- Continue regular calculations
-			pos = position + Vector(rng:RandomFloat() * 400 - 200, rng:RandomFloat() * 400 - 200)
-			pos = POR:FindFreeRockPosition(pos)
-		elseif close then -- Overwrite previous calculations with "close" calculations
-			pos = position + Vector(rng:RandomFloat() * 150 - 75, rng:RandomFloat() * 150 - 75)
-			pos = POR:FindFreeRockPosition(pos)
-		end
+		local pos = position or POR:GetRandomRoomTile()
+		pos = POR:FindFreeRockPosition(pos)
 
 		local gravityExists = POR:RoomHasGravity()
 		local isBeastFight = game:GetLevel():GetStage() == LevelStage.STAGE8 and gravityExists
