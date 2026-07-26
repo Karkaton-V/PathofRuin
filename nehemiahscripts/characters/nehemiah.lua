@@ -115,6 +115,14 @@ function POR:GetMaxRocksInRoom()
 	end
 end
 
+---Returns true only for Crawlspaces and The Beast's fight room — the only rooms with gravity
+---@function
+function POR:RoomHasGravity()
+	local roomType = game:GetRoom():GetType()
+	local isHomeStage = game:GetLevel():GetStage() == LevelStage.STAGE8
+	return roomType == RoomType.ROOM_DUNGEON or isHomeStage
+end
+
 ---@param pos Vector
 ---@function
 function POR:FindFreeRockPosition(pos)
@@ -143,7 +151,7 @@ end
 ---@param tag? string What extra data should be attached to the rock?
 ---@function
 function POR:DropRocks(player, position, close, tag)
-	local rockCount = Isaac.CountEntities(nil, EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_EFFECT_VARIANT)
+	local rockCount = Isaac.CountEntities(nil, EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_VARIANT)
 	local rocksToSpawn = math.min(2, POR:GetMaxRocksInRoom() - rockCount)
 	local room = game:GetRoom()
 	local rng = player:GetCollectibleRNG(NEHEMIAHSHAMMER_ITEM_ID)
@@ -151,7 +159,7 @@ function POR:DropRocks(player, position, close, tag)
 	if rocksToSpawn == 0 then
 		local spawnedRocks = 0
 		-- FindByType returns entities sorted by FrameCount
-		local rocks = Isaac.FindByType(EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_EFFECT_VARIANT)
+		local rocks = Isaac.FindByType(EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_VARIANT)
 		POR_Incrementor.inverseiforeach(rocks, function(rock)
 			if spawnedRocks == 1 then return end
 
@@ -195,7 +203,7 @@ function POR:DropRocks(player, position, close, tag)
 		end
 
 		local gravityExists = POR:RoomHasGravity()
-		local isBeastFight = POR.Level():GetStage() == LevelStage.STAGE8 and gravityExists
+		local isBeastFight = game:GetLevel():GetStage() == LevelStage.STAGE8 and gravityExists
 		if gravityExists and not isBeastFight then
 			local bottomPos = room:GetBottomRightPos().Y
 			for y = pos.Y, bottomPos, 15 do -- 15 is how much it moves between each check.
@@ -209,17 +217,12 @@ function POR:DropRocks(player, position, close, tag)
 			pos = Vector(pos.X, room:GetTopLeftPos().Y + 5) -- 5 is an arbitrary offset so that it doesn't spawn in the ceiling
 		end
 
-		local rockPickup = Isaac.Spawn(EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_EFFECT_VARIANT, 0, pos, Vector.Zero,
+		local rockPickup = Isaac.Spawn(EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_VARIANT, 0, pos, Vector.Zero,
 			player):ToEffect()
 		---@cast rockPickup EntityEffect
 		rockPickup:GetData().POR_RockFallingBeast = isBeastFight
 		rockPickup:GetData().POR_RockTag = tag
 
-		POR.ROCKTABLE:RockInit(rockPickup, player)
-
-		local frame = rng:RandomInt(10)
-		rockPickup:GetSprite():SetFrame(frame)
+		POR.ROCKTABLE:PickupInit(rockPickup)
 	end
 end
-
-

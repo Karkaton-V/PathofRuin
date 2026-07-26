@@ -69,12 +69,9 @@ POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.BookofEzraUse,      BOOKO
 
 -- Rock / Boulder
 POR:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, POR.ROCKTABLE.BedSleptCheck,      PickupVariant.PICKUP_BED)
-POR:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE,   POR.ManageRockPickupSprite,        POR.ROCK_VARIANT)
-POR:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE,   POR.RockBeastFalling,              POR.ROCK_VARIANT)
+POR:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE,   POR.ROCKTABLE.PickupUpdate,        POR.ROCK_VARIANT)
+POR:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE,   POR.ROCKTABLE.ProjectileUpdate,    POR.ROCK_PROJECTILE_VARIANT)
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE,   POR.ROCKTABLE.PostPlayerUpdate)
-POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.ROCKTABLE.OnUpdate)
-POR:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE,     POR.ROCKTABLE.RockUpdate,          POR.ROCK_TEAR_VARIANT)
-POR:AddCallback(ModCallbacks.MC_PRE_TEAR_COLLISION,   POR.ROCKTABLE.RockCollide,         POR.ROCK_TEAR_VARIANT)
 POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.ROCKTABLE.HideRocksOnTrapdoor)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,             POR.stopHoldingRock,               CollectibleType.COLLECTIBLE_CANDLE)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,             POR.stopHoldingRock,               CollectibleType.COLLECTIBLE_RED_CANDLE)

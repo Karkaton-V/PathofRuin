@@ -68,10 +68,10 @@ POR:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
         sprite:Play("SwingHammer", true)
         swingAnimating = true
         lastNumFired = currentNumFired
-        local randInt = rng:RandomInt()
-        local rockChance = math.max(0.80, 0.80 + (player.Luck / 100))
-        if randInt < rockChance and Isaac.GetPlayer() == Isaac.GetPlayerTypeByName("Nehemiah", false) then
-            POR_NehemiahCharacter:DropRocks()
+        local randFloat = rng:RandomFloat()
+        local rockChance = math.max(0.80, 0.80 + (swingOwner.Luck / 100))
+        if randFloat < rockChance and swingOwner:GetPlayerType() == Isaac.GetPlayerTypeByName("Nehemiah", false) then
+            POR:DropRocks(swingOwner)
         end
 
     end

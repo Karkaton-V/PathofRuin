@@ -2,7 +2,7 @@
 
     <!-- Effects -->
     <entity name="Ezra's Moonlight" anm2path="ezras_moonlight.anm2" id="1000" variant="3555" />
-    <entity name="Throwing Boulder"  anm2path="nehemiahs_boulder.anm2"  id="1000" variant="3556" />
-    <entity name="Holding Boulder"   anm2path="nehemiahs_boulder.anm2"  id="1000" variant="3557" />
+    <entity name="Throwing Boulder"  anm2path="rock_pickup.anm2"  id="1000" variant="3556" />
+    <entity name="Holding Boulder"   anm2path="rock_tear.anm2"  id="1000" variant="3557" />
 
 </entities>
