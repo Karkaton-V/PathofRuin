@@ -269,7 +269,7 @@ function BOULDER:ThrowBoulder(player, direction)
     return boulder
 end
 
--- burstBoulder — spawns 3 plain, non-recursing rock fragments and removes the boulder
+-- burstBoulder — spawns rock fragments (and, for Birthright Nehemiah, some blue spiders instead) then removes the boulder
 ---@param boulder EntityEffect
 ---@param player EntityPlayer?
 ---@function
@@ -277,7 +277,19 @@ local function burstBoulder(boulder, player)
     SFXManager():Play(SoundEffect.SOUND_HELLBOSS_GROUNDPOUND)
 
     if player then
-        for _ = 1, PROJECTILE_FRAGMENTS do
+        local spiderCount = 0
+        if player:GetPlayerType() == NEHEMIAH_TYPE and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) then
+            spiderCount = math.random(0, PROJECTILE_FRAGMENTS)
+        end
+        local rockCount = PROJECTILE_FRAGMENTS - spiderCount
+
+        for _ = 1, spiderCount do
+            local velAngle = math.random() * 360
+            local vel = Vector.FromAngle(velAngle) * (math.random() * 10 + 6)
+            Isaac.Spawn(EntityType.ENTITY_FAMILIAR, FamiliarVariant.BLUE_SPIDER, 0, boulder.Position, vel, player)
+        end
+
+        for _ = 1, rockCount do
             local velAngle = math.random() * 360
             local vel = Vector.FromAngle(velAngle) * (math.random() * 10 + 6)
             local fragment = player:FireTear(boulder.Position, vel)

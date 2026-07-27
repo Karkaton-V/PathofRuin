@@ -85,7 +85,6 @@ Nehemiah’s Hammer now breaks rocks instantly, dropping larger chunks, which de
 T. Nehemiah
 Starts with: Book of Ezra (PA) (Latent), Buried Secret Rooms
 Also: When playing as T. Nehemiah, Walls connecting a Room with a Secret Room will stand out in some way, but will also take 2 Bombs to open
--When T. Nehemiah uses Book of Ezra, it reveals all secret rooms of the most common type (which still has not been found) on the map.
 
 
 Isaac, ???, Satan, Lamb - Signet Ring //passive

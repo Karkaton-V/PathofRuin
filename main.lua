@@ -35,6 +35,9 @@ POR_NehemiahRockEntity = include("nehemiahscripts.entities.nehemiahs_boulder")
 POR_BookofEzra         = include("nehemiahscripts.items.book_of_ezra")
 POR_NehemiahsHammer    = include("nehemiahscripts.items.nehemiahs_hammer")
 
+-- -- -- Misc
+POR_SecretDoor         = include("nehemiahscripts.misc.custom_secret_door")
+
 -------------------------------------------------------------------------------------------------------------------------------
 -- Initializes Save Handler
 function POR:Init(folder, table)
@@ -77,6 +80,9 @@ POR:AddCallback(ModCallbacks.MC_USE_ITEM,             POR.stopHoldingRock,      
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,             POR.stopHoldingRock,               CollectibleType.COLLECTIBLE_BAG_OF_CRAFTING)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,             POR.stopHoldingHideAnim,           CollectibleType.COLLECTIBLE_URN_OF_SOULS)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,             POR.stopHoldingHideAnim,           CollectibleType.COLLECTIBLE_NOTCHED_AXE)
+
+-- Ezra's Moonlight
+POR:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE,   POR.EzrasMoonlight.MoonlightUpdate, POR.MOONLIGHT_VARIANT)
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Custom Callbacks
@@ -172,3 +178,38 @@ function POR:Set(list)
     for _, l in ipairs(list) do set[l] = true end
     return set
 end
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+--[[
+local GOLDEN_DAMAGE = 1
+function POR:GoldenAppleCache(player, cacheFlags)
+    if cacheFlags & CacheFlag.CACHE_DAMAGE == CacheFlag.CACHE_DAMAGE then
+        local itemcount  = player:GetCollectibleNum(GOLDENAPPLE_ITEM_ID)
+        player.Damage    = player.Damage + (GOLDEN_DAMAGE * itemcount)
+    end
+end
+
+local HS_POISON_CHANCE       = 0.4
+local HS_POISON_LENGTH       = 3
+local ONE_INTERVAL_OF_POISON = 20   -- poison ticks at frame 3, then every 20 frames after
+
+function POR:HolySmokesNewRoom()
+    local playerCount = game:GetNumPlayers()
+    for playerIndex = 0, playerCount - 1 do
+        local player    = Isaac.GetPlayer(playerIndex)
+        local copyCount = player:GetCollectibleNum(HOLYSMOKES_ITEM_ID)
+        if copyCount > 0 then
+            local rng      = player:GetCollectibleRNG(HOLYSMOKES_ITEM_ID)
+            local entities = Isaac.GetRoomEntities()
+            for _, entity in ipairs(entities) do
+                if entity:IsActiveEnemy() and entity:IsVulnerableEnemy() then
+                    if rng:RandomFloat() < HS_POISON_CHANCE then
+                        entity:AddPoison(EntityRef(player), HS_POISON_LENGTH + (ONE_INTERVAL_OF_POISON * copyCount), player.Damage)
+                    end
+                end
+            end
+        end
+    end
+end
+--]]
