@@ -5,4 +5,107 @@
     <entity name="Throwing Boulder"  anm2path="rock_pickup.anm2"  id="1000" variant="3556" />
     <entity name="Holding Boulder"   anm2path="rock_tear.anm2"  id="1000" variant="3557" />
 
+
+    <!-- Cards -->
+    <entity name="0 - The Fool!"            anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="1"  collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="I - The Magician"         anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="2"  collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="II - The High Priestess"  anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="3"  collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="III - The Empress"        anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="4"  collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="IV - The Emperor"         anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="5"  collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="V - The Hierophant"       anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="6"  collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="VI - The Lovers"          anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="7"  collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="VII - The Chariot"        anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="8"  collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="VIII - Justice"           anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="9"  collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="IX - The Hermit"          anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="10" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="X - The Wheel of Fortune" anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="11" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XI - Strength"            anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="12" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XII - The Hanged Man"     anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="13" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XIII - Death"             anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="14" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XIV - Temperance"         anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="15" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XV - The Devil"           anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="16" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XVI - The Tower"          anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="17" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XVII - The Star"          anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="18" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XVIII - The Moon"         anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="19" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XIX - The Sun"            anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="20" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XX - Judgment"            anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="21" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="XXI - The World"          anm2path="radiant_cards.anm2"  id="1001"
+        variant="3558"  subtype="22" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+
+    <entity name="Misprinted Hierophant"    anm2path="radiant_cards.anm2"  id="1001"
+        variant="3559"  subtype="23" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="Misprinted Justice"       anm2path="radiant_cards.anm2"  id="1001"
+        variant="3559"  subtype="24" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+
+    <entity name="SR Suicide King"      anm2path="foil_cards.anm2"     id="1001"
+        variant="3560"  subtype="25" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="SR King of Clubs"     anm2path="foil_cards.anm2"     id="1001"
+        variant="3560"  subtype="26" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="SR Jack of Diamonds"  anm2path="foil_cards.anm2"     id="1001"
+        variant="3560"  subtype="27" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+
+    <entity name="Graceful Charity"     anm2path="yugioh.anm2"         id="1001"
+        variant="3561"  subtype="28" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+    <entity name="Disgraceful Charity"  anm2path="yugioh.anm2"         id="1001"
+        variant="3561"  subtype="29" collisionMass="3"  collisionRadius="12"
+        friction="1" numGridCollisionPoints="24" shadowSize="16" stageHP="0" />
+
+
+    <!-- Hearts -->
+    <entity id="5" variant="10" name="Cement Heart" anm2path="cement_heart_pickup.anm2" subtype="30" bagofcrafting="soulheart"
+		collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17">
+	</entity>
+	<entity id="5" variant="10" name="Cement Heart (Double)" anm2path="cement_heart_pickup_double.anm2" subtype="31" bagofcrafting="soulheart soulheart"
+		collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17">
+	</entity>
+
+
 </entities>

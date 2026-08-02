@@ -1,0 +1,38 @@
+<pocketitems>
+    <!-- Radiant Cards -->
+    <card id="1"    type="tarot_reverse" name="0 - The Fool!"              description="New Beginnings"                             announcer="375"  announcerdelay="60"  mimiccharge="0"  hud="FFool"            pickup="1"  />
+    <card id="2"    type="tarot_reverse" name="I - The Magician!"          description="May Your Goal Never Escape You"             announcer="381"  announcerdelay="60"  mimiccharge="6"  hud="FMagician"        pickup="2"  />
+    <card id="3"    type="tarot_reverse" name="II - The High Priestess!"   description="Mother is Coming"                           announcer="379"  announcerdelay="60"  mimiccharge="6"  hud="FHighPriestess"   pickup="3"  />
+    <card id="4"    type="tarot_reverse" name="III - The Empress!"         description="May Your Torment Bring Destruction"         announcer="374"  announcerdelay="60"  mimiccharge="6"  hud="FEmpress"         pickup="4"  />
+    <card id="5"    type="tarot_reverse" name="IV - The Emperor!"          description="Challenge Yourself"                         announcer="373"  announcerdelay="60"  mimiccharge="3"  hud="FEmperor"         pickup="5"  />
+    <card id="6"    type="tarot_reverse" name="V - The Hierophant!"        description="Two Prayers For The Keeper"                 announcer="378"  announcerdelay="60"  mimiccharge="12" hud="FHierophant"      pickup="6"  />
+    <card id="7"    type="tarot_reverse" name="VI - The Lovers!"           description="May You Live to See New Endings"            announcer="380"  announcerdelay="60"  mimiccharge="6"  hud="FLovers"          pickup="7"  />
+    <card id="8"    type="tarot_reverse" name="VII - The Chariot!"         description="Trample Over Your Enemies"                  announcer="371"  announcerdelay="60"  mimiccharge="3"  hud="FChariot"         pickup="8"  />
+    <card id="9"    type="tarot_reverse" name="VIII - Justice!"            description="May Your Future be in Your Favor"           announcer="349"  announcerdelay="60"  mimiccharge="12" hud="FJustice"         pickup="9 " />
+    <card id="10"   type="tarot_reverse" name="IX - The Hermit!"           description="May You See What Life Has Abandoned"        announcer="377"  announcerdelay="60"  mimiccharge="3"  hud="FHermit"          pickup="10" />
+    <card id="11"   type="tarot_reverse" name="X - The Wheel of Fortune!"  description="Play the Game of Luck"                      announcer="391"  announcerdelay="60"  mimiccharge="6"  hud="FWheelOfFortune"  pickup="11" />
+    <card id="12"   type="tarot_reverse" name="XI - Strength!"             description="May Your Fervor Bring Avarice"              announcer="365"  announcerdelay="60"  mimiccharge="4"  hud="FStrength"        pickup="12" />
+    <card id="13"   type="tarot_reverse" name="XII - The Hanged Man!"      description="May You Find Inner Peace"                   announcer="376"  announcerdelay="60"  mimiccharge="12" hud="FHangedMan"       pickup="13" />
+    <card id="14"   type="tarot_reverse" name="XIII - Death!"              description="Reap the Souls of Your Enemies"             announcer="337"  announcerdelay="60"  mimiccharge="6"  hud="FDeath"           pickup="14" />
+    <card id="15"   type="tarot_reverse" name="XIV - Temperance!"          description="May Your Heart be Pure and True"            announcer="370"  announcerdelay="60"  mimiccharge="12" hud="FTemperance"      pickup="15" />
+    <card id="16"   type="tarot_reverse" name="XV - The Devil!"            description="Revel in the Weakness of your Enemies"      announcer="372"  announcerdelay="60"  mimiccharge="6"  hud="FDevil"           pickup="16" />
+    <card id="17"   type="tarot_reverse" name="XVI - The Tower!"           description="Destruction Brings Destruction"             announcer="385"  announcerdelay="60"  mimiccharge="6"  hud="FTower"           pickup="17" />
+    <card id="18"   type="tarot_reverse" name="XVII - The Star!"           description="May You Find What Fate Holds"               announcer="383"  announcerdelay="60"  mimiccharge="12" hud="FStar"            pickup="18" />
+    <card id="19"   type="tarot_reverse" name="XVIII - The Moon!"          description="May You Find All That Has Yet Been Found"   announcer="382"  announcerdelay="60"  mimiccharge="3"  hud="FMoon"            pickup="19" />
+    <card id="20"   type="tarot_reverse" name="XIX - The Sun!"             description="May the Light Find and Empower You"         announcer="384"  announcerdelay="60"  mimiccharge="12" hud="FSun"             pickup="20" />
+    <card id="21"   type="tarot_reverse" name="XX - Judgment!"             description="Judge the Insatiable"                       announcer="348"  announcerdelay="60"  mimiccharge="12" hud="FJudgement"       pickup="21" />
+    <card id="22"   type="tarot_reverse" name="XXI - The World!"           description="Open the Path and be Free"                  announcer="386"  announcerdelay="60"  mimiccharge="3"  hud="FWorld"           pickup="22" />
+
+    <!-- Misprints -->
+    <card id="23" type="tarot_reverse" name="V - The Heirophant!"          description="ourself =[$] Two Prayers F"                 announcer="378"  announcerdelay="60"  mimiccharge="12" hud="MPHierophant"  pickup="23" />
+    <card id="24" type="tarot_reverse" name="VIII - Jutsice!"              description="nemies =[$] May Your Future Be "            announcer="349"  announcerdelay="60"  mimiccharge="12" hud="MPJustice"  pickup="24" />
+
+    <!-- Secret Rares -->
+    <card id="25" type="suit"   name="Suicide King!"            description="A True Ending!"                                        announcer="366"  announcerdelay="60"  mimiccharge="2"  hud="SRSuicideKing"  pickup="25"/>
+    <card id="26" type="suit"   name="King of Clubs!"           description="Destroy All Who Oppose You!"       mimiccharge="12"  hud="SRKingofClubs"  pickup="26"/>
+    <card id="27" type="suit"   name="Jack of Diamonds!"        description="Wealth at No Cost!"                mimiccharge="0"   hud="SRJackofDiamonds"  pickup="27"/>
+
+    <!-- Duel Monsters -->
+    <card id="28" type="special" name="Graceful Charity"        description="You Win Some, You Lose Some"      mimiccharge="12"  hud="GracefulCharity"  pickup="28"/>
+    <card id="29" type="special" name="Disgraceful Charity"     description="You Lose Some, You Win Some"      mimiccharge="12"  hud="DisgracefulCharity"  pickup="29"/>
+</pocketitems>

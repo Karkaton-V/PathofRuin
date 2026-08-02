@@ -6,6 +6,7 @@ local NEHEMIAH_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiah_addon
 local NEHEMIAHB_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiahb_addon.anm2")       -- T. Nehemiah's Costume
 local NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")                      -- Item Id of Nehemiah's Hammer
 local BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra")                                -- Item Id of Book of Ezra
+local BOOKOFNEHEMIAH_ITEM_ID = Isaac.GetItemIdByName("Book of Nehemiah")                        -- Item Id of Book of Nehemiah
 local LargeRooms = {}
 
 -- Character Inits
@@ -38,6 +39,14 @@ function POR:TaintedNehemiahInit(player)
     pool:RemoveCollectible(BOOKOFEZRA_ITEM_ID)
 
 end
+
+-- Swaps Book of Ezra for Book of Nehemiah once Tainted Nehemiah picks up Birthright
+POR:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, collectibleType, charge, firstTime, slot, varData, player)
+    if collectibleType ~= CollectibleType.COLLECTIBLE_BIRTHRIGHT then return end
+    if player:GetPlayerType() ~= TAINTED_NEHEMIAH_TYPE then return end
+
+    player:SetPocketActiveItem(BOOKOFNEHEMIAH_ITEM_ID, ActiveSlot.SLOT_POCKET, true)
+end)
 
 -- Custom GetAimDirection that doesn't reset between rooms and also accounts for Marked
 ---@param player EntityPlayer

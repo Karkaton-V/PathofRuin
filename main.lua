@@ -17,6 +17,7 @@ POR.SaveCallbacks      = POR.SaveCompiler.SaveCallbacks
 POR_CustomSaveCreator  = include("nehemiahscripts.custom_save_creator")
 POR_ScrumMaster        = include("nehemiahscripts.custom_scrum_master_schedule")
 POR_Incrementor        = include("nehemiahscripts.custom_incrementor")
+POR_SecretDoor         = include("nehemiahscripts.misc.custom_secret_door")
 
 -- -- Nehemiah
 -- -- -- Characters
@@ -28,15 +29,22 @@ POR_NehemiahCompat     = include("nehemiahscripts.compat.eid")
 
 -- -- -- Entities
 POR_MoonlightEntity    = include("nehemiahscripts.entities.ezras_moonlight")
--- NOTE: nehemiahs_boulder.lua sets POR.ROCKTABLE, POR.ROCK_VARIANT, POR.ROCK_PROJECTILE_VARIANT, POR.stopHoldingRock, and POR.stopHoldingHideAnim
 POR_NehemiahRockEntity = include("nehemiahscripts.entities.nehemiahs_boulder")
 
 -- -- -- Items
 POR_BookofEzra         = include("nehemiahscripts.items.book_of_ezra")
+POR_BookofNehemiah     = include("nehemiahscripts.items.book_of_nehemiah")
+POR_HappyHour          = include("nehemiahscripts.items.happy_hour")
+POR_GoldenApple        = include("nehemiahscripts.items.golden_apple")
+POR_WoolenBlanket      = include("nehemiahscripts.items.woolen_blanket")
+POR_DumbLuck           = include("nehemiahscripts.trinkets.dumb_luck")
+POR_OilyBranch         = include("nehemiahscripts.trinkets.oily_branch")
+POR_ButterflyWings     = include("nehemiahscripts.trinkets.butterfly_wings")
 POR_NehemiahsHammer    = include("nehemiahscripts.items.nehemiahs_hammer")
 
--- -- -- Misc
-POR_SecretDoor         = include("nehemiahscripts.misc.custom_secret_door")
+-- -- -- Pickups
+POR_RadiantCards       = include("nehemiahscripts.pickups.radiant_cards")
+POR_OtherCards         = include("nehemiahscripts.pickups.other_cards")
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Initializes Save Handler
@@ -67,6 +75,8 @@ POR:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT,  POR.NehemiahInit)
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT,  POR.TaintedNehemiahInit)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.NehemiahHammerUse,  NEHEMIAHSHAMMER_ITEM_ID)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.BookofEzraUse,      BOOKOFEZRA_ITEM_ID)
+POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.BookofNehemiahUse,  BOOKOFNEHEMIAH_ITEM_ID)
+POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.HappyHourUse,       HAPPYHOUR_ITEM_ID)
 
 -- Rock / Boulder
 POR:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, POR.ROCKTABLE.BedSleptCheck,      PickupVariant.PICKUP_BED)
@@ -178,38 +188,3 @@ function POR:Set(list)
     for _, l in ipairs(list) do set[l] = true end
     return set
 end
-
--------------------------------------------------------------------------------------------------------------------------------
-
---[[
-local GOLDEN_DAMAGE = 1
-function POR:GoldenAppleCache(player, cacheFlags)
-    if cacheFlags & CacheFlag.CACHE_DAMAGE == CacheFlag.CACHE_DAMAGE then
-        local itemcount  = player:GetCollectibleNum(GOLDENAPPLE_ITEM_ID)
-        player.Damage    = player.Damage + (GOLDEN_DAMAGE * itemcount)
-    end
-end
-
-local HS_POISON_CHANCE       = 0.4
-local HS_POISON_LENGTH       = 3
-local ONE_INTERVAL_OF_POISON = 20   -- poison ticks at frame 3, then every 20 frames after
-
-function POR:HolySmokesNewRoom()
-    local playerCount = game:GetNumPlayers()
-    for playerIndex = 0, playerCount - 1 do
-        local player    = Isaac.GetPlayer(playerIndex)
-        local copyCount = player:GetCollectibleNum(HOLYSMOKES_ITEM_ID)
-        if copyCount > 0 then
-            local rng      = player:GetCollectibleRNG(HOLYSMOKES_ITEM_ID)
-            local entities = Isaac.GetRoomEntities()
-            for _, entity in ipairs(entities) do
-                if entity:IsActiveEnemy() and entity:IsVulnerableEnemy() then
-                    if rng:RandomFloat() < HS_POISON_CHANCE then
-                        entity:AddPoison(EntityRef(player), HS_POISON_LENGTH + (ONE_INTERVAL_OF_POISON * copyCount), player.Damage)
-                    end
-                end
-            end
-        end
-    end
-end
---]]

@@ -1,3 +1,8 @@
+========================================--------------------
+Early Documentations (circa 2023) of what Nehemiah was planned to be devleloped like.
+Most ideas ended up sticking, but the characters were changed to better fit their own niches and require a lot less custom callbacks
+========================================--------------------
+
 Nehemiah
 Starts with: Nehemiah’s Hammer (PA) (Latent), Shiny Rock
 Also: Nehemiah’s Hammer can be used in a shop (if the secret room has not been found) to turn it into a Secret Room, and using it in a Super Secret Room turns it into a Secret Shop
@@ -12,34 +17,40 @@ Mom’s Heart ✡️ - The Masons //familliar
 “Your Personal Wrecking Crew”
 — Spawns a familiar that changes every floor, can be: A tiny Nehemiah that shoots nail tears, A tiny mason that shoots brick tears, A tiny buff mason that bounces around the room and shoots a tiny spike ball at nearby enemies, and an old man that shoots rock tears at nearby enemies that split into more tears.
 
-Isaac - Happy Hour - 1 //active
+Isaac - Happy Hour - 1 //active -----XXXXXX-----
 “Benefits of Nobility”
 — For the current room, gives Isaac an All Stats Up (+10%) and a random worm trinket effect.
 
-Satan - Golden Apple //passive
+Satan - Golden Apple //passive -----XXXXX-----
 “The Lord Returns”
 — Extra Life (x1); Respawn with 10 seconds of invincibility and 10 seconds of Midas’ touch
+:-- Updated Effect --:
+— Right when Isaac would take fatal damage, grants a half soul heart, a golden heart, and ~2 seconds of invincibility and Midas Touch
 
 ??? - Holy Smokes! //passive
 “Return of the Torch”
 — Gives Isaac a small Orange aura that burns enemies inside; +20% Angel Chance
 
-The Lamb - Woolen Blanket //passive
+The Lamb - Woolen Blanket //passive -----XXXXX-----
 “The Lord Comforts”
 — The first damage taken on a floor is reduced to half a heart of damage, and after being hit Isaac has extra long invincibility; Luck Up (+2)
 
-Mega Satan - Nehemiah’s Hammer //active
+Mega Satan - Nehemiah’s Hammer //active -----XXXXX-----
 “I’m Gonna Wreck It!”
 — Works similarly to Notched Axe, but instead of breaking rocks, carves them into a funny shape with a chance to drop a goodie or two; Using this item on a carved rock will destroy it, which yields a greater chance to drop goodies.
 — Tinted Rocks are guaranteed to drop a pickup when carved, and tinted rock spiders upon destruction
 — The Hammer can open any doors that would normally require bombs to enter, such as Secret Rooms, Paneled Doors, and the entrance to the Mines
 — — Picking up Iron Bar will fully recharge this item
+: -- Updated Effect --:
+— Works like Notched Axe, though when you destroy a rock, there's a high chance for rock chunks to descend from the ceiling, TR Samson style
+— Isaac can pick up the rocks and throw them at enemies, doing substantial damage and splitting into 3 rock tears on collision
+— The Item was changed to be timer-based, so the Iron Bar no longer recharges it.
 
-Boss Rush - Dumb Luck //trinket
+Boss Rush - Dumb Luck //trinket -----XXXXX-----
 “Foolish Wishes” //Windflower
 — When Isaac stands still for one second, he gets a tear-repellant aura, similar to I - The Magician?
 
-Hush - Oily Branch //trinket
+Hush - Oily Branch //trinket -----XXXXX-----
 “Smells like Olives”
 — Isaac’s tears have a chance to charm enemies
 
@@ -50,10 +61,9 @@ Delirium - The Memoir //passive
 — 3 Random Stats Up (+15%)
 — Isaac gains a permanent tear-repelling aura, similar to I - The Magician?
 
-Mother - Butterfly Wings (52 pattern) //trinket
+Mother - Butterfly Wings (52 pattern) //trinket -----XXXXX-----
 “I Feel Good!”
 — Higher Chance for a room to contain a tinted rock; The chance of this happening is based on your luck stat.
-— (Making a 52 pattern in pixel art is gonna be pretty difficult. I have something but it doesn’t exactly look pretty)
 
 The Beast - Old Brick //passive
 “Feel the Vengeance”
@@ -71,6 +81,8 @@ Ultra Greedier 🪙 - Graceful Charity //card
 All Marks ✡️ - Cement Hearts //pickup
 “Definitely bad for you”
 — Cement Hearts act as heart armor, like golden hearts, except they cover your left-most heart and take 4 damage to destroy. They are also immediately destroyed when Isaac takes explosion damage
+:-- Updated Effect --:
+— Cement Hearts still act as heart armor, but take 2 damage to destroy (Bombs still break it instantly).
 
 
 Tainted Closet 🔓 - The Condemned
@@ -78,14 +90,18 @@ Tainted Closet 🔓 - The Condemned
 
 
 Birthright - “Strong Arm”
-Nehemiah’s Hammer now breaks rocks instantly, dropping larger chunks, which deal more damage, and release 0-2 friendly Rock Spiders
+— Nehemiah’s Hammer now breaks rocks instantly, dropping larger chunks, which deal more damage, and release 0-2 friendly Rock Spiders
+: -- Updated Effect --:
+— The Rocks that drop from the ceiling from this item's effect will have a random chance to replace 0-3 rock projectiles into blue spiders
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 T. Nehemiah
 Starts with: Book of Ezra (PA) (Latent), Buried Secret Rooms
 Also: When playing as T. Nehemiah, Walls connecting a Room with a Secret Room will stand out in some way, but will also take 2 Bombs to open
-
+:-- Updated Effect --:
+— When Playing as T. Nehemiah, Secret Rooms will be given new visible doors that require 2 bombs to be opened
+— Using the Book of Ezra in a shop will attempt to open the Member Card shop, though you should remember that your actions have consequences...
 
 Isaac, ???, Satan, Lamb - Signet Ring //passive
 “House of Xerxes”
@@ -103,17 +119,17 @@ Ultra Greedier 🪙 - Disgraceful Charity //card
 “You Lose Some, You Win Some”
 — If you have less pickups then when you entered the current floor, the difference is returned to you.
 
-Delirium - Book of Ezra - 6 //active
+Delirium - Book of Ezra - 6 //active -----XXXXX-----
 “Ab Ipso Ferro”
 — When used, summons a ray of light in the middle of the current room; when Isaac enters this light he gains a temporary all stats up that slowly fades (can stack).
 
-** Book of Nehemiah - 6 //active **
+** Book of Nehemiah - 6 //active ** -----XXXXX-----
 “Ab Ordine Libertas”
 — When used, activates the Crack the Sky effect that summons beams of light in the room, followed by a ray of light in the center that dissipates any 1 curse on the floor if stepped into
 
 Mother - I - The Magician! //card
 “May your goal never escape you”
-— Isaac gains Coninuum tears for the room
+— Isaac gains Continuum tears for the room
 — Isaac’s Range doubles for the room
 
 The Beast - Pistanthrophobia //passive

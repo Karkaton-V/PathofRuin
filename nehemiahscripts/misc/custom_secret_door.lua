@@ -49,6 +49,18 @@ local DIRECTION_ROTATION = {
     [Direction.RIGHT] = 90,
 }
 
+-- Counts how many doors currently exist in this room
+local function countRoomDoors()
+    local room = game:GetRoom()
+    local count = 0
+    for slot = DoorSlot.NO_DOOR_SLOT + 1, DoorSlot.NUM_DOOR_SLOTS - 1 do
+        if room:GetDoor(slot) then
+            count = count + 1
+        end
+    end
+    return count
+end
+
 -- Lazily creates and caches per-door state
 local function getDoorState(door)
     local key = doorKey(door)
@@ -66,7 +78,9 @@ local function getDoorState(door)
             sprite:Play("Closed", true)
         end
 
-        data = { sprite = sprite, bombHits = 0, wasOpen = door:IsOpen(), needsGating = not door:IsOpen() }
+        -- If this is the only door in the room, never gate it, so the player is never trapped
+        local isOnlyDoor = isInSecretRoom() and countRoomDoors() <= 1
+        data = { sprite = sprite, bombHits = 0, wasOpen = door:IsOpen(), needsGating = (not door:IsOpen()) and not isOnlyDoor }
         doorStates[key] = data
     end
     return data

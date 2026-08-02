@@ -2,16 +2,21 @@
     <active id="1" name="Happy Hour" gfx="happy_hour.png" description="Benefits of Nobility" quality="1" maxcharges="3" chargetype="normal" cache="all" />
     <active id="2" name="Nehemiah's Hammer" gfx="nehemiahs_hammer.png" description="I'm Gonna Wreck It!" quality="3" maxcharges="90" chargetype="timed" cache="weapon" />
     <active id="3" name="Gold Brick" gfx="gold_brick.png" description="Feel the Mercy" quality="2" maxcharges="3" chargetype="normal" cache="tearflag, tearcolor" />
-    <active id="4" name="Book of Ezra" gfx="book_of_ezra.png" description="Ab Ipso Ferro" quality="4" maxcharges="6" chargetype="normal" cache="all" />
-    <active id="5" name="Book of Nehemiah" gfx="book_of_nehemiah.png" description="Ab Ordine Libertas" quality="0" maxcharges="6" chargetype="normal" cache="all" hidden="true" />
+    <active id="4" name="Book of Ezra" gfx="book_of_ezra.png" description="Ab Ipso Ferro" quality="4" maxcharges="6" chargetype="normal" tag="book" cache="all" />
+    <active id="5" name="Book of Nehemiah" gfx="book_of_nehemiah.png" description="Ab Ordine Libertas" quality="0" maxcharges="6" chargetype="normal" tag="book" cache="all" hidden="true" />
 
-    <passive id="6" name="Golden Apple" gfx="golden_apple.png" description="The Lord Returns" quality="3" cache="all" />
+    <passive id="6" name="Golden Apple" gfx="golden_apple.png" description="Deus-Ex-Machina" quality="2" cache="all" />
     <passive id="7" name="Holy Smokes!" gfx="holy_smokes.png" description="Return of the Torch" quality="2" cache="" />
-    <passive id="8" name="Woolen Blanket" gfx="woolen_blanket.png" description="The Lord Comforts" quality="4" cache="" />
+    <passive id="8" name="Woolen Blanket" gfx="woolen_blanket.png" description="The Lord Comforts" quality="2" cache="luck" />
     <passive id="9" name="The Memoir" gfx="the_memoir.png" description="Take a Deep Breath" quality="2" cache="" />
     <passive id="10" name="Old Brick" gfx="old_brick.png" description="Feel the Vengeance" quality="3" cache="" />
     <passive id="11" name="Signet Ring" gfx="signet_ring.png" description="House of Xerxes" quality="" cache="" />
     <passive id="12" name="Pistanthrophobia" gfx="pistanthrophobia.png" description="Serious Trust Issues" quality="4" cache="" />
+
+    <trinket name="Windflower" gfx="dumb_luck.png" description="Dumb Luck" />
+    <trinket name="Oily Branch" gfx="oily_branch.png" description="Smells Like Olives" cache="tearcolor" />
+    <trinket name="Butterfly Wings" gfx="butterfly_wings.png" description="Lost and Found" />
+
 
 </items>
 
