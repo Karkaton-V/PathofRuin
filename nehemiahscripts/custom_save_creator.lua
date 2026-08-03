@@ -19,37 +19,37 @@ function POR:GameSave()
 	return POR.SaveCompiler.GetPersistentSave() ---@type table
 end
 
----@param ent? Entity @If an entity is provided, returns an entity specific save within the run save. Otherwise, returns arbitrary data in the save not attached to an entity.
----@param noHourglass false|boolean? @If true, it'll look in a separate game save that is not affected by the Glowing Hourglass.
----@param allowSoulSave? boolean @If true, if the `ent` is The Soul attached to The Forgotten, will return a differently indexed save, as opposed to a shared save between the two.
+---@param ent? Entity @Entity-specific save, or run-wide data if omitted
+---@param noHourglass false|boolean? @Use the save unaffected by Glowing Hourglass
+---@param allowSoulSave? boolean @Give The Soul its own save instead of sharing with The Forgotten
 ---@return table
 ---@function
 function POR:RunSave(ent, noHourglass, allowSoulSave)
 	return POR.SaveCompiler.GetRunSave(ent, noHourglass, allowSoulSave)
 end
 
----@param ent? Entity  @If an entity is provided, returns an entity specific save within the floor save. Otherwise, returns arbitrary data in the save not attached to an entity.
----@param noHourglass false|boolean? @If true, it'll look in a separate game save that is not affected by the Glowing Hourglass.
----@param allowSoulSave? boolean @If true, if the `ent` is The Soul attached to The Forgotten, will return a differently indexed save, as opposed to a shared save between the two.
+---@param ent? Entity @Entity-specific save, or floor-wide data if omitted
+---@param noHourglass false|boolean? @Use the save unaffected by Glowing Hourglass
+---@param allowSoulSave? boolean @Give The Soul its own save instead of sharing with The Forgotten
 ---@return table
 ---@function
 function POR:FloorSave(ent, noHourglass, allowSoulSave)
 	return POR.SaveCompiler.GetFloorSave(ent, noHourglass, allowSoulSave)
 end
 
----@param ent? Entity | integer @If an entity is provided, returns an entity specific save within the roomFloor save, which is a floor-lasting save that has unique data per-room. If a grid index is provided, returns a grid index specific save. Otherwise, returns arbitrary data in the save not attached to an entity.
----@param noHourglass false|boolean? @If true, it'll look in a separate game save that is not affected by the Glowing Hourglass.
----@param listIndex? integer @Returns data for the provided `listIndex` instead of the index of the current room.
----@param allowSoulSave? boolean @If true, if the `ent` is The Soul attached to The Forgotten, will return a differently indexed save, as opposed to a shared save between the two.
+---@param ent? Entity | integer @Entity or grid-index specific save within this floor's per-room data
+---@param noHourglass false|boolean? @Use the save unaffected by Glowing Hourglass
+---@param listIndex? integer @Use this room's index instead of the current one
+---@param allowSoulSave? boolean @Give The Soul its own save instead of sharing with The Forgotten
 ---@return table
 ---@function
 function POR:RoomSave(ent, noHourglass, listIndex, allowSoulSave)
 	return POR.SaveCompiler.GetRoomSave(ent, noHourglass, listIndex, allowSoulSave)
 end
 
----@param ent? Entity | integer  @If an entity is provided, returns an entity specific save within the room save. If a grid index is provided, returns a grid index specific save. Otherwise, returns arbitrary data in the save not attached to an entity.
----@param noHourglass false|boolean? @If true, it'll look in a separate game save that is not affected by the Glowing Hourglass.
----@param allowSoulSave? boolean @If true, if the `ent` is The Soul attached to The Forgotten, will return a differently indexed save, as opposed to a shared save between the two.
+---@param ent? Entity | integer @Entity or grid-index specific save within the current room
+---@param noHourglass false|boolean? @Use the save unaffected by Glowing Hourglass
+---@param allowSoulSave? boolean @Give The Soul its own save instead of sharing with The Forgotten
 ---@return table
 ---@function
 function POR:TempSave(ent, noHourglass, allowSoulSave)
@@ -62,8 +62,7 @@ end
 -- Re-Scrapped Epiphany Pickup Utility Saving functions --
 -- ===========================================
 
---- Gets given pickup's persistent data table or creates an empty one if it doesn't exist.
---- Use this if you intend to add persistent data to a pickup.
+--- Gets (or creates) a pickup's persistent data table.
 ---@param pickup EntityPickup
 ---@return table
 ---@function
@@ -71,10 +70,7 @@ function POR:GetPickupData(pickup)
 	return POR.SaveCompiler.GetNoRerollPickupSave(pickup)
 end
 
---- Gets given pickup's persistent data table.
---- Unlike GetPickupData, this function may return nil,
---- and doesn't create a persistent table.
---- Use this if you intend to read, but not add any persistent data.
+--- Like GetPickupData, but read-only: returns nil instead of creating a table.
 ---@param pickup EntityPickup
 ---@return table|nil
 ---@function
@@ -82,17 +78,14 @@ function POR:TryGetPickupData(pickup)
 	return POR.SaveCompiler.TryGetNoRerollPickupSave(pickup)
 end
 
----Gets given pickup's reroll persistent data table or creates an empty one if it doesn't exist.
+--- Gets (or creates) a pickup's reroll-persistent data table.
 ---@param pickup EntityPickup
 ---@return table
 function POR:GetRerollPersistentData(pickup)
 	return POR.SaveCompiler.GetRerollPickupSave(pickup)
 end
 
---- Gets given pickup's reroll persistent data table.
---- Unlike GetRerollPersistentData, this function may return nil,
---- and doesn't create a persistent table.
---- Use this if you intend to read, but not add any persistent data.
+--- Like GetRerollPersistentData, but read-only: returns nil instead of creating a table.
 ---@param pickup EntityPickup
 ---@return table?
 function POR:TryGetRerollPersistentData(pickup)
@@ -142,8 +135,7 @@ end)
 POR.PersistentDataHelper = {}
 local pData = POR.PersistentDataHelper
 
---- Gets given pickup's persistent data table or creates an empty one if it doesn't exist.
---- Use this if you intend to add persistent data to a pickup.
+--- Gets (or creates) a pickup's persistent data table.
 ---@param pickup EntityPickup
 ---@return table
 ---@function

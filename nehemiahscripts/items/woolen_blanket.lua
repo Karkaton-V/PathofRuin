@@ -3,7 +3,7 @@ local game = Game()
 WOOLENBLANKET_ITEM_ID = Isaac.GetItemIdByName("Woolen Blanket") -- item id of Woolen Blanket
 -- Costume is fully automatic: costumes2.xml's <costume id="..." type="passive"> matches items.xml's <passive id="...">
 
--- Reduces the first hit taken each floor down to exactly half a heart, re-applying it ourselves to avoid recursion
+-- Reduces the first hit each floor to exactly half a heart
 POR:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, amount, damageFlags, source, countdownFrames)
     local player = entity:ToPlayer()
     if not player then return end
@@ -19,7 +19,7 @@ POR:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, amount, dam
     end
 end, EntityType.ENTITY_PLAYER)
 
--- Doubles the invincibility frames from any hit, and refreshes the flicker at the midpoint to cover the extra duration
+-- Doubles i-frames from any hit, refreshing the flicker at the midpoint
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     if not player:HasCollectible(WOOLENBLANKET_ITEM_ID) then return end
 

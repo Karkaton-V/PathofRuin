@@ -6,7 +6,7 @@ local BASE_CHANCE = 0.002 -- 0.2% at 0 luck
 local MAX_CHANCE = 0.02 -- 2% at +10 luck
 local CHANCE_PER_LUCK = (MAX_CHANCE - BASE_CHANCE) / 10
 
--- Has a luck-scaled chance to upgrade one plain rock in the room into a Tinted Rock, if the room doesn't already have one
+-- Luck-scaled chance to upgrade a plain rock into a Tinted Rock (skips rooms that already have one)
 POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
     local player = Isaac.GetPlayer(0)
     if not player:HasTrinket(BUTTERFLYWINGS_TRINKET_ID) then return end

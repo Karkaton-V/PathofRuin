@@ -10,7 +10,7 @@ local BOOKOFNEHEMIAH_ITEM_ID = Isaac.GetItemIdByName("Book of Nehemiah")        
 local LargeRooms = {}
 
 -- Character Inits
---- @param player EntityPlayer       -- establishes that player references an EntityPlayer
+--- @param player EntityPlayer
 function POR:NehemiahInit(player)
     if player:GetPlayerType() ~= NEHEMIAH_TYPE then
         return -- If not Nehemiah, exits

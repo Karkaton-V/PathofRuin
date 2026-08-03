@@ -86,7 +86,7 @@ local function getDoorState(door)
     return data
 end
 
--- Always blocks a bomb's mere contact from opening a not-yet-fully-revealed secret door; real progress only happens on actual explosion
+-- Blocks a bomb's mere contact from opening the door; only an actual explosion counts
 POR:AddCallback(ModCallbacks.MC_PRE_BOMB_GRID_COLLISION, function(_, bomb, gridIndex)
     local gridEntity = game:GetRoom():GetGridEntity(gridIndex)
     local door = gridEntity and gridEntity:ToDoor()
@@ -98,7 +98,7 @@ POR:AddCallback(ModCallbacks.MC_PRE_BOMB_GRID_COLLISION, function(_, bomb, gridI
     return false
 end)
 
--- Counts a hit only when a bomb explosion effect actually spawns near the door, and advances the reveal animation
+-- Counts a hit when a bomb explosion spawns near the door, and advances the reveal animation
 POR:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, effect)
     if effect.Variant ~= EffectVariant.BOMB_EXPLOSION then return end
 
@@ -130,9 +130,9 @@ POR:AddCallback(ModCallbacks.MC_PRE_GRID_ENTITY_DOOR_RENDER, function(_, door, o
     return false
 end)
 
--- Advances one-shot animations, keeps the sprite in sync with the door's open/closed state, and enforces the bomb gate
+-- Advances animations, syncs the sprite to open/closed state, and enforces the bomb gate
 POR:AddCallback(ModCallbacks.MC_POST_GRID_ENTITY_DOOR_UPDATE, function(_, door)
-    -- Close()/Busted only affect the door's animation state, not actual physics, so also force CollisionClass solid
+    -- Close()/Busted don't affect physics, so also force CollisionClass solid
     if shouldSkinDoor(door) then
         local lockData = getDoorState(door)
         if lockData.needsGating and lockData.bombHits < requiredHitsFor() then

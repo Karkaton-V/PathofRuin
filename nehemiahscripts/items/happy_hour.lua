@@ -30,7 +30,7 @@ local WORM_SHOT_SPEED = {
     [TrinketType.TRINKET_LAZY_WORM] = -0.5,
 }
 
--- Worms that modify Range instead of a TearFlag; TAPE also doubles range, LAZY only adds flat range
+-- Worms that modify Range instead of a TearFlag
 local WORM_RANGE_FLAT = {
     [TrinketType.TRINKET_TAPE_WORM] = 3,
     [TrinketType.TRINKET_LAZY_WORM] = 4,

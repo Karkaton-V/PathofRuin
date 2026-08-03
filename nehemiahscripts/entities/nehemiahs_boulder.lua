@@ -1,4 +1,4 @@
--- Boulder entity logic for Nehemiah's Hammer; pickup uses "Throwing Boulder"/rock_pickup.anm2, thrown projectile uses "Holding Boulder"/rock_tear.anm2
+-- Boulder entity logic for Nehemiah's Hammer (ground pickup + thrown projectile)
 
 local game = Game()
 
@@ -90,7 +90,7 @@ BOULDER.ROOMTYPE_TO_VARIANT = {
     [RoomType.ROOM_BARREN] = BOULDER.SPRITE_VARIANTS.Home,
 }
 
--- GetStageId — returns a stage config id used to pick the sprite variant, or nil if unrecognized
+-- Returns a stage config id for picking the sprite variant, or nil if unrecognized
 ---@function
 function BOULDER:GetStageId()
     local level = game:GetLevel()
@@ -191,7 +191,7 @@ function BOULDER:SpawnBoulder(position, player)
     return boulder
 end
 
--- PickupUpdate — runs every frame on ground boulder pickups; handles fall -> idle -> collect, and Beast/Crawlspace gravity fall
+-- Runs each frame on ground boulders: fall -> idle -> collect, plus Beast/Crawlspace gravity
 ---@param effect EntityEffect
 ---@function
 function BOULDER:PickupUpdate(effect)
@@ -246,11 +246,11 @@ function BOULDER:ThrowBoulder(player, direction)
 
     local spawnPos = player.Position
     if math.abs(direction.X) > math.abs(direction.Y) then
-        spawnPos = spawnPos + Vector(0, HORIZONTAL_THROW_HEIGHT_OFFSET) -- raise it so it isn't centered on the floor when thrown sideways
+        spawnPos = spawnPos + Vector(0, HORIZONTAL_THROW_HEIGHT_OFFSET) -- raise it off the floor for sideways throws
     end
 
     local boulder = Isaac.Spawn(EntityType.ENTITY_EFFECT, BOULDER.PROJECTILE_VARIANT, 0, spawnPos, Vector.Zero, player):ToEffect()
-    boulder.Velocity = Vector.Zero -- movement is fully manual (see ProjectileUpdate); prevents the engine's own physics/friction from fighting it
+    boulder.Velocity = Vector.Zero -- movement is fully manual, see ProjectileUpdate
     boulder.Size = boulder.Size * BOULDER_HITBOX_MULT
 
     local data = boulder:GetData()
@@ -269,7 +269,7 @@ function BOULDER:ThrowBoulder(player, direction)
     return boulder
 end
 
--- burstBoulder — spawns rock fragments (and, for Birthright Nehemiah, some blue spiders instead) then removes the boulder
+-- Spawns rock fragments (or blue spiders, for Birthright Nehemiah) and removes the boulder
 ---@param boulder EntityEffect
 ---@param player EntityPlayer?
 ---@function
@@ -308,7 +308,7 @@ end
 ---@param boulder EntityEffect
 ---@function
 function BOULDER:ProjectileUpdate(boulder)
-    boulder.Velocity = Vector.Zero -- keep the engine's own physics from fighting our manual movement below
+    boulder.Velocity = Vector.Zero -- movement below is fully manual
 
     local data = boulder:GetData()
     local ref = data.POR_BoulderSpawner

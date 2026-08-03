@@ -9,6 +9,10 @@ POR = RegisterMod("Path of Ruin", 1)
 POR.game = Game()
 
 -- Includes
+-- -- Third-party libraries
+-- Must load first: patches EntityPlayer's health methods, so everything else can use them normally.
+include("sharedscripts.APIs.customhealthapi.core")
+
 -- -- Base Case
 -- -- -- Helpers
 -- NOTE: custom_save_compiler must be first; it sets POR.SaveCompiler as a side effect
@@ -21,7 +25,7 @@ POR_SecretDoor         = include("nehemiahscripts.misc.custom_secret_door")
 
 -- -- Nehemiah
 -- -- -- Characters
--- NOTE: nehemiah.lua must load before all other scripts; it sets NEHEMIAH_TYPE, TAINTED_NEHEMIAH_TYPE, NEHEMIAHSHAMMER_ITEM_ID, and BOOKOFEZRA_ITEM_ID used by callbacks below
+-- Must load first: sets globals (NEHEMIAH_TYPE, item IDs, etc.) other scripts depend on
 POR_NehemiahCharacter  = include("nehemiahscripts.characters.nehemiah")
 
 -- -- -- Compat
@@ -45,6 +49,9 @@ POR_NehemiahsHammer    = include("nehemiahscripts.items.nehemiahs_hammer")
 -- -- -- Pickups
 POR_RadiantCards       = include("nehemiahscripts.pickups.radiant_cards")
 POR_OtherCards         = include("nehemiahscripts.pickups.other_cards")
+-- Must load after RadiantCards/OtherCards; reads their card id tables
+POR_CardPool           = include("nehemiahscripts.pickups.card_pool")
+POR_CementHeart        = include("nehemiahscripts.pickups.cement_heart")
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Initializes Save Handler
@@ -153,7 +160,7 @@ POR.ExtraCallbacks = {
         end
     },
 
-    -- Called before a rock sprite is initialized; return a RockSpriteModifier (Anm2, ThrownAnm2, Spritesheet, Priority, DontUpdate) or nil to use default
+    -- Called before a rock sprite is initialized; return a RockSpriteModifier or nil for default
     NEHEMIAH_PRE_ROCK_SPRITE_INIT = {
         Name = "NEHEMIAH_PRE_ROCK_SPRITE_INIT",
         Functions = {},

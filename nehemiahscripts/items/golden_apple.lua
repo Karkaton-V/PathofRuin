@@ -10,7 +10,7 @@ local function getTotalHealth(player)
     return player:GetHearts() + player:GetSoulHearts() + player:GetBoneHearts()
 end
 
--- Grants a golden heart just before fatal damage lands, so the native damage code consumes it instead of Isaac's real health
+-- Grants a golden heart right before a fatal hit, so it absorbs the damage instead
 POR:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, amount, damageFlags, source, countdownFrames)
     local player = entity:ToPlayer()
     if not player then return end
@@ -20,7 +20,7 @@ POR:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, amount, dam
     if not player:HasCollectible(GOLDENAPPLE_ITEM_ID) then return end
     if amount < getTotalHealth(player) then return end -- not fatal; let it through normally
 
-    -- Fatal hit: grant the golden heart (and a half soul heart) so they absorb this hit, then let the damage proceed
+    -- Fatal hit: grant the golden heart + a half soul heart, then let the damage proceed
     player:AddGoldenHearts(1)
     player:AddSoulHearts(1) -- 1 unit = half a soul heart
 
@@ -28,5 +28,5 @@ POR:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, amount, dam
     player:UseActiveItem(CollectibleType.COLLECTIBLE_MIDAS_TOUCH, UseFlag.USE_NOANNOUNCER | UseFlag.USE_NOANIM | UseFlag.USE_OWNED)
     player:RemoveCollectible(GOLDENAPPLE_ITEM_ID)
 
-    -- no explicit return: the damage goes through, and the golden heart is what actually gets consumed
+    -- no return: damage proceeds and consumes the golden heart
 end, EntityType.ENTITY_PLAYER)

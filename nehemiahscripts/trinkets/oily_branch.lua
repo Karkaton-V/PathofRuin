@@ -17,7 +17,7 @@ POR:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     local rng = player:GetTrinketRNG(OILYBRANCH_TRINKET_ID)
 
     if rng:RandomFloat() < chance then
-        tear:AddTearFlags(TearFlags.TEAR_CHARM | TearFlags.TEAR_COLOR)
+        tear:AddTearFlags(TearFlags.TEAR_CHARM)
         tear.Color = CHARM_TEAR_COLOR
     end
 end)

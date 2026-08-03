@@ -185,7 +185,7 @@ function FOREACHTABLE.startForEachPartition(func, partition, pos, radius, varian
 end
 
 ---@generic V
----@param func fun(player: EntityPlayer, index: integer): V? --With REPENTOGON enabled, `index` is specifically obtained from `EntityPlayer:GetPlayerIndex()` rather than the table's index
+---@param func fun(player: EntityPlayer, index: integer): V? @index is GetPlayerIndex() under REPENTOGON
 ---@param variant? PlayerVariant @default: `-1`
 ---@param playerType? PlayerType @default: `-1`
 ---@param searchParams? SearchParams
@@ -197,7 +197,7 @@ end
 ---@generic V
 ---@param pos Vector
 ---@param radius number
----@param func fun(player: EntityPlayer, index: integer): V? --With REPENTOGON enabled, `index` is specifically obtained from `EntityPlayer:GetPlayerIndex()` rather than the table's index
+---@param func fun(player: EntityPlayer, index: integer): V? @index is GetPlayerIndex() under REPENTOGON
 ---@param variant? PlayerVariant @default: `-1`
 ---@param playerType? PlayerType @default: `-1`
 ---@param searchParams? SearchParams
@@ -261,7 +261,7 @@ function FOREACHTABLE.Bomb(func, variant, subtype, searchParams)
 end
 
 ---@generic V
----@param pos Vector | Entity @As Bombs lack an EntityPartition, provide an entity to account for collision spheres intersecting
+---@param pos Vector | Entity @Bombs have no EntityPartition, so pass an entity for collision sphere checks
 ---@param radius number
 ---@param func fun(bomb: EntityBomb, index: integer): V?
 ---@param variant? BombVariant @default: `-1`
@@ -305,7 +305,7 @@ function FOREACHTABLE.Slot(func, variant, subtype, searchParams)
 end
 
 ---@generic V
----@param pos Vector | Entity @As Slots lack an EntityPartition, provide an entity to account for collision spheres intersecting
+---@param pos Vector | Entity @Slots have no EntityPartition, so pass an entity for collision sphere checks
 ---@param radius number
 ---@param func fun(slot: EntitySlot, index: integer): V?
 ---@param variant? SlotVariant @default: `-1`
@@ -327,7 +327,7 @@ function FOREACHTABLE.Laser(func, variant, subtype, searchParams)
 end
 
 ---@generic V
----@param pos Vector | Entity @As Lasers lack an EntityPartition, provide an entity to account for collision spheres intersecting
+---@param pos Vector | Entity @Lasers have no EntityPartition, so pass an entity for collision sphere checks
 ---@param radius number
 ---@param func fun(laser: EntityLaser, index: integer): V?
 ---@param variant? LaserVariant @default: `-1`
@@ -349,7 +349,7 @@ function FOREACHTABLE.Knife(func, variant, subtype, searchParams)
 end
 
 ---@generic V
----@param pos Vector | Entity @As Knifes lack an EntityPartition, provide an entity to account for collision spheres intersecting
+---@param pos Vector | Entity @Knives have no EntityPartition, so pass an entity for collision sphere checks
 ---@param radius number
 ---@param func fun(knife: EntityKnife, index: integer): V?
 ---@param variant? KnifeVariant @default: `-1`
@@ -387,7 +387,7 @@ end
 ---@param entType? EntityType @default: `-1`
 ---@param variant? integer @default: `-1`
 ---@param subtype? integer @default: `-1`
----@param searchParams? AllowEnemySearchParams @Extended list of search parameters catered towards enemies. If given a table, will go through the default list of requirements for a valid enemy target. Use the table's parameters to adjust the specifics of the search
+---@param searchParams? AllowEnemySearchParams @Enemy-specific filters; pass a table to adjust the default valid-target checks
 ---@return V?
 function FOREACHTABLE.NPC(func, entType, variant, subtype, searchParams)
 	searchParams = searchParams or {}
@@ -401,7 +401,7 @@ end
 ---@param func fun(npc: EntityNPC, index: integer): V?
 ---@param variant? integer @default: `-1`
 ---@param subtype? integer @default: `-1`
----@param searchParams? AllowEnemySearchParams @Extended list of search parameters catered towards enemies. If given a table, will go through the default list of requirements for a valid enemy target. Use the table's parameters to adjust the specifics of the search
+---@param searchParams? AllowEnemySearchParams @Enemy-specific filters; pass a table to adjust the default valid-target checks
 ---@return V?
 function FOREACHTABLE.NPCInRadius(pos, radius, func, variant, subtype, searchParams)
 	return FOREACHTABLE.startForEachPartition(func, EntityPartition.ENEMY, pos, radius, variant, subtype, searchParams)
@@ -424,7 +424,7 @@ end
 ---@param variant? EffectVariant @default: `-1`
 ---@param subtype? integer @default: `-1`
 ---@param searchParams? SearchParams
----@param collisionOnly? boolean @By  default, effects don't inherently don't have collision, but REPENTOGON fixes Isaac.FindInRadius's EntityPartition.EFFECT by allowing it to show if it has a set collision type. Set to true to use this, otherwise it'll use the manual FindByType + DistanceSquared method
+---@param collisionOnly? boolean @Use REPENTOGON's collision-aware EntityPartition.EFFECT instead of manual distance checks
 ---@return V?
 function FOREACHTABLE.EffectInRadius(pos, radius, func, variant, subtype, searchParams, collisionOnly)
 	return FOREACHTABLE.startForEachPartition(func, REPENTOGON and collisionOnly and EntityPartition.EFFECT or EntityType.ENTITY_EFFECT, pos, radius, variant, subtype, searchParams, not REPENTOGON or not collisionOnly)
@@ -489,7 +489,7 @@ function FOREACHTABLE.EntityInRadius(pos, radius, func, searchParams)
 	return FOREACHTABLE.startForEachPartition(func, nil, pos, radius, nil, nil, searchParams)
 end
 
---Will move DOWN the chain from the provided entity. Provide the parent if you want to loop through the whole line of enemies
+-- Walks DOWN the chain from the given entity; pass the parent to loop the whole line
 ---@param npc Entity
 ---@param func fun(npc: Entity)
 function FOREACHTABLE.Segment(npc, func)

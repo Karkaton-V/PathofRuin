@@ -27,7 +27,7 @@ local function openAllDoors()
     end
 end
 
--- Clears a shop's items and machines (and, if enabled, shopkeepers), locks the doors, then spawns Greed (or Super Greed on floor 5+); the Secret Shop trapdoor appears once Greed dies
+-- Clears the shop, locks the doors, and spawns Greed (Super Greed on floor 5+)
 local function raidShop(player)
     local room = game:GetRoom()
 

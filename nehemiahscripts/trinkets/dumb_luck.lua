@@ -5,7 +5,7 @@ DUMBLUCK_TRINKET_ID = Isaac.GetTrinketIdByName("Windflower")
 local STANDSTILL_FRAMES = 150
 local MOVE_THRESHOLD = 0.15
 
--- Triggers the real Telekinesis effect once, after standing still long enough; won't re-trigger until Isaac moves and stands still again
+-- Triggers Telekinesis after standing still long enough; resets once Isaac moves again
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     if not player:HasTrinket(DUMBLUCK_TRINKET_ID) then return end
 

@@ -2,7 +2,7 @@ local game = Game()
 
 BOOKOFNEHEMIAH_ITEM_ID = Isaac.GetItemIdByName("Book of Nehemiah") -- item id of Book of Nehemiah
 
--- Mimics Crack the Sky's meteor shower and summons Ezra's Moonlight, which grants the fading all-stats buff and clears the floor's curse on contact
+-- Mimics Crack the Sky, then summons Ezra's Moonlight (buff + curse clear on contact)
 function POR:BookofNehemiahUse(_, _, player)
     local room = game:GetRoom()
 

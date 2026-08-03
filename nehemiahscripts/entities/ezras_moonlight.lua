@@ -7,7 +7,7 @@ EZRA_MOONLIGHT.VARIANT = Isaac.GetEntityVariantByName("Ezra's Moonlight") -- var
 POR.MOONLIGHT_VARIANT = EZRA_MOONLIGHT.VARIANT -- main.lua references this for callback registration
 
 local COLLISION_RADIUS = 20
-local BUFF_DURATION_FRAMES = 1250 -- 25 seconds; tuned from testing (750 measured as ~15s, so scaled up proportionally)
+local BUFF_DURATION_FRAMES = 1250 -- ~25 seconds, tuned from testing
 local BUFF_MAX_MULTIPLIER = 1.5 -- 1.5x all stats at pickup, fading linearly down to 1x
 local BUFF_CACHE_FLAGS = CacheFlag.CACHE_DAMAGE | CacheFlag.CACHE_FIREDELAY | CacheFlag.CACHE_SPEED
     | CacheFlag.CACHE_RANGE | CacheFlag.CACHE_SHOTSPEED | CacheFlag.CACHE_LUCK
@@ -31,7 +31,7 @@ local function removeFloorCurses()
     level:RemoveCurses(level:GetCurses() & ~labyrinthBit)
 end
 
--- Holds on Appear's 2nd frame once it finishes, then plays Disappear and grants the buff when any player overlaps it
+-- Holds on Appear's last frame, then grants the buff and plays Disappear on player contact
 ---@param effect EntityEffect
 ---@function
 function EZRA_MOONLIGHT:MoonlightUpdate(effect)
