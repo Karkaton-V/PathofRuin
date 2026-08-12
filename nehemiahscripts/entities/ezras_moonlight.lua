@@ -71,7 +71,7 @@ function EZRA_MOONLIGHT:MoonlightUpdate(effect)
 end
 
 -- Ticks down the buff timer each frame and keeps the cache re-evaluating so the fade is smooth
-POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+function EZRA_MOONLIGHT.OnPlayerUpdate(_, player)
     local pData = player:GetData()
     local framesLeft = pData.POR_EzraBuffFramesLeft
     if framesLeft and framesLeft > 0 then
@@ -79,10 +79,10 @@ POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         player:AddCacheFlags(BUFF_CACHE_FLAGS, true)
         player:EvaluateItems()
     end
-end)
+end
 
 -- Applies the fading stat multiplier while the buff is active
-POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
+function EZRA_MOONLIGHT.OnEvaluateCache(_, player, cacheFlag)
     local framesLeft = player:GetData().POR_EzraBuffFramesLeft
     if not framesLeft or framesLeft <= 0 then return end
 
@@ -101,6 +101,6 @@ POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
     elseif cacheFlag == CacheFlag.CACHE_LUCK then
         player.Luck = player.Luck * factor
     end
-end)
+end
 
 return EZRA_MOONLIGHT

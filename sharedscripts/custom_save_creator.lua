@@ -111,7 +111,7 @@ end
 -- ===========================================
 
 -- Cache Flag trigger on New floor
-POR:AddPriorityCallback(ModCallbacks.MC_POST_NEW_LEVEL, CallbackPriority.LATE, function()
+function POR.OnNewLevelApplyCacheFlags()
 	local run_save = POR:RunSave()
     if run_save == nil then return end
 	if not run_save.CacheFlagsFloor then
@@ -125,7 +125,7 @@ POR:AddPriorityCallback(ModCallbacks.MC_POST_NEW_LEVEL, CallbackPriority.LATE, f
 		player:EvaluateItems()
 	end
 	run_save.CacheFlagsFloor = nil
-end)
+end
 
 -- ===========================================
 -- Legacy functions ------------------------

@@ -87,7 +87,7 @@ local function getDoorState(door)
 end
 
 -- Blocks a bomb's mere contact from opening the door; only an actual explosion counts
-POR:AddCallback(ModCallbacks.MC_PRE_BOMB_GRID_COLLISION, function(_, bomb, gridIndex)
+function SECRET_DOOR.OnBombGridCollision(_, bomb, gridIndex)
     local gridEntity = game:GetRoom():GetGridEntity(gridIndex)
     local door = gridEntity and gridEntity:ToDoor()
     if not door or not shouldSkinDoor(door) then return end
@@ -96,10 +96,10 @@ POR:AddCallback(ModCallbacks.MC_PRE_BOMB_GRID_COLLISION, function(_, bomb, gridI
     if not data.needsGating or data.bombHits >= requiredHitsFor() then return end
 
     return false
-end)
+end
 
 -- Counts a hit when a bomb explosion spawns near the door, and advances the reveal animation
-POR:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, effect)
+function SECRET_DOOR.OnEffectInit(_, effect)
     if effect.Variant ~= EffectVariant.BOMB_EXPLOSION then return end
 
     local room = game:GetRoom()
@@ -119,20 +119,19 @@ POR:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, effect)
             end
         end
     end
-end)
+end
 
 -- Cancels the door's native sprite and draws our own instead
-POR:AddCallback(ModCallbacks.MC_PRE_GRID_ENTITY_DOOR_RENDER, function(_, door, offset)
+function SECRET_DOOR.OnDoorRender(_, door, offset)
     if not shouldSkinDoor(door) then return end
     local data = getDoorState(door)
     local renderPos = Isaac.WorldToScreen(door.Position)
     data.sprite:Render(renderPos, Vector.Zero, Vector.Zero)
     return false
-end)
+end
 
--- Advances animations, syncs the sprite to open/closed state, and enforces the bomb gate
-POR:AddCallback(ModCallbacks.MC_POST_GRID_ENTITY_DOOR_UPDATE, function(_, door)
-    -- Close()/Busted don't affect physics, so also force CollisionClass solid
+-- Advances animations, syncs the sprite to open/closed state, and enforces the bomb gate (Close()/Busted don't affect physics, so CollisionClass is also forced solid)
+function SECRET_DOOR.OnDoorUpdate(_, door)
     if shouldSkinDoor(door) then
         local lockData = getDoorState(door)
         if lockData.needsGating and lockData.bombHits < requiredHitsFor() then
@@ -166,11 +165,11 @@ POR:AddCallback(ModCallbacks.MC_POST_GRID_ENTITY_DOOR_UPDATE, function(_, door)
     end
 
     sprite:Update()
-end)
+end
 
 -- Per-door state is keyed to the room it belongs to, so clear it out on floor change
-POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function()
+function SECRET_DOOR.OnNewLevel()
     doorStates = {}
-end)
+end
 
 return SECRET_DOOR

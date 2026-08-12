@@ -11,7 +11,7 @@
     <card id="8" name="VII - The Chariot!"          type="tarot_reverse" hidden="true"   description="Trample Over Your Enemies"                  announcer="371"  announcerdelay="60"  mimiccharge="3"  hud="FChariot"         pickup="507"  />
     <card id="9" name="VIII - Justice!"             type="tarot_reverse" hidden="true"   description="May Your Future be in Your Favor"           announcer="349"  announcerdelay="60"  mimiccharge="12" hud="FJustice"         pickup="508" />
     <card id="10" name="IX - The Hermit!"           type="tarot_reverse" hidden="true"   description="May You See What Life Has Abandoned"        announcer="377"  announcerdelay="60"  mimiccharge="3"  hud="FHermit"          pickup="509" />
-    <card id="11" name="X - The Wheel of Fortune!"  type="tarot_reverse" hidden="true"   description="Play the Game of Luck"                      announcer="391"  announcerdelay="60"  mimiccharge="6"  hud="FWheelOfFortune"  pickup="510" />
+    <card id="11" name="X - Wheel of Fortune!"  type="tarot_reverse" hidden="true"   description="Play the Game of Luck"                      announcer="391"  announcerdelay="60"  mimiccharge="6"  hud="FWheelOfFortune"  pickup="510" />
     <card id="12" name="XI - Strength!"             type="tarot_reverse" hidden="true"   description="May Your Fervor Bring Avarice"              announcer="365"  announcerdelay="60"  mimiccharge="4"  hud="FStrength"        pickup="511" />
     <card id="13" name="XII - The Hanged Man!"      type="tarot_reverse" hidden="true"   description="May You Find Inner Peace"                   announcer="376"  announcerdelay="60"  mimiccharge="12" hud="FHangedMan"       pickup="512" />
     <card id="14" name="XIII - Death!"              type="tarot_reverse" hidden="true"   description="Reap the Souls of Your Enemies"             announcer="337"  announcerdelay="60"  mimiccharge="6"  hud="FDeath"           pickup="513" />
@@ -36,4 +36,8 @@
     <!-- Duel Monsters -->
     <card id="28" name="Graceful Charity"           type="special" hidden="true"   description="You Win Some, You Lose Some"      mimiccharge="12"  hud="GracefulCharity"  pickup="527"/>
     <card id="29" name="Disgraceful Charity"        type="special" hidden="true"   description="You Lose Some, You Win Some"      mimiccharge="12"  hud="DisgracefulCharity"  pickup="528"/>
+
+    <!-- Runes -->
+    <rune id="30" name="Soul of Nehemiah"           type="rune"    hidden="true"   description="Rise From the Rubble"              hud="SoulOfNehemiah"  pickup="529"/>
+
 </pocketitems>

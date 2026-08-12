@@ -11,10 +11,9 @@
 
 	<player name="The Condemned"
 	skin="characterb_nehemiah.png"
-	nameimage="playernameb_nehemiah.png" 
-	hp="4" 
-	armor="2" 
-	keys="1"  
+	nameimage="playernameb_nehemiah.png"
+	hp="4"
+	keys="1"
 	portrait="playerportraitb_nehemiah.png"  
 	skinColor="-1"
 	birthright="Breaking Through the Chains of Fate"

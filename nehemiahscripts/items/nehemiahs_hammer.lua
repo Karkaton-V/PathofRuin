@@ -52,14 +52,14 @@ function POR:NehemiahHammerUse(item, rng, player)
 end
 
 -- Cache eval — only enables the axe if swing is active
-POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player)
+function POR.NehemiahHammerEvaluateCache(_, player)
     if swingActive and swingOwner and player:GetPlayerIndex() == swingOwner:GetPlayerIndex() then
         player:EnableWeaponType(WeaponType.WEAPON_NOTCHED_AXE, true)
     end
-end, CacheFlag.CACHE_WEAPON)
+end
 
 -- Replace the notched axe sprite with the hammer after the player updates
-POR:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
+function POR.NehemiahHammerSwapSprite(_, player)
     if not swingActive or not swingOwner then return end
     if player:GetPlayerIndex() ~= swingOwner:GetPlayerIndex() then return end
 
@@ -72,10 +72,10 @@ POR:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
             sprite:Play("Idle", true)
         end
     end
-end)
+end
 
 -- Watch for swing, then re-eval cache without weapon
-POR:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
+function POR.NehemiahHammerUpdate()
     if not swingActive or not swingOwner then return end
 
     local weapon = swingOwner:GetWeapon(2)
@@ -105,4 +105,4 @@ POR:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
             swingOwner = nil
         end
     end
-end)
+end

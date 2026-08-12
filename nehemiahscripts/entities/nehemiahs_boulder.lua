@@ -6,11 +6,19 @@ local BOULDER = {}
 POR.ROCKTABLE = BOULDER -- main.lua references POR.ROCKTABLE for all callbacks
 
 BOULDER.PICKUP_VARIANT = Isaac.GetEntityVariantByName("Throwing Boulder") -- ground effect: rock_pickup.anm2 (Appear#, Idle, Collect)
+BOULDER.PICKUP_VARIANT_TINTED = Isaac.GetEntityVariantByName("Throwing Boulder (Tinted)")
+BOULDER.PICKUP_VARIANT_GOLDEN = Isaac.GetEntityVariantByName("Throwing Boulder (Golden)")
 BOULDER.PROJECTILE_VARIANT = Isaac.GetEntityVariantByName("Holding Boulder") -- thrown effect: rock_tear.anm2 (Idle# per floor)
+BOULDER.PROJECTILE_VARIANT_TINTED = Isaac.GetEntityVariantByName("Holding Boulder (Tinted)")
+BOULDER.PROJECTILE_VARIANT_GOLDEN = Isaac.GetEntityVariantByName("Holding Boulder (Golden)")
 
 -- Exposed on POR directly for callback registration in main.lua
 POR.ROCK_VARIANT = BOULDER.PICKUP_VARIANT
+POR.ROCK_VARIANT_TINTED = BOULDER.PICKUP_VARIANT_TINTED
+POR.ROCK_VARIANT_GOLDEN = BOULDER.PICKUP_VARIANT_GOLDEN
 POR.ROCK_PROJECTILE_VARIANT = BOULDER.PROJECTILE_VARIANT
+POR.ROCK_PROJECTILE_VARIANT_TINTED = BOULDER.PROJECTILE_VARIANT_TINTED
+POR.ROCK_PROJECTILE_VARIANT_GOLDEN = BOULDER.PROJECTILE_VARIANT_GOLDEN
 
 local PROJECTILE_DAMAGE = 40
 local PROJECTILE_FRAGMENTS = 3 -- fragments spawned on impact; ordinary tears, no splitting callback attached
@@ -18,8 +26,47 @@ local BOULDER_FALL_SPEED_BEAST = 8
 local BOULDER_HITBOX_MULT = 2
 local HORIZONTAL_THROW_HEIGHT_OFFSET = -10 -- raises the spawn point when thrown mostly left/right
 
+-- Boulder kinds: which spritesheet + entity variants each rolls (all 3 share one anm2 each; only ReplaceSpritesheet changes the look, variants exist so ProjectileUpdate can tell them apart)
+BOULDER.KIND_NORMAL = "Normal"
+BOULDER.KIND_GOLDEN = "Golden"
+BOULDER.KIND_TINTED = "Tinted"
+
+local GOLDEN_CHANCE = 0.10
+local TINTED_CHANCE = 0.01
+local NEHEMIAH_KIND_BONUS = 0.05 -- untainted Nehemiah gets +5% to each of golden and tinted
+
+BOULDER.KIND_DATA = {
+    [BOULDER.KIND_NORMAL] = {
+        Sheet = "gfx/effects/rock_variation_1.png",
+        PickupVariant = BOULDER.PICKUP_VARIANT,
+        ProjectileVariant = BOULDER.PROJECTILE_VARIANT,
+    },
+    [BOULDER.KIND_GOLDEN] = {
+        Sheet = "gfx/effects/rock_variation_3.png",
+        PickupVariant = BOULDER.PICKUP_VARIANT_GOLDEN,
+        ProjectileVariant = BOULDER.PROJECTILE_VARIANT_GOLDEN,
+    },
+    [BOULDER.KIND_TINTED] = {
+        Sheet = "gfx/effects/rock_variation_2.png",
+        PickupVariant = BOULDER.PICKUP_VARIANT_TINTED,
+        ProjectileVariant = BOULDER.PROJECTILE_VARIANT_TINTED,
+    },
+}
+
+-- All pickup/projectile variants across all 3 kinds, for room-cap counting across the whole set
+BOULDER.ALL_PICKUP_VARIANTS = { BOULDER.PICKUP_VARIANT, BOULDER.PICKUP_VARIANT_GOLDEN, BOULDER.PICKUP_VARIANT_TINTED }
+BOULDER.ALL_PROJECTILE_VARIANTS = { BOULDER.PROJECTILE_VARIANT, BOULDER.PROJECTILE_VARIANT_GOLDEN, BOULDER.PROJECTILE_VARIANT_TINTED }
+
+local GOLD_DUST_COUNT = 8
+local GOLD_COIN_MIN, GOLD_COIN_MAX = 0, 2
+local TINTED_PICKUP_MIN, TINTED_PICKUP_MAX = 0, 2
+local TINTED_PICKUP_TABLE = {
+    { PickupVariant.PICKUP_KEY,   KeySubType.KEY_NORMAL },
+    { PickupVariant.PICKUP_BOMB,  BombSubType.BOMB_NORMAL },
+    { PickupVariant.PICKUP_HEART, HeartSubType.HEART_SOUL },
+}
+
 local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
 
 -- Sprite variant numbers, matching Appear1-26 / Idle1-26 in the entities' anm2s
 BOULDER.SPRITE_VARIANTS = {
@@ -156,20 +203,60 @@ function BOULDER:GetSpriteVariant()
     return math.random(1, 26) -- unrecognized stage (Void); rooms there take a random appearance anyway
 end
 
--- Picks one of the 3 rock spritesheets at random
+-- Rolls a boulder kind: 1% tinted, 10% golden, the rest normal -- untainted Nehemiah gets +5% to each
+---@param player EntityPlayer?
 ---@function
-local function randomRockSheet()
-    return "gfx/effects/rock_variation_" .. tostring(math.random(1, 3)) .. ".png"
+function BOULDER:RollKind(player)
+    local tintedChance = TINTED_CHANCE
+    local goldenChance = GOLDEN_CHANCE
+    if player and player:GetPlayerType() == NEHEMIAH_TYPE then
+        tintedChance = tintedChance + NEHEMIAH_KIND_BONUS
+        goldenChance = goldenChance + NEHEMIAH_KIND_BONUS
+    end
+
+    local roll = math.random()
+    if roll < tintedChance then
+        return BOULDER.KIND_TINTED
+    elseif roll < tintedChance + goldenChance then
+        return BOULDER.KIND_GOLDEN
+    end
+    return BOULDER.KIND_NORMAL
 end
 
--- PickupInit — sets up a freshly spawned ground boulder pickup
----@param effect EntityEffect
+-- Counts every boulder pickup on the ground, across all 3 kinds
 ---@function
-function BOULDER:PickupInit(effect)
+function BOULDER:CountBoulders()
+    local total = 0
+    for _, variant in ipairs(BOULDER.ALL_PICKUP_VARIANTS) do
+        total = total + Isaac.CountEntities(nil, EntityType.ENTITY_EFFECT, variant)
+    end
+    return total
+end
+
+-- Finds every boulder pickup on the ground, across all 3 kinds, oldest-spawned first
+---@function
+function BOULDER:FindAllBoulders()
+    local all = {}
+    for _, variant in ipairs(BOULDER.ALL_PICKUP_VARIANTS) do
+        for _, rock in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, variant)) do
+            table.insert(all, rock)
+        end
+    end
+    table.sort(all, function(a, b) return a.FrameCount < b.FrameCount end)
+    return all
+end
+
+-- PickupInit — sets up a freshly spawned ground boulder pickup; kind must match the spawned variant (SpawnBoulder handles this) or falls back to Normal
+---@param effect EntityEffect
+---@param kind string?
+---@function
+function BOULDER:PickupInit(effect, kind)
     local data = effect:GetData()
     local sprite = effect:GetSprite()
+    local kindData = BOULDER.KIND_DATA[kind] or BOULDER.KIND_DATA[BOULDER.KIND_NORMAL]
 
-    data.POR_BoulderSheet = randomRockSheet()
+    data.POR_BoulderKind = kind or BOULDER.KIND_NORMAL
+    data.POR_BoulderSheet = kindData.Sheet
     data.POR_SpriteVariant = BOULDER:GetSpriteVariant()
 
     sprite:ReplaceSpritesheet(0, data.POR_BoulderSheet)
@@ -179,16 +266,108 @@ function BOULDER:PickupInit(effect)
     effect.Size = effect.Size * BOULDER_HITBOX_MULT
 end
 
--- SpawnBoulder — spawns a boulder pickup effect at a given position
+-- Persistence: ENTITY_EFFECT isn't covered by native room save/restore, so ground boulders track themselves in POR:RoomSave() (keyed by ListIndex) and respawn on re-entry; the save key must contain "__" or custom_save_compiler's pruning wipes it every room entry
+local boulderSaveIdCounter = 0
+
+-- RegisterPersistence — records a freshly spawned ground boulder into the current room's save data
+---@param effect EntityEffect
+---@function
+function BOULDER:RegisterPersistence(effect)
+    local data = effect:GetData()
+    boulderSaveIdCounter = boulderSaveIdCounter + 1
+    local saveId = boulderSaveIdCounter
+    data.POR_BoulderSaveId = saveId
+
+    local roomSave = POR:RoomSave()
+    local listIndex = game:GetLevel():GetCurrentRoomDesc().ListIndex
+    Isaac.DebugString(string.format(
+        "[POR DEBUG] RegisterPersistence: saveId=%d kind=%s pos=(%.1f,%.1f) listIndex=%s roomSave=%s",
+        saveId, tostring(data.POR_BoulderKind), effect.Position.X, effect.Position.Y,
+        tostring(listIndex), tostring(roomSave)))
+    if not roomSave then
+        Isaac.DebugString("[POR DEBUG] RegisterPersistence: POR:RoomSave() returned nil, record NOT saved!")
+        return
+    end
+
+    roomSave.__POR_Boulders = roomSave.__POR_Boulders or {}
+    roomSave.__POR_Boulders[saveId] = {
+        Kind = data.POR_BoulderKind,
+        X = effect.Position.X,
+        Y = effect.Position.Y,
+    }
+end
+
+-- UnregisterPersistence — clears a boulder's save record; call right before removing/collecting it, or it'll keep reappearing on room re-entry
+---@param effect EntityEffect
+---@function
+function BOULDER:UnregisterPersistence(effect)
+    local data = effect:GetData()
+    local saveId = data.POR_BoulderSaveId
+    Isaac.DebugString(string.format("[POR DEBUG] UnregisterPersistence: saveId=%s", tostring(saveId)))
+    if not saveId then return end
+
+    local roomSave = POR:RoomSave()
+    if roomSave and roomSave.__POR_Boulders then
+        roomSave.__POR_Boulders[saveId] = nil
+    end
+end
+
+-- RestorePersistentBoulders — respawns boulders recorded for the current room (run on MC_POST_NEW_ROOM, see main.lua); reuses each record's existing save id so it clears the same record later on pickup/removal
+---@function
+function BOULDER:RestorePersistentBoulders()
+    local listIndex = game:GetLevel():GetCurrentRoomDesc().ListIndex
+    local roomSave = POR:RoomSave()
+    local records = roomSave and roomSave.__POR_Boulders
+    local count = 0
+    if records then
+        for _ in pairs(records) do count = count + 1 end
+    end
+    Isaac.DebugString(string.format(
+        "[POR DEBUG] RestorePersistentBoulders FIRED: listIndex=%s roomSave=%s records=%s count=%d",
+        tostring(listIndex), tostring(roomSave), tostring(records), count))
+    if not records then return end
+
+    for saveId, record in pairs(records) do
+        Isaac.DebugString(string.format(
+            "[POR DEBUG]   restoring saveId=%d kind=%s pos=(%.1f,%.1f)",
+            saveId, tostring(record.Kind), record.X, record.Y))
+        local kindData = BOULDER.KIND_DATA[record.Kind] or BOULDER.KIND_DATA[BOULDER.KIND_NORMAL]
+        local pos = Vector(record.X, record.Y)
+
+        local boulder = Isaac.Spawn(EntityType.ENTITY_EFFECT, kindData.PickupVariant, 0, pos, Vector.Zero, nil):ToEffect()
+        if boulder then
+            BOULDER:PickupInit(boulder, record.Kind)
+            boulder:GetData().POR_BoulderSaveId = saveId
+            -- Already settled -- skip the falling-in animation and go straight to idle
+            boulder:GetSprite():Play("Idle" .. boulder:GetData().POR_SpriteVariant, true)
+        else
+            Isaac.DebugString(string.format("[POR DEBUG]   restore FAILED to spawn saveId=%d", saveId))
+        end
+    end
+end
+
+-- SpawnBoulderOfKind — spawns a specific boulder kind at a given position, bypassing RollKind; for callers with their own odds table (e.g. Soul of Nehemiah's rune effect in runes.lua)
+---@param position Vector
+---@param player EntityPlayer
+---@param kind string
+---@function
+function BOULDER:SpawnBoulderOfKind(position, player, kind)
+    local kindData = BOULDER.KIND_DATA[kind] or BOULDER.KIND_DATA[BOULDER.KIND_NORMAL]
+
+    local boulder = Isaac.Spawn(EntityType.ENTITY_EFFECT, kindData.PickupVariant, 0, position, Vector.Zero, player):ToEffect()
+    if not boulder then return end
+
+    BOULDER:PickupInit(boulder, kind)
+    BOULDER:RegisterPersistence(boulder)
+    return boulder
+end
+
+-- SpawnBoulder — rolls a kind and spawns the matching boulder pickup effect at a given position
 ---@param position Vector
 ---@param player EntityPlayer
 ---@function
 function BOULDER:SpawnBoulder(position, player)
-    local boulder = Isaac.Spawn(EntityType.ENTITY_EFFECT, BOULDER.PICKUP_VARIANT, 0, position, Vector.Zero, player):ToEffect()
-    if not boulder then return end
-
-    BOULDER:PickupInit(boulder)
-    return boulder
+    return BOULDER:SpawnBoulderOfKind(position, player, BOULDER:RollKind(player))
 end
 
 -- Runs each frame on ground boulders: fall -> idle -> collect, plus Beast/Crawlspace gravity
@@ -201,6 +380,7 @@ function BOULDER:PickupUpdate(effect)
     if data.POR_RockFallingBeast then
         effect.Position = effect.Position + Vector(0, BOULDER_FALL_SPEED_BEAST)
         if effect.Position.Y > game:GetRoom():GetBottomRightPos().Y then
+            BOULDER:UnregisterPersistence(effect)
             effect:Remove()
         end
         return
@@ -217,9 +397,7 @@ function BOULDER:PickupUpdate(effect)
 
     for _, ent in ipairs(Isaac.FindInRadius(effect.Position, effect.Size, EntityPartition.PLAYER)) do
         local player = ent:ToPlayer()
-        local playerType = player and player:GetPlayerType()
         if player
-            and (playerType == NEHEMIAH_TYPE or playerType == TAINTED_NEHEMIAH_TYPE)
             and player.Variant == 0
             and player:IsExtraAnimationFinished()
             and not player:IsCoopGhost()
@@ -228,7 +406,11 @@ function BOULDER:PickupUpdate(effect)
             local pData = player:GetData()
             pData.POR_HoldingBoulder = true
             pData.POR_HoldingBoulderSheet = data.POR_BoulderSheet
+            pData.POR_HoldingBoulderKind = data.POR_BoulderKind
+            -- Floor variant the boulder rolled on the ground, so the held sprite shows the same floor's look
+            pData.POR_HoldingBoulderVariant = data.POR_SpriteVariant
             player:AnimatePickup(sprite, false, "LiftItem")
+            BOULDER:UnregisterPersistence(effect)
             effect:Remove()
             break
         end
@@ -249,7 +431,10 @@ function BOULDER:ThrowBoulder(player, direction)
         spawnPos = spawnPos + Vector(0, HORIZONTAL_THROW_HEIGHT_OFFSET) -- raise it off the floor for sideways throws
     end
 
-    local boulder = Isaac.Spawn(EntityType.ENTITY_EFFECT, BOULDER.PROJECTILE_VARIANT, 0, spawnPos, Vector.Zero, player):ToEffect()
+    local kind = player:GetData().POR_HoldingBoulderKind or BOULDER.KIND_NORMAL
+    local kindData = BOULDER.KIND_DATA[kind]
+
+    local boulder = Isaac.Spawn(EntityType.ENTITY_EFFECT, kindData.ProjectileVariant, 0, spawnPos, Vector.Zero, player):ToEffect()
     boulder.Velocity = Vector.Zero -- movement is fully manual, see ProjectileUpdate
     boulder.Size = boulder.Size * BOULDER_HITBOX_MULT
 
@@ -257,8 +442,9 @@ function BOULDER:ThrowBoulder(player, direction)
     data.POR_Velocity = vel
     data.POR_BoulderSpawner = EntityRef(player)
     data.POR_SpriteVariant = BOULDER:GetSpriteVariant()
+    data.POR_BoulderKind = kind
 
-    local sheet = player:GetData().POR_HoldingBoulderSheet or randomRockSheet()
+    local sheet = player:GetData().POR_HoldingBoulderSheet or kindData.Sheet
     local sprite = boulder:GetSprite()
     sprite:ReplaceSpritesheet(0, sheet)
     sprite:LoadGraphics()
@@ -267,6 +453,56 @@ function BOULDER:ThrowBoulder(player, direction)
     SFXManager():Stop(SoundEffect.SOUND_TEARS_FIRE)
 
     return boulder
+end
+
+-- Golden boulder impact: bursts into gold dust, turns the enemy to gold (Midas' Touch flag, also freezes it in place), and drops 0-2 coins
+---@param enemy Entity
+---@param position Vector
+---@param player EntityPlayer?
+---@function
+local function applyGoldenHitEffect(enemy, position, player)
+    for _ = 1, GOLD_DUST_COUNT do
+        local velAngle = math.random() * 360
+        local vel = Vector.FromAngle(velAngle) * (math.random() * 4 + 2)
+        Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.GOLD_PARTICLE, 0, position, vel, player)
+    end
+
+    enemy:AddEntityFlags(EntityFlag.FLAG_MIDAS_FREEZE)
+
+    local coinCount = math.random(GOLD_COIN_MIN, GOLD_COIN_MAX)
+    for _ = 1, coinCount do
+        local velAngle = math.random() * 360
+        local vel = Vector.FromAngle(velAngle) * (math.random() * 6 + 4)
+        Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COIN, CoinSubType.COIN_PENNY, position, vel, player)
+    end
+end
+
+-- Tinted boulder impact: splits into 0-2 pickups, each randomly a key, bomb, or soul heart
+---@param position Vector
+---@param player EntityPlayer?
+---@function
+local function applyTintedHitEffect(position, player)
+    local pickupCount = math.random(TINTED_PICKUP_MIN, TINTED_PICKUP_MAX)
+    for _ = 1, pickupCount do
+        local choice = TINTED_PICKUP_TABLE[math.random(1, #TINTED_PICKUP_TABLE)]
+        local velAngle = math.random() * 360
+        local vel = Vector.FromAngle(velAngle) * (math.random() * 6 + 4)
+        Isaac.Spawn(EntityType.ENTITY_PICKUP, choice[1], choice[2], position, vel, player)
+    end
+end
+
+-- Dispatches the on-hit bonus effect for golden/tinted boulders; no-ops for Normal
+---@param kind string
+---@param enemy Entity
+---@param position Vector
+---@param player EntityPlayer?
+---@function
+function BOULDER:ApplyKindHitEffect(kind, enemy, position, player)
+    if kind == BOULDER.KIND_GOLDEN then
+        applyGoldenHitEffect(enemy, position, player)
+    elseif kind == BOULDER.KIND_TINTED then
+        applyTintedHitEffect(position, player)
+    end
 end
 
 -- Spawns rock fragments (or blue spiders, for Birthright Nehemiah) and removes the boulder
@@ -325,12 +561,37 @@ function BOULDER:ProjectileUpdate(boulder)
     for _, ent in ipairs(Isaac.FindInRadius(newPos, boulder.Size, EntityPartition.ENEMY)) do
         if ent:IsActiveEnemy() and ent:IsVulnerableEnemy() then
             ent:TakeDamage(PROJECTILE_DAMAGE, 0, EntityRef(player), 0)
+            BOULDER:ApplyKindHitEffect(data.POR_BoulderKind, ent, boulder.Position, player)
             burstBoulder(boulder, player)
             return
         end
     end
 
     boulder.Position = newPos
+end
+
+-- BuildHeldSprite — builds the carried-boulder overlay sprite; variant selects Idle1..Idle27 (per-floor look, matching AppearN's crop columns) or nil for the plain "Idle"
+---@param sheet string
+---@param variant number?
+---@return Sprite
+---@function
+function BOULDER:BuildHeldSprite(sheet, variant)
+    local sprite = Sprite()
+    sprite:Load("gfx/rock_pickup.anm2", false)
+    sprite:ReplaceSpritesheet(0, sheet)
+    sprite:LoadGraphics()
+    sprite:Play(variant and ("Idle" .. variant) or "Idle", true)
+    return sprite
+end
+
+-- RestoreHeldBoulderVisual — re-triggers the carry animation on room load (the logical state survives on its own; only the extra-animation overlay needs restarting)
+---@param player EntityPlayer
+---@function
+function BOULDER:RestoreHeldBoulderVisual(player)
+    local pData = player:GetData()
+    if not pData.POR_HoldingBoulder then return end
+    player:AnimatePickup(BOULDER:BuildHeldSprite(pData.POR_HoldingBoulderSheet, pData.POR_HoldingBoulderVariant), false, "LiftItem")
+    pData.POR_BoulderFrameCount = 1
 end
 
 -- PostPlayerUpdate — handles throw-on-shoot and re-playing the carry animation
@@ -361,12 +622,7 @@ function BOULDER:PostPlayerUpdate(player)
 
             -- Re-play hold animation each time the previous one ends
             if player:IsExtraAnimationFinished() then
-                local sprite = Sprite()
-                sprite:Load("rock_pickup.anm2", false)
-                sprite:ReplaceSpritesheet(0, pData.POR_HoldingBoulderSheet)
-                sprite:LoadGraphics()
-                sprite:Play("Idle" .. BOULDER:GetSpriteVariant(), true)
-                player:AnimatePickup(sprite, false, "LiftItem")
+                player:AnimatePickup(BOULDER:BuildHeldSprite(pData.POR_HoldingBoulderSheet, pData.POR_HoldingBoulderVariant), false, "LiftItem")
                 pData.POR_BoulderFrameCount = 1
             end
         end

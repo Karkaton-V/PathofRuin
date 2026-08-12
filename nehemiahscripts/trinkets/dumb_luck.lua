@@ -6,7 +6,7 @@ local STANDSTILL_FRAMES = 150
 local MOVE_THRESHOLD = 0.15
 
 -- Triggers Telekinesis after standing still long enough; resets once Isaac moves again
-POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+function POR.DumbLuckPlayerUpdate(_, player)
     if not player:HasTrinket(DUMBLUCK_TRINKET_ID) then return end
 
     local pData = player:GetData()
@@ -24,4 +24,4 @@ POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         pData.POR_DumbLuckActive = true
         player:UseActiveItem(CollectibleType.COLLECTIBLE_TELEKINESIS, UseFlag.USE_NOANNOUNCER | UseFlag.USE_NOANIM | UseFlag.USE_OWNED)
     end
-end)
+end

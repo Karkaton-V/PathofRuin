@@ -2,8 +2,15 @@
 
     <!-- Effects -->
     <entity name="Ezra's Moonlight" anm2path="moonlight.anm2" id="1000" variant="3555" />
-    <entity name="Throwing Boulder"  anm2path="rock_pickup.anm2"  id="1000" variant="3556" />
-    <entity name="Holding Boulder"   anm2path="rock_tear.anm2"  id="1000" variant="3557" />
+    <entity name="Spike Ball"       anm2path="ball_and_chain.anm2" id="1000" variant="3562" />
+
+    <!-- Rocks -->
+    <entity name="Throwing Boulder"             anm2path="rock_pickup.anm2"  id="1000" variant="3556" />
+    <entity name="Throwing Boulder (Tinted)"    anm2path="rock_pickup.anm2"  id="1000" variant="3557" />
+    <entity name="Throwing Boulder (Golden)"    anm2path="rock_pickup.anm2"  id="1000" variant="3558" />
+    <entity name="Holding Boulder"              anm2path="rock_tear.anm2"    id="1000" variant="3559" />
+    <entity name="Holding Boulder (Tinted)"     anm2path="rock_tear.anm2"    id="1000" variant="3560" />
+    <entity name="Holding Boulder (Golden)"     anm2path="rock_tear.anm2"    id="1000" variant="3561" />
 
 
     <!-- Cards -->
@@ -100,12 +107,17 @@
 
 
     <!-- Hearts -->
-    <entity id="5" variant="10" name="Cement Heart" anm2path="cement_heart_pickup.anm2" subtype="530" bagofcrafting="soulheart"
+    <entity id="5" variant="10" name="Cement Heart" anm2path="cement_heart_pickup.anm2" subtype="100" bagofcrafting="soulheart"
 		collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17">
 	</entity>
-	<entity id="5" variant="10" name="Cement Heart (Double)" anm2path="cement_heart_pickup_double.anm2" subtype="531" bagofcrafting="soulheart soulheart"
+	<entity id="5" variant="10" name="Cement Heart (Double)" anm2path="cement_heart_pickup_double.anm2" subtype="101" bagofcrafting="soulheart soulheart"
 		collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17">
 	</entity>
 
+    <!-- Runes -->
+    <entity id="5" variant="300" name="SoulofNehemiah" anm2path="nehemiah_soul.anm2" subtype="529"
+            collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="16">
+        <preload-snd id="8" />
+    </entity>
 
 </entities>

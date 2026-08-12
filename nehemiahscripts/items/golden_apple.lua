@@ -11,7 +11,7 @@ local function getTotalHealth(player)
 end
 
 -- Grants a golden heart right before a fatal hit, so it absorbs the damage instead
-POR:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, amount, damageFlags, source, countdownFrames)
+function POR.GoldenAppleTakeDamage(_, entity, amount, damageFlags, source, countdownFrames)
     local player = entity:ToPlayer()
     if not player then return end
 
@@ -20,13 +20,12 @@ POR:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, amount, dam
     if not player:HasCollectible(GOLDENAPPLE_ITEM_ID) then return end
     if amount < getTotalHealth(player) then return end -- not fatal; let it through normally
 
-    -- Fatal hit: grant the golden heart + a half soul heart, then let the damage proceed
+    -- Fatal hit: grant the golden heart + a half soul heart (1 unit), then let the damage proceed
     player:AddGoldenHearts(1)
-    player:AddSoulHearts(1) -- 1 unit = half a soul heart
+    player:AddSoulHearts(1)
 
     player:SetMinDamageCooldown(INVINCIBILITY_FRAMES) -- native invincibility + vanilla flicker animation
     player:UseActiveItem(CollectibleType.COLLECTIBLE_MIDAS_TOUCH, UseFlag.USE_NOANNOUNCER | UseFlag.USE_NOANIM | UseFlag.USE_OWNED)
     player:RemoveCollectible(GOLDENAPPLE_ITEM_ID)
-
     -- no return: damage proceeds and consumes the golden heart
-end, EntityType.ENTITY_PLAYER)
+end

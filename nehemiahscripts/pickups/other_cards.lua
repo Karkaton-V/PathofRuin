@@ -98,9 +98,7 @@ local function RemoveTrackedPedestals(hashes)
     end
 end
 
--- Called from MC_POST_ADD_COLLECTIBLE. Watching for the pedestal entity to disappear turned out to
--- be unreliable (these custom-spawned pedestals don't reliably despawn on pickup), so collection is
--- instead detected the authoritative way: the item actually landing in the player's inventory.
+-- Collection is detected via the item landing in inventory, since watching the pedestal disappear is unreliable
 function OTHER_CARDS.OnSuicideKingItemAdded(player, collectibleType)
     local pData = player:GetData()
     local items = pData.POR_SuicideKingItems
@@ -159,10 +157,7 @@ function OTHER_CARDS:JackOfDiamonds(player)
     local pos = room:FindFreePickupSpawnPosition(player.Position + Vector(0, 40), 40)
     Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COIN, CoinSubType.COIN_PENNY, pos, Vector.Zero, player)
 end
--- Spawns 3 pedestal items; once 1 is taken, removes the other 2. Pulls from POOL_TREASURE directly
--- rather than pool:GetPoolForRoom(room:GetType(), seed) -- that call only maps special rooms
--- (Treasure/Shop/Devil/etc) to a pool and returns -1 in a normal room, which made GetCollectible
--- always fail and return CollectibleType.COLLECTIBLE_NULL.
+-- Spawns 3 pedestal items; once 1 is taken, removes the other 2. Pulls from POOL_TREASURE directly since GetPoolForRoom only maps special rooms.
 function OTHER_CARDS:GracefulCharity(player)
     local room = game:GetRoom()
     local pool = game:GetItemPool()
@@ -203,38 +198,27 @@ function OTHER_CARDS.OnGracefulCharityItemAdded(player, collectibleType)
     pData.POR_GracefulCharityPedestals = nil
     pData.POR_GracefulCharityItems = nil
 end
--- Records each newly picked up collectible, keeping only the 2 most recent per player
-function OTHER_CARDS.TrackRecentItem(collectibleType, player)
-    local pData = player:GetData()
-    local recent = pData.POR_RecentItems or {}
-    table.insert(recent, collectibleType)
-    while #recent > 2 do
-        table.remove(recent, 1)
-    end
-    pData.POR_RecentItems = recent
+-- Snapshots Isaac's key/coin/bomb counts on floor entry, for DisgracefulCharity to diff against
+function OTHER_CARDS.SnapshotDisgracefulCharity(player)
+    player:GetData().POR_DisgracefulCharitySnapshot = {
+        Keys = player:GetNumKeys(),
+        Coins = player:GetNumCoins(),
+        Bombs = player:GetNumBombs(),
+    }
 end
 
--- Removes Isaac's 2 most recent items, then spawns 3 pedestal items
+-- Refunds only the shortfall below the floor-entry snapshot per resource (e.g. enter with 20 coins/10 keys/5 bombs, later at 25/4/0 -> +6 keys, +5 bombs), so repeat uses just top up further spending
 function OTHER_CARDS:DisgracefulCharity(player)
-    local pData = player:GetData()
-    local recent = pData.POR_RecentItems or {}
-    for _, itemId in ipairs(recent) do
-        player:RemoveCollectible(itemId)
-    end
-    pData.POR_RecentItems = {}
+    local snapshot = player:GetData().POR_DisgracefulCharitySnapshot
+    if not snapshot then return end
 
-    local room = game:GetRoom()
-    local pool = game:GetItemPool()
-    local seed = room:GetSpawnSeed()
+    local keysShort = snapshot.Keys - player:GetNumKeys()
+    local coinsShort = snapshot.Coins - player:GetNumCoins()
+    local bombsShort = snapshot.Bombs - player:GetNumBombs()
 
-    for i = 1, 3 do
-        -- See SuicideKing for why POOL_TREASURE is used directly instead of GetPoolForRoom
-        local itemId = pool:GetCollectible(ItemPoolType.POOL_TREASURE, true, seed + i, CollectibleType.COLLECTIBLE_NULL)
-        local angle = (i - 1) * 120 + math.random() * 20 - 10
-        local offset = Vector.FromAngle(angle) * 50
-        local pos = room:FindFreePickupSpawnPosition(player.Position + Vector(0, 60) + offset, 40)
-        Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, itemId, pos, Vector.Zero, player)
-    end
+    if keysShort > 0 then player:AddKeys(keysShort) end
+    if coinsShort > 0 then player:AddCoins(coinsShort) end
+    if bombsShort > 0 then player:AddBombs(bombsShort) end
 end
 
 -- Maps each card id to its handler function
@@ -256,8 +240,7 @@ function OTHER_CARDS.UseCard(card, player)
     end
 end
 
--- entities2.xml's card entries are disabled (registering out of sync with pocketitems.xml), so the
--- world-pickup sprite is set manually here instead.
+-- entities2.xml's card entries are disabled, so the world-pickup sprite is set manually here instead.
 local CARD_ANM2 = {}
 for _, id in ipairs({ OTHER_CARDS.MISPRINTED_HIEROPHANT_ID, OTHER_CARDS.MISPRINTED_JUSTICE_ID }) do
     CARD_ANM2[id] = "gfx/radiant_cards.anm2"
@@ -269,9 +252,7 @@ for _, id in ipairs({ OTHER_CARDS.GRACEFUL_CHARITY_ID, OTHER_CARDS.DISGRACEFUL_C
     CARD_ANM2[id] = "gfx/yugioh.anm2"
 end
 
--- Loads the sprite, plays the spawn-in animation, and restores collision physics (custom CardType
--- ids are assigned dynamically at runtime, so no entities2.xml entry can ever match them; without
--- one the entity gets zeroed collision -- Size 0 = walk-through -- so it's set here instead).
+-- Loads the sprite and restores collision physics manually, since dynamically-assigned CardType ids never match an entities2.xml entry
 local function InitCardPickup(pickup, anm2)
     pickup:GetSprite():Load(anm2, true)
     pickup:GetSprite():Play("Appear", true)
@@ -292,8 +273,7 @@ function OTHER_CARDS.FixPickupSprite(_, pickup)
     end
 end
 
--- Falls back to initializing here too (MC_POST_PICKUP_INIT doesn't guarantee SubType is set yet in
--- every spawn path, e.g. dropping a currently-held card), then handles Appear -> looping Idle.
+-- Falls back to initializing here too (SubType isn't always set yet on MC_POST_PICKUP_INIT), then handles Appear -> looping Idle
 function OTHER_CARDS.OnPickupUpdate(_, pickup)
     local anm2 = CARD_ANM2[pickup.SubType]
     if not anm2 then return end
@@ -321,27 +301,23 @@ end
 
 --#region Callbacks
 
-POR:AddCallback(ModCallbacks.MC_USE_CARD, function(_, card, player)
+function OTHER_CARDS.OnUseCard(_, card, player)
     OTHER_CARDS.UseCard(card, player)
-end)
+end
 
-POR:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, OTHER_CARDS.FixPickupSprite, PickupVariant.PICKUP_TAROTCARD)
-POR:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, OTHER_CARDS.OnPickupUpdate, PickupVariant.PICKUP_TAROTCARD)
-POR:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, OTHER_CARDS.OnPickupCollide, PickupVariant.PICKUP_TAROTCARD)
-
-POR:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, collectibleType, charge, firstTime, slot, varData, player)
-    OTHER_CARDS.TrackRecentItem(collectibleType, player)
+function OTHER_CARDS.OnAddCollectible(_, collectibleType, charge, firstTime, slot, varData, player)
     OTHER_CARDS.OnSuicideKingItemAdded(player, collectibleType)
     OTHER_CARDS.OnGracefulCharityItemAdded(player, collectibleType)
-end)
+end
 
-POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
+function OTHER_CARDS.OnNewRoom()
     POR:ForEachPlayer(OTHER_CARDS.ClearPedestalTracking)
-end)
+end
 
-POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function()
+function OTHER_CARDS.OnNewLevel()
     POR:ForEachPlayer(OTHER_CARDS.ClearPedestalTracking)
-end)
+    POR:ForEachPlayer(OTHER_CARDS.SnapshotDisgracefulCharity)
+end
 
 --#endregion
 

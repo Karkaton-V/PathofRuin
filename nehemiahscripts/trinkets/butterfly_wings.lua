@@ -7,7 +7,7 @@ local MAX_CHANCE = 0.02 -- 2% at +10 luck
 local CHANCE_PER_LUCK = (MAX_CHANCE - BASE_CHANCE) / 10
 
 -- Luck-scaled chance to upgrade a plain rock into a Tinted Rock (skips rooms that already have one)
-POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
+function POR.ButterflyWingsNewRoom()
     local player = Isaac.GetPlayer(0)
     if not player:HasTrinket(BUTTERFLYWINGS_TRINKET_ID) then return end
 
@@ -38,4 +38,4 @@ POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
         room:RemoveGridEntity(gridIndex, 0, false)
         Isaac.GridSpawn(GridEntityType.GRID_ROCK_SS, 0, pos, true)
     end
-end)
+end

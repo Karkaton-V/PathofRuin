@@ -60,10 +60,10 @@ function POR:BookofEzraUse(_, _, player)
 end
 
 -- Reopens the doors and spawns the Secret Shop trapdoor once the raid's Greed dies
-POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, function(_, npc)
+function POR:BookofEzraGreedDeath(npc)
     if npc.Type == EntityType.ENTITY_GREED and doorsClosedForGreed then
         doorsClosedForGreed = false
         openAllDoors()
         game:GetRoom():TrySpawnSecretShop(true)
     end
-end)
+end

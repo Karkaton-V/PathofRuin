@@ -1,13 +1,12 @@
 local game = POR.game
 
-local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)                              -- Nehemiah
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)                  -- T. Nehemiah
-local NEHEMIAH_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiah_addon.anm2")         -- Nehemiah's Costume
-local NEHEMIAHB_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiahb_addon.anm2")       -- T. Nehemiah's Costume
-local NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")                      -- Item Id of Nehemiah's Hammer
-local BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra")                                -- Item Id of Book of Ezra
-local BOOKOFNEHEMIAH_ITEM_ID = Isaac.GetItemIdByName("Book of Nehemiah")                        -- Item Id of Book of Nehemiah
-local LargeRooms = {}
+local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)
+local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local NEHEMIAH_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiah_addon.anm2")
+local NEHEMIAHB_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiahb_addon.anm2")
+local NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")
+local BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra")
+local BOOKOFNEHEMIAH_ITEM_ID = Isaac.GetItemIdByName("Book of Nehemiah")
 
 -- Character Inits
 --- @param player EntityPlayer
@@ -38,15 +37,20 @@ function POR:TaintedNehemiahInit(player)
     player:SetPocketActiveItem(BOOKOFEZRA_ITEM_ID, ActiveSlot.SLOT_POCKET, true)
     pool:RemoveCollectible(BOOKOFEZRA_ITEM_ID)
 
+    player:AddCollectible(PISTANTHROPHOBIA_ITEM_ID, 0, false)
+    pool:RemoveCollectible(PISTANTHROPHOBIA_ITEM_ID)
+
+    -- players.xml no longer grants vanilla armor -- starts with a Cement Heart instead
+    CustomHealthAPI.Library.AddHealth(player, POR.CementHeart.KEY, POR.CementHeart.MAX_HP)
 end
 
 -- Swaps Book of Ezra for Book of Nehemiah once Tainted Nehemiah picks up Birthright
-POR:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, collectibleType, charge, firstTime, slot, varData, player)
+function POR.OnAddCollectibleBirthrightSwap(_, collectibleType, charge, firstTime, slot, varData, player)
     if collectibleType ~= CollectibleType.COLLECTIBLE_BIRTHRIGHT then return end
     if player:GetPlayerType() ~= TAINTED_NEHEMIAH_TYPE then return end
 
     player:SetPocketActiveItem(BOOKOFNEHEMIAH_ITEM_ID, ActiveSlot.SLOT_POCKET, true)
-end)
+end
 
 -- Custom GetAimDirection that doesn't reset between rooms and also accounts for Marked
 ---@param player EntityPlayer
@@ -108,19 +112,14 @@ function POR:IsShooting(player)
 end
 
 
+-- Max boulders allowed on the ground in this room at once: 4 for untainted Nehemiah, 3 otherwise
+---@param player EntityPlayer
 ---@function
-function POR:GetMaxRocksInRoom()
-	local shape = game:GetRoom():GetRoomShape()
-	local rockCount = Isaac.CountEntities(nil, EntityType.ENTITY_PLAYER, -1, NEHEMIAH_TYPE)
-
-	if POR:Set({ RoomShape.ROOMSHAPE_2x2, RoomShape.ROOMSHAPE_LBL, RoomShape.ROOMSHAPE_LBR, RoomShape.ROOMSHAPE_LTL, RoomShape.ROOMSHAPE_LTR }) ~= nil then
-		LargeRooms = POR:Set({ RoomShape.ROOMSHAPE_2x2, RoomShape.ROOMSHAPE_LBL, RoomShape.ROOMSHAPE_LBR, RoomShape.ROOMSHAPE_LTL, RoomShape.ROOMSHAPE_LTR })
+function POR:GetMaxRocksInRoom(player)
+	if player and player:GetPlayerType() == NEHEMIAH_TYPE then
+		return 4
 	end
-	if LargeRooms[shape] then
-		return 9 + 3 * (rockCount - 1)
-	else
-		return 6 + 2 * (rockCount - 1)
-	end
+	return 3
 end
 
 ---Returns true only for Crawlspaces and The Beast's fight room — the only rooms with gravity
@@ -129,6 +128,17 @@ function POR:RoomHasGravity()
 	local roomType = game:GetRoom():GetType()
 	local isHomeStage = game:GetLevel():GetStage() == LevelStage.STAGE8
 	return roomType == RoomType.ROOM_DUNGEON or isHomeStage
+end
+
+---Returns true if any active, vulnerable enemy is currently in the room
+---@function
+function POR:RoomHasEnemies()
+	for _, ent in ipairs(Isaac.GetRoomEntities()) do
+		if ent:IsActiveEnemy() and ent:IsVulnerableEnemy() then
+			return true
+		end
+	end
+	return false
 end
 
 ---@param pos Vector
@@ -174,17 +184,22 @@ end
 ---@param tag? string What extra data should be attached to the rock?
 ---@function
 function POR:DropRocks(player, position, tag)
-	local rockCount = Isaac.CountEntities(nil, EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_VARIANT)
-	local rocksToSpawn = math.min(2, POR:GetMaxRocksInRoom() - rockCount)
+	-- The rock itself still breaks either way (see checkRocks); boulders just don't drop unless there's something in the room to use them on
+	if not POR:RoomHasEnemies() then return end
+
+	-- Counts/finds across all 3 boulder kinds (Normal/Tinted/Golden are separate entity variants)
+	local rockCount = POR.ROCKTABLE:CountBoulders()
+	local rocksToSpawn = math.min(2, POR:GetMaxRocksInRoom(player) - rockCount)
 	local room = game:GetRoom()
 
 	if rocksToSpawn == 0 then
 		local spawnedRocks = 0
-		-- FindByType returns entities sorted by FrameCount
-		local rocks = Isaac.FindByType(EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_VARIANT)
+		-- FindAllBoulders returns entities sorted by FrameCount
+		local rocks = POR.ROCKTABLE:FindAllBoulders()
 		POR_Incrementor.inverseiforeach(rocks, function(rock)
 			if spawnedRocks == 1 then return end
 
+			POR.ROCKTABLE:UnregisterPersistence(rock)
 			rock:Remove()
 			Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, rock.Position, Vector.Zero, nil)
 			spawnedRocks = spawnedRocks + 1
@@ -213,12 +228,11 @@ function POR:DropRocks(player, position, tag)
 			pos = Vector(pos.X, room:GetTopLeftPos().Y + 5) -- 5 is an arbitrary offset so that it doesn't spawn in the ceiling
 		end
 
-		local rockPickup = Isaac.Spawn(EntityType.ENTITY_EFFECT, POR.ROCKTABLE.PICKUP_VARIANT, 0, pos, Vector.Zero,
-			player):ToEffect()
-		---@cast rockPickup EntityEffect
-		rockPickup:GetData().POR_RockFallingBeast = isBeastFight
-		rockPickup:GetData().POR_RockTag = tag
-
-		POR.ROCKTABLE:PickupInit(rockPickup)
+		-- SpawnBoulder rolls the kind (Normal/Tinted/Golden) and spawns the matching variant + PickupInit
+		local rockPickup = POR.ROCKTABLE:SpawnBoulder(pos, player)
+		if rockPickup then
+			rockPickup:GetData().POR_RockFallingBeast = isBeastFight
+			rockPickup:GetData().POR_RockTag = tag
+		end
 	end
 end

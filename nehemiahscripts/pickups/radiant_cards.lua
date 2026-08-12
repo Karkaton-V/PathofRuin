@@ -174,26 +174,36 @@ function RADIANT_CARDS:Lovers(player)
     local pos = room:FindFreePickupSpawnPosition(player.Position, 40)
     Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, CollectibleType.COLLECTIBLE_HEART, pos, Vector.Zero, player)
 end
--- Gives Leo for the room, without its costume
+-- Gives Leo (without its costume) and Mars for the room; pre-grant SpriteScale is snapshotted and force-restored since Leo's size boost isn't a costume layer
 function RADIANT_CARDS:Chariot(player)
+    local pData = player:GetData()
+    pData.POR_ChariotBaseScale = player.SpriteScale
+
     player:AddCollectible(CollectibleType.COLLECTIBLE_LEO, 0, false)
+    player:AddCollectible(CollectibleType.COLLECTIBLE_MARS, 0, false)
     player:TryRemoveCollectibleCostume(CollectibleType.COLLECTIBLE_LEO, false)
-    player:GetData().POR_ChariotActive = true
+    pData.POR_ChariotActive = true
 end
 
--- Defensively keeps Leo's costume suppressed each tick, in case it reapplies on its own
+-- Defensively keeps Leo's costume suppressed and its size increase reverted each tick, in case either reapplies on its own
 function RADIANT_CARDS.ChariotSuppressCostume(player)
-    if player:GetData().POR_ChariotActive then
+    local pData = player:GetData()
+    if pData.POR_ChariotActive then
         player:TryRemoveCollectibleCostume(CollectibleType.COLLECTIBLE_LEO, false)
+        if pData.POR_ChariotBaseScale then
+            player.SpriteScale = pData.POR_ChariotBaseScale
+        end
     end
 end
 
--- Clears the Chariot's Leo
+-- Clears the Chariot's Leo and Mars
 function RADIANT_CARDS.ClearChariot(player)
     local pData = player:GetData()
     if pData.POR_ChariotActive then
         pData.POR_ChariotActive = false
+        pData.POR_ChariotBaseScale = nil
         player:RemoveCollectible(CollectibleType.COLLECTIBLE_LEO)
+        player:RemoveCollectible(CollectibleType.COLLECTIBLE_MARS)
     end
 end
 -- Spawns a Bomb, Key, Coin, and Heart Doublepack spread around Isaac
@@ -392,8 +402,7 @@ function RADIANT_CARDS.ClearRoomBuffs(player)
     RADIANT_CARDS.ClearDeath(player)
 end
 
--- entities2.xml's card entries are disabled (registering out of sync with pocketitems.xml), so the
--- world-pickup sprite is set manually here instead.
+-- entities2.xml's card entries are disabled, so the world-pickup sprite is set manually here instead.
 local IS_RADIANT_CARD = {}
 for _, id in ipairs({
     RADIANT_CARDS.FOOL_ID, RADIANT_CARDS.MAGICIAN_ID, RADIANT_CARDS.PRIESTESS_ID, RADIANT_CARDS.EMPRESS_ID,
@@ -406,9 +415,8 @@ for _, id in ipairs({
     IS_RADIANT_CARD[id] = true
 end
 
--- Loads the sprite, plays the spawn-in animation, and restores collision physics (custom CardType
--- ids are assigned dynamically at runtime, so no entities2.xml entry can ever match them; without
--- one the entity gets zeroed collision -- Size 0 = walk-through -- so it's set here instead).
+-- Loads the sprite and restores collision physics manually, since dynamically-assigned CardType ids
+-- never match an entities2.xml entry and would otherwise get zeroed (walk-through) collision.
 local function InitCardPickup(pickup)
     pickup:GetSprite():Load("gfx/radiant_cards.anm2", true)
     pickup:GetSprite():Play("Appear", true)
@@ -428,8 +436,7 @@ function RADIANT_CARDS.FixPickupSprite(_, pickup)
     end
 end
 
--- Falls back to initializing here too (MC_POST_PICKUP_INIT doesn't guarantee SubType is set yet in
--- every spawn path, e.g. dropping a currently-held card), then handles Appear -> looping Idle.
+-- Falls back to initializing here too (SubType isn't always set yet on MC_POST_PICKUP_INIT), then handles Appear -> looping Idle
 function RADIANT_CARDS.OnPickupUpdate(_, pickup)
     if not IS_RADIANT_CARD[pickup.SubType] then return end
 
@@ -454,33 +461,25 @@ function RADIANT_CARDS.OnPickupCollide(_, pickup, collider)
     pickup:GetSprite():Play("Collect", true)
 end
 
---#region Callbacks
-
-POR:AddCallback(ModCallbacks.MC_USE_CARD, function(_, card, player)
+function RADIANT_CARDS.OnUseCard(_, card, player)
     RADIANT_CARDS.UseCard(card, player)
-end)
+end
 
-POR:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, RADIANT_CARDS.FixPickupSprite, PickupVariant.PICKUP_TAROTCARD)
-POR:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, RADIANT_CARDS.OnPickupUpdate, PickupVariant.PICKUP_TAROTCARD)
-POR:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, RADIANT_CARDS.OnPickupCollide, PickupVariant.PICKUP_TAROTCARD)
-
-POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
+function RADIANT_CARDS.OnEvaluateCache(_, player, cacheFlag)
     RADIANT_CARDS.MagicianCache(player, cacheFlag)
-end)
+end
 
-POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+function RADIANT_CARDS.OnPlayerUpdate(_, player)
     RADIANT_CARDS.ChariotSuppressCostume(player)
-end)
+end
 
-POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
+function RADIANT_CARDS.OnNewRoom()
     POR:ForEachPlayer(RADIANT_CARDS.ClearRoomBuffs)
-end)
+end
 
-POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function()
+function RADIANT_CARDS.OnNewLevel()
     POR:ForEachPlayer(RADIANT_CARDS.ClearRoomBuffs)
     POR:ForEachPlayer(RADIANT_CARDS.ClearSun)
-end)
-
---#endregion
+end
 
 return RADIANT_CARDS

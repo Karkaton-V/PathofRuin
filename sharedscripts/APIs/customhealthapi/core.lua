@@ -1,7 +1,10 @@
-local version = 0.961
+-- POR: forked identity + inflated version so this vendored copy never gets clobbered by (or clobbers
+-- data owned by) another mod's unmodified copy of the same shared library -- see cement_heart.lua's
+-- PRE_RENDER_HEART layering hook, which depends on renderhealthbar.lua edits that only exist here.
+local version = 9999.001
 
 local root = "sharedscripts.APIs.customhealthapi."
-local modname = "Custom Health API (Restored Hearts)"
+local modname = "Custom Health API (Restored Hearts) [Path of Ruin Fork]"
 local modinitials = "RMRH"
 
 CustomHealthAPI = CustomHealthAPI or {}

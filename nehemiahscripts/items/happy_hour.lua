@@ -56,7 +56,7 @@ function POR:HappyHourUse(_, rng, player)
 end
 
 -- Applies the flat 10% all-stats boost, plus the chosen worm's specific effect, while Happy Hour is active
-POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
+function POR.HappyHourEvaluateCache(_, player, cacheFlag)
     local pData = player:GetData()
     if not pData.POR_HappyHourActive then return end
 
@@ -82,10 +82,10 @@ POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
         local tearFlag = WORM_TEAR_FLAGS[pData.POR_HappyHourWorm]
         if tearFlag then player.TearFlags = player.TearFlags | tearFlag end
     end
-end)
+end
 
 -- Clears the stat boost and worm effect
-local function clearHappyHour(player)
+function POR.ClearHappyHour(player)
     local pData = player:GetData()
     if pData.POR_HappyHourActive then
         pData.POR_HappyHourActive = false
@@ -96,10 +96,6 @@ local function clearHappyHour(player)
 end
 
 -- Both effects expire when entering a new room or a new floor
-POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
-    POR:ForEachPlayer(clearHappyHour)
-end)
-
-POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function()
-    POR:ForEachPlayer(clearHappyHour)
-end)
+function POR.HappyHourClearAll()
+    POR:ForEachPlayer(POR.ClearHappyHour)
+end

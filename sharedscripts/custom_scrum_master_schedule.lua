@@ -32,7 +32,7 @@ function POR.scrum_master_schedule.ScheduleForRoom(delay, func, args)
 	})
 end
 
-POR:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
+function POR.scrum_master_schedule.OnUpdate()
 	local time = game:GetFrameCount()
 	for i = #POR.scrum_master_schedule.ScheduleData, 1, -1 do
 		local data = POR.scrum_master_schedule.ScheduleData[i]
@@ -41,19 +41,19 @@ POR:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
 			data.Call(table.unpack(data.Args))
 		end
 	end
-end)
+end
 
-POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
+function POR.scrum_master_schedule.OnNewRoom()
 	for i = #POR.scrum_master_schedule.ScheduleData, 1, -1 do
 		local data = POR.scrum_master_schedule.ScheduleData[i]
 		if data.PerRoom then
 			table.remove(POR.scrum_master_schedule.ScheduleData, i)
 		end
 	end
-end)
+end
 
-POR:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function()
+function POR.scrum_master_schedule.OnGameExit()
 	POR.scrum_master_schedule.ScheduleData = {}
-end)
+end
 
 return POR.scrum_master_schedule

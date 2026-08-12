@@ -8,7 +8,7 @@ local CHANCE_PER_LUCK = (MAX_CHANCE - BASE_CHANCE) / 10
 local CHARM_TEAR_COLOR = Color(1, 0.55, 0.75, 1, 0, 0, 0) -- pink
 
 -- Gives tears a chance to become charming (colored pink), scaling from 10% at 0 luck up to 80% at +10 luck
-POR:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
+function POR.OilyBranchFireTear(_, tear)
     local player = tear.SpawnerEntity and tear.SpawnerEntity:ToPlayer()
     if not player then return end
     if not player:HasTrinket(OILYBRANCH_TRINKET_ID) then return end
@@ -20,4 +20,4 @@ POR:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
         tear:AddTearFlags(TearFlags.TEAR_CHARM)
         tear.Color = CHARM_TEAR_COLOR
     end
-end)
+end

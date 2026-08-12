@@ -429,7 +429,7 @@ function CustomHealthAPI.Helper.RenderCustomHealthOfPlayer(player, playerSlot, i
 	while currentOtherHealth[otherHealthIndex] ~= nil do
 		local animationFilename = nil
 		local animationName = nil
-		
+
 		local health = currentOtherHealth[otherHealthIndex]
 		local healthDefinition = CustomHealthAPI.PersistentData.HealthDefinitions[health.Key]
 		local hasRedHealth = false
@@ -440,7 +440,7 @@ function CustomHealthAPI.Helper.RenderCustomHealthOfPlayer(player, playerSlot, i
 		if healthDefinition.Type == CustomHealthAPI.Enums.HealthTypes.CONTAINER then
 			animationFilename = healthDefinition.AnimationFilename
 			animationName = healthDefinition.AnimationName
-			
+
 			redHealth = currentRedHealth[redHealthIndex]
 			if redHealth ~= nil then
 				local redHealthDefinition = CustomHealthAPI.PersistentData.HealthDefinitions[redHealth.Key]
@@ -503,7 +503,11 @@ function CustomHealthAPI.Helper.RenderCustomHealthOfPlayer(player, playerSlot, i
 			CustomHealthAPI.PersistentData.PreventResyncing = CustomHealthAPI.PersistentData.PreventResyncing + 1
 			local callbacks = CustomHealthAPI.Helper.GetCallbacks(CustomHealthAPI.Enums.Callbacks.PRE_RENDER_HEART)
 			for _, callback in ipairs(callbacks) do
-				local returnTable = callback.Function(player, healthIndex, health, redHealth, filename, animname, Color.Lerp(color, Color(1,1,1,1,0,0,0), 0), extraOffset)
+				-- POR: trailing args (playerSlot, renderOffset, numOtherHearts) appended so a callback can
+				-- manually render an extra sprite (e.g. a base heart under an overlay-style override) at the
+				-- correct HUD position -- CustomHealthAPI.Helper.RenderHealth requires all three.
+				local returnTable = callback.Function(player, healthIndex, health, redHealth, filename, animname, Color.Lerp(color, Color(1,1,1,1,0,0,0), 0), extraOffset,
+					playerSlot, renderOffset, numOtherHearts)
 				if returnTable ~= nil then
 					if returnTable.Prevent == true then
 						prevent = true
@@ -527,14 +531,14 @@ function CustomHealthAPI.Helper.RenderCustomHealthOfPlayer(player, playerSlot, i
 				end
 			end
 			CustomHealthAPI.PersistentData.PreventResyncing = CustomHealthAPI.PersistentData.PreventResyncing - 1
-			
+
 			local healthSprite = CustomHealthAPI.Helper.GetHealthSprite(filename)
 			healthSprite:Play(animname, true)
 			healthSprite.Color = color
-			
+
 			if not prevent then
 				CustomHealthAPI.Helper.RenderHealth(healthSprite, player, playerSlot, healthIndex, renderOffset, numOtherHearts, extraOffset)
-				
+
 				CustomHealthAPI.PersistentData.PreventResyncing = CustomHealthAPI.PersistentData.PreventResyncing + 1
 				local callbacks = CustomHealthAPI.Helper.GetCallbacks(CustomHealthAPI.Enums.Callbacks.POST_RENDER_HEART)
 				for _, callback in ipairs(callbacks) do
@@ -543,7 +547,7 @@ function CustomHealthAPI.Helper.RenderCustomHealthOfPlayer(player, playerSlot, i
 				CustomHealthAPI.PersistentData.PreventResyncing = CustomHealthAPI.PersistentData.PreventResyncing - 1
 			end
 		end
-		
+
 		if otherHealthIndex == eternalIndex and data.Overlays["ETERNAL_HEART"] > 0 then
 			local eternalDefinition = CustomHealthAPI.PersistentData.HealthDefinitions["ETERNAL_HEART"]
 			
@@ -1078,7 +1082,12 @@ function CustomHealthAPI.Helper.RenderPlayerHPBar(player, playerSlot, renderOffs
 			lineSprite:Play(lineSprite:GetDefaultAnimation(), true)
 			lineSprite:Render(barPos + Vector(0, -13) + renderOffset)
 		end
-		if REPENTOGON then
+		-- [Path of Ruin fork] Guarded against Curse of the Unknown -- this re-fires REPENTOGON's native
+		-- heart-badge rendering (Wooden Cross charge, Holy Mantle shield, etc.) at the obscured-heart
+		-- icon's position, since CHAPI blocks vanilla heart rendering outright and normally relies on
+		-- this callback to bring those native badges back. Left unguarded, it drew those badges on top
+		-- of the "?" icon even while cursed, when nothing should render there at all.
+		if REPENTOGON and Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_THE_UNKNOWN == 0 then
 			local hud = Game():GetHUD()
 			local playerhud = player.GetPlayerHUD and player:GetPlayerHUD() or (playerSlot > -1 and hud:GetPlayerHUD(playerSlot))
 			if playerhud then
