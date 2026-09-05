@@ -12,10 +12,10 @@ local BUFF_MAX_MULTIPLIER = 1.5 -- 1.5x all stats at pickup, fading linearly dow
 local BUFF_CACHE_FLAGS = CacheFlag.CACHE_DAMAGE | CacheFlag.CACHE_FIREDELAY | CacheFlag.CACHE_SPEED
     | CacheFlag.CACHE_RANGE | CacheFlag.CACHE_SHOTSPEED | CacheFlag.CACHE_LUCK
 
--- Spawns the moonlight effect playing its Appear animation
+-- Spawns the moonlight effect playing the Appear animation
 ---@param position Vector
 ---@param player EntityPlayer
----@param removesCurse boolean? if true, also removes the floor's curse when a player walks into it
+---@param removesCurse boolean? if true, also removes the curse on the floor when a player walks into it
 ---@function
 function EZRA_MOONLIGHT:SpawnMoonlight(position, player, removesCurse)
     local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EZRA_MOONLIGHT.VARIANT, 0, position, Vector.Zero, player):ToEffect()
@@ -24,14 +24,14 @@ function EZRA_MOONLIGHT:SpawnMoonlight(position, player, removesCurse)
     return effect
 end
 
--- Removes all of the floor's curses except Curse of the Labyrinth, like Black Candle
+-- Removes all of the curses on the floor except Curse of the Labyrinth, like Black Candle
 local function removeFloorCurses()
     local level = game:GetLevel()
     local labyrinthBit = 1 << (Isaac.GetCurseIdByName("Curse of the Labyrinth") - 1)
     level:RemoveCurses(level:GetCurses() & ~labyrinthBit)
 end
 
--- Holds on Appear's last frame, then grants the buff and plays Disappear on player contact
+-- Holds on the last frame of Appear, then grants the buff and plays Disappear on player contact
 ---@param effect EntityEffect
 ---@function
 function EZRA_MOONLIGHT:MoonlightUpdate(effect)

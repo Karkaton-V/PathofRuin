@@ -7,6 +7,8 @@
 	portrait="playerportrait_nehemiah.png" 
 	skinColor="-1"
 	birthright="What Doesn't Kill You Makes You... Spider?"
+
+	achievement="POR_Nehemiah"
 	/>
 
 	<player name="The Condemned"
@@ -21,5 +23,7 @@
 	bSkinParent="Nehemiah"
 	costumeSuffix="nehemiahb"
 	costume="104"
+
+	achievement="POR_Condemned"
 	/>
 </players>

@@ -14,9 +14,11 @@ function POR:NehemiahInit(player)
     if player:GetPlayerType() ~= NEHEMIAH_TYPE then
         return -- If not Nehemiah, exits
     end
+    local sprite = player:GetSprite()
+
+    sprite:Load("gfx/characters/nehemiah.anm2", true)
     player:AddNullCostume(NEHEMIAH_COSTUME)
-    -- "KeepinPools?" is bugged, so if set to false, game will always crash when trying to continue a run
-    player:SetPocketActiveItem(NEHEMIAHSHAMMER_ITEM_ID, ActiveSlot.SLOT_POCKET, true)
+    player:SetPocketActiveItem(NEHEMIAHSHAMMER_ITEM_ID, ActiveSlot.SLOT_POCKET, true) -- KeepInPools must stay true; false crashes the game when continuing a run
     player:AddTrinket(62, true)     -- 62 is TrinketType: SHINY_ROCK
 
     local pool = game:GetItemPool()
@@ -40,8 +42,7 @@ function POR:TaintedNehemiahInit(player)
     player:AddCollectible(PISTANTHROPHOBIA_ITEM_ID, 0, false)
     pool:RemoveCollectible(PISTANTHROPHOBIA_ITEM_ID)
 
-    -- players.xml no longer grants vanilla armor -- starts with a Cement Heart instead
-    CustomHealthAPI.Library.AddHealth(player, POR.CementHeart.KEY, POR.CementHeart.MAX_HP)
+    CustomHealthAPI.Library.AddHealth(player, POR.CementHeart.KEY, POR.CementHeart.MAX_HP) -- replaces the vanilla armor players.xml no longer grants
 end
 
 -- Swaps Book of Ezra for Book of Nehemiah once Tainted Nehemiah picks up Birthright
@@ -101,7 +102,7 @@ function POR:GetAttackDirection(player)
 	return Vector.FromAngle(angle)
 end
 
----Returns true if player's aim direction vector length is greater than 0
+---Returns true if the player aim direction vector length is greater than 0
 function POR:IsShooting(player)
 
 	if Isaac.GetPlayer():HasCollectible(Isaac.GetItemIdByName("COLLECTIBLE_KIDNEY_STONE")) then
@@ -122,7 +123,7 @@ function POR:GetMaxRocksInRoom(player)
 	return 3
 end
 
----Returns true only for Crawlspaces and The Beast's fight room — the only rooms with gravity
+---Returns true only for Crawlspaces and The Beast fight room — the only rooms with gravity
 ---@function
 function POR:RoomHasGravity()
 	local roomType = game:GetRoom():GetType()
@@ -184,17 +185,14 @@ end
 ---@param tag? string What extra data should be attached to the rock?
 ---@function
 function POR:DropRocks(player, position, tag)
-	-- The rock itself still breaks either way (see checkRocks); boulders just don't drop unless there's something in the room to use them on
 	if not POR:RoomHasEnemies() then return end
 
-	-- Counts/finds across all 3 boulder kinds (Normal/Tinted/Golden are separate entity variants)
 	local rockCount = POR.ROCKTABLE:CountBoulders()
 	local rocksToSpawn = math.min(2, POR:GetMaxRocksInRoom(player) - rockCount)
 	local room = game:GetRoom()
 
 	if rocksToSpawn == 0 then
 		local spawnedRocks = 0
-		-- FindAllBoulders returns entities sorted by FrameCount
 		local rocks = POR.ROCKTABLE:FindAllBoulders()
 		POR_Incrementor.inverseiforeach(rocks, function(rock)
 			if spawnedRocks == 1 then return end
@@ -228,8 +226,7 @@ function POR:DropRocks(player, position, tag)
 			pos = Vector(pos.X, room:GetTopLeftPos().Y + 5) -- 5 is an arbitrary offset so that it doesn't spawn in the ceiling
 		end
 
-		-- SpawnBoulder rolls the kind (Normal/Tinted/Golden) and spawns the matching variant + PickupInit
-		local rockPickup = POR.ROCKTABLE:SpawnBoulder(pos, player)
+		local rockPickup = POR.ROCKTABLE:SpawnBoulder(pos, player) -- rolls Normal/Tinted/Golden and spawns the matching variant plus PickupInit
 		if rockPickup then
 			rockPickup:GetData().POR_RockFallingBeast = isBeastFight
 			rockPickup:GetData().POR_RockTag = tag

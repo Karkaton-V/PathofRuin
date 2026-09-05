@@ -3,7 +3,7 @@ local game = Game()
 local OTHER_CARDS = {}
 POR.OtherCards = OTHER_CARDS
 
--- Card ids, looked up by their "hud" attribute in pocketitems.xml
+-- Card ids, looked up by the "hud" attribute in pocketitems.xml
 OTHER_CARDS.MISPRINTED_HIEROPHANT_ID = Isaac.GetCardIdByName("MPHierophant")
 OTHER_CARDS.MISPRINTED_JUSTICE_ID    = Isaac.GetCardIdByName("MPJustice")
 OTHER_CARDS.SUICIDE_KING_ID          = Isaac.GetCardIdByName("SRSuicideKing")
@@ -12,7 +12,7 @@ OTHER_CARDS.JACK_OF_DIAMONDS_ID      = Isaac.GetCardIdByName("SRJackofDiamonds")
 OTHER_CARDS.GRACEFUL_CHARITY_ID      = Isaac.GetCardIdByName("GracefulCharity")
 OTHER_CARDS.DISGRACEFUL_CHARITY_ID   = Isaac.GetCardIdByName("DisgracefulCharity")
 
--- Re-applies each card's HUD icon from ui_cardfronts.anm2, in case the native hud= link desyncs
+-- Re-applies the HUD icon for each card from ui_cardfronts.anm2, in case the native hud= link desyncs
 local function SetCardFront(cardId, animName)
     if not cardId or cardId == 0 then return end
     local cardConfig = Isaac.GetItemConfig():GetCard(cardId)
@@ -68,7 +68,6 @@ function OTHER_CARDS:SuicideKing(player)
     local pedestals = {}
     local items = {}
     for i = 1, 4 do
-        -- See comment above GracefulCharity's pool draw for why POOL_TREASURE is used directly
         local itemId = pool:GetCollectible(ItemPoolType.POOL_TREASURE, true, seed + i, CollectibleType.COLLECTIBLE_NULL)
         local angle = (i - 1) * 90 + math.random() * 20 - 10
         local offset = Vector.FromAngle(angle) * 50
@@ -83,8 +82,7 @@ function OTHER_CARDS:SuicideKing(player)
     player:GetData().POR_SuicideKingCollectedCount = 0
 end
 
--- Clears every pedestal still tracked in `hashes`, best-effort (some may already be gone). Removes it
--- and spawns a poof effect in the same frame, so the puff reads as the moment it disappears.
+-- Clears every pedestal still tracked in `hashes` on a best-effort basis, spawning the poof effect in the same frame as the removal so the puff reads as the moment it disappears
 local function RemoveTrackedPedestals(hashes)
     if not hashes or #hashes == 0 then return end
     local existing = Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE)
@@ -121,7 +119,7 @@ function OTHER_CARDS.OnSuicideKingItemAdded(player, collectibleType)
     end
 end
 
--- Clears Suicide King/Graceful Charity tracking on room or floor change, since their pedestals become unreachable
+-- Clears Suicide King/Graceful Charity tracking on room or floor change, since the pedestals become unreachable
 function OTHER_CARDS.ClearPedestalTracking(player)
     local pData = player:GetData()
     pData.POR_SuicideKingPedestals = nil
@@ -198,7 +196,7 @@ function OTHER_CARDS.OnGracefulCharityItemAdded(player, collectibleType)
     pData.POR_GracefulCharityPedestals = nil
     pData.POR_GracefulCharityItems = nil
 end
--- Snapshots Isaac's key/coin/bomb counts on floor entry, for DisgracefulCharity to diff against
+-- Snapshots the Isaac key/coin/bomb counts on floor entry, for DisgracefulCharity to diff against
 function OTHER_CARDS.SnapshotDisgracefulCharity(player)
     player:GetData().POR_DisgracefulCharitySnapshot = {
         Keys = player:GetNumKeys(),
@@ -221,7 +219,7 @@ function OTHER_CARDS:DisgracefulCharity(player)
     if bombsShort > 0 then player:AddBombs(bombsShort) end
 end
 
--- Maps each card id to its handler function
+-- Maps each card id to the handler function
 local CARD_HANDLERS = {
     [OTHER_CARDS.MISPRINTED_HIEROPHANT_ID] = OTHER_CARDS.MisprintedHierophant,
     [OTHER_CARDS.MISPRINTED_JUSTICE_ID]    = OTHER_CARDS.MisprintedJustice,
@@ -232,7 +230,7 @@ local CARD_HANDLERS = {
     [OTHER_CARDS.DISGRACEFUL_CHARITY_ID]   = OTHER_CARDS.DisgracefulCharity,
 }
 
--- Dispatches to the matching card's effect stub on use
+-- Dispatches to the effect stub for the matching card on use
 function OTHER_CARDS.UseCard(card, player)
     local handler = CARD_HANDLERS[card]
     if handler then
@@ -240,7 +238,7 @@ function OTHER_CARDS.UseCard(card, player)
     end
 end
 
--- entities2.xml's card entries are disabled, so the world-pickup sprite is set manually here instead.
+-- the card entries in entities2.xml are disabled, so the world-pickup sprite is set manually here instead.
 local CARD_ANM2 = {}
 for _, id in ipairs({ OTHER_CARDS.MISPRINTED_HIEROPHANT_ID, OTHER_CARDS.MISPRINTED_JUSTICE_ID }) do
     CARD_ANM2[id] = "gfx/radiant_cards.anm2"

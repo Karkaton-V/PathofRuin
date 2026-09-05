@@ -5,8 +5,7 @@ Most ideas ended up sticking, but the characters were changed to better fit thei
 
 Nehemiah
 Starts with: Nehemiah’s Hammer (PA) (Latent), Shiny Rock
-Also: Nehemiah’s Hammer can be used in a shop (if the secret room has not been found) to turn it into a Secret Room, and using it in a Super Secret Room turns it into a Secret Shop
--When Nehemiah holds his hammer, instead of pickups, rocks drop chunks that can be thrown at enemies, but when carved a second time, the rock is destroyed and drops 1-2 pickups or rock spiders
+When Nehemiah holds his hammer, instead of pickups, rocks drop chunks that can be thrown at enemies, but when carved a second time, the rock is destroyed and drops 1-2 pickups or rock spiders
 
 
 Mom - Radiant Cards! //unlock -----XXXXX-----

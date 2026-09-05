@@ -16,10 +16,10 @@ local RUNE_MIN, RUNE_MAX                   = 32, 41  -- RUNE_HAGALAZ .. RUNE_BLA
 local SPECIAL_MIN, SPECIAL_MAX             = 42, 54  -- CARD_CHAOS .. CARD_ERA_WALK
 local REVERSE_TAROT_MIN, REVERSE_TAROT_MAX = 56, 77  -- CARD_REVERSE_FOOL .. CARD_REVERSE_WORLD
 
--- Looked up directly (not via runes.lua's local) so this file has no load-order dependency on it
+-- Looked up directly (not via the local in runes.lua) so this file has no load-order dependency on it
 local SOUL_OF_NEHEMIAH_ID = Isaac.GetCardIdByName("SoulOfNehemiah")
 
--- Custom cards eligible for the Tarot/Reverse Tarot swap (King of Clubs and Disgraceful Charity are excluded -- they use their own dedicated pools below)
+-- Custom cards eligible for the Tarot/Reverse Tarot swap (King of Clubs and Disgraceful Charity are excluded -- they use the dedicated pools below)
 local ALL_CARD_IDS = {}
 for _, id in ipairs({
     POR.RadiantCards.FOOL_ID, POR.RadiantCards.MAGICIAN_ID, POR.RadiantCards.PRIESTESS_ID, POR.RadiantCards.EMPRESS_ID,
@@ -58,6 +58,16 @@ local CARD_REQUIRES = {
 }
 -- Every other Radiant Card (all but the Magician) falls back to the bulk Mom-lock
 local RADIANT_BULK_REQUIRES = { "Mom_Hard" }
+
+-- Achievement each card unlock awards, published so unlockmanager.lua can grant them from the same flags gating the pool
+POR.CardUnlockAchievements = {
+    [POR.RadiantCards.MAGICIAN_ID]          = { Requires = CARD_REQUIRES[POR.RadiantCards.MAGICIAN_ID],          Achievement = "POR_Magician" },
+    [POR.OtherCards.GRACEFUL_CHARITY_ID]    = { Requires = CARD_REQUIRES[POR.OtherCards.GRACEFUL_CHARITY_ID],    Achievement = "POR_Graceful" },
+    [POR.OtherCards.KING_OF_CLUBS_ID]       = { Requires = CARD_REQUIRES[POR.OtherCards.KING_OF_CLUBS_ID],       Achievement = "POR_KClubs" },
+    [POR.OtherCards.DISGRACEFUL_CHARITY_ID] = { Requires = CARD_REQUIRES[POR.OtherCards.DISGRACEFUL_CHARITY_ID], Achievement = "POR_Disgraceful" },
+    [SOUL_OF_NEHEMIAH_ID]                   = { Requires = CARD_REQUIRES[SOUL_OF_NEHEMIAH_ID],                   Achievement = "POR_SoulNehemiah" },
+    RadiantBulk                             = { Requires = RADIANT_BULK_REQUIRES,                                Achievement = "POR_RCards" },
+}
 for _, id in ipairs({
     POR.RadiantCards.FOOL_ID, POR.RadiantCards.PRIESTESS_ID, POR.RadiantCards.EMPRESS_ID,
     POR.RadiantCards.EMPEROR_ID, POR.RadiantCards.HIEROPHANT_ID, POR.RadiantCards.LOVERS_ID, POR.RadiantCards.CHARIOT_ID,
@@ -71,8 +81,19 @@ for _, id in ipairs({
     end
 end
 
--- True if `id` has no unlock requirement, or every one of its required flags is currently set
+-- Cards a challenge reward gates, keyed to the achievement that challenge awards since no boss kill flag ever covers them
+local CARD_ACHIEVEMENT_REQUIRES = {
+    [POR.RadiantCards.CHARIOT_ID]             = "POR_Chariot",
+    [POR.RadiantCards.HERMIT_ID]              = "POR_Hermit",
+    [POR.OtherCards.MISPRINTED_JUSTICE_ID]    = "POR_MJustice",
+    [POR.OtherCards.MISPRINTED_HIEROPHANT_ID] = "POR_MHierophant",
+}
+
+-- True if `id` clears both gates: every required flag set, and the prerequisite achievement earned where it names one
 local function isCardUnlocked(id)
+    local achievement = CARD_ACHIEVEMENT_REQUIRES[id]
+    if achievement and not (POR.AchievementUnlocked and POR.AchievementUnlocked(achievement)) then return false end
+
     local requires = CARD_REQUIRES[id]
     return not requires or POR:UnlockMet(requires)
 end
@@ -89,7 +110,7 @@ local function pickUnlockedCandidate(candidates)
     return pool[math.random(#pool)]
 end
 
--- Rolls a chance to swap in a random unlocked custom card matching the vanilla pickup's category
+-- Rolls a chance to swap in a random unlocked custom card matching the category of the vanilla pickup
 function CARD_POOL.OnPickupSelection(_, pickup, variant, subType)
     if variant ~= PickupVariant.PICKUP_TAROTCARD then return end
 

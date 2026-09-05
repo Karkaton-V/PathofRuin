@@ -1,4 +1,4 @@
--- Cement Heart //pickup: heart armor on your left-most red heart, 2 hits to destroy, insta-broken by explosions; registered as a RED health "kind" via Custom Health API.
+-- Cement Heart pickup: armor on the left-most red heart, 2 hits to break, instantly broken by explosions
 
 local CEMENT_HEART = {}
 POR.CementHeart = CEMENT_HEART
@@ -9,7 +9,7 @@ CEMENT_HEART.SUBTYPE_DOUBLE = 101
 
 --#region Registration
 
--- cement_heart_ui.anm2 frames already match the API's RED-kind convention (16x16, pivot 8,8).
+-- cement_heart_ui.anm2 frames already match the RED-kind convention in the API (16x16, pivot 8,8).
 CEMENT_HEART.MAX_HP = 3
 
 CustomHealthAPI.Library.RegisterRedHealth(CEMENT_HEART.KEY, {
@@ -19,12 +19,11 @@ CustomHealthAPI.Library.RegisterRedHealth(CEMENT_HEART.KEY, {
         BONE_HEART  = "gfx/cement_heart_ui.anm2",
     },
     AnimationNames = {
-        -- Indexed by remaining HP: full (3) shows the whole shell, anything below that shows the
-        -- cracked frame. The PRE_RENDER_HEART hook below adds transparency on top once damaged.
+        -- Indexed by remaining HP; the render hook below adds transparency once damaged
         EMPTY_HEART = { "CrackingHeartOverlay", "CrackingHeartOverlay", "CementHeartOverlay" }, -- {1, 2, 3=Full}
         BONE_HEART  = { "CrackingHeartOverlay", "CrackingHeartOverlay", "CementHeartOverlay" },
     },
-    SortOrder = -10, -- < RED_HEART (0), so Cement Heart's overlay lands on the left-most heart
+    SortOrder = -10, -- < RED_HEART (0), so the Cement Heart overlay lands on the left-most heart
     AddPriority = 10, -- > RED_HEART (0), < ROTTEN_HEART (100)
     HealFlashRO = 150 / 255,
     HealFlashGO = 150 / 255,
@@ -33,8 +32,7 @@ CustomHealthAPI.Library.RegisterRedHealth(CEMENT_HEART.KEY, {
     PrioritizeHealing = false,
 })
 
--- Explosions ignore Cement Heart's protection entirely; otherwise caps damage at its remaining HP so a breaking hit is fully absorbed, not carried over to real red hearts in the same hit.
--- Registered directly here (not moved to main.lua) since CustomHealthAPI.Library.AddCallback is the vendored CHAPI plugin's own registration system, tightly coupled to the RegisterRedHealth setup above.
+-- Explosions bypass Cement Heart; other damage is capped at the HP so a breaking hit is absorbed, not carried into real hearts
 function CEMENT_HEART.OnHealthDamaged(_, flags, redKey, redHP, _, _, amountToRemove)
     if redKey ~= CEMENT_HEART.KEY then return end
 
@@ -45,9 +43,13 @@ function CEMENT_HEART.OnHealthDamaged(_, flags, redKey, redHP, _, _, amountToRem
 end
 CustomHealthAPI.Library.AddCallback(POR, CustomHealthAPI.Enums.Callbacks.PRE_HEALTH_DAMAGED, CustomHealthAPI.Enums.CallbackPriorities.EARLY, CEMENT_HEART.OnHealthDamaged)
 
--- Draws a plain full RED_HEART underneath first, since RegisterRedHealth's overlay art replaces rather than layers on the container's art; HP=3 whole+opaque, HP=2 cracked+opaque, HP=1 cracked+transparent.
-function CEMENT_HEART.OnRenderHeart(player, healthIndex, health, redHealth, filename, animname, color, extraOffset, playerSlot, renderOffset, numOtherHearts)
+-- Draws a full RED_HEART underneath, as the overlay replaces container art; the legacy render id drops args RenderHealth needs
+function CEMENT_HEART.OnRenderHeart(player, playerSlot, healthIndex, info)
+    local redHealth = info.RedHealth
     if not redHealth or redHealth.Key ~= CEMENT_HEART.KEY then return end
+
+    local health = info.OtherHealth
+    if not health then return end
 
     local redHeartDef = CustomHealthAPI.PersistentData.HealthDefinitions.RED_HEART
     local baseFilename = redHeartDef.AnimationFilenames[health.Key]
@@ -58,19 +60,80 @@ function CEMENT_HEART.OnRenderHeart(player, healthIndex, health, redHealth, file
     local baseSprite = CustomHealthAPI.Helper.GetHealthSprite(baseFilename)
     baseSprite:Play(baseNames[#baseNames], true) -- last entry = Full
     baseSprite.Color = Color(1, 1, 1, 1, 0, 0, 0)
-    CustomHealthAPI.Helper.RenderHealth(baseSprite, player, playerSlot, healthIndex, renderOffset, numOtherHearts, extraOffset)
+    CustomHealthAPI.Helper.RenderHealth(baseSprite, player, playerSlot, healthIndex, info.RenderOffset, info.TotalHealthRendered, info.ExtraOffset)
 
     if redHealth.HP < CEMENT_HEART.MAX_HP - 1 then
         return { Color = Color(1, 1, 1, 0.35, 0, 0, 0) }
     end
 end
-CustomHealthAPI.Library.AddCallback(POR, CustomHealthAPI.Enums.Callbacks.PRE_RENDER_HEART, CustomHealthAPI.Enums.CallbackPriorities.EARLY, CEMENT_HEART.OnRenderHeart)
+CustomHealthAPI.Library.AddCallback(POR, CustomHealthAPI.Enums.Callbacks.PRE_HEALTH_RENDER, CustomHealthAPI.Enums.CallbackPriorities.EARLY, CEMENT_HEART.OnRenderHeart)
+
+--#endregion
+
+--#region Red heart healing
+
+-- Reports every Cement Heart currently held, paired with the real HP so a caller can restore it
+local function collectCementHealth(player)
+    local data = CustomHealthAPI.Helper.GetSavedata(player)
+    local found = {}
+
+    for _, mask in ipairs(data and data.RedHealthMasks or {}) do
+        for _, health in ipairs(mask) do
+            if health.Key == CEMENT_HEART.KEY then
+                found[#found + 1] = { Health = health, HP = health.HP }
+            end
+        end
+    end
+
+    return found
+end
+
+-- Runs a Custom Health API heal with every Cement Heart reported as already full, so the heal passes over them and lands on real containers instead
+local function healPastCementHearts(player, heal)
+    local masked = collectCementHealth(player)
+    for _, entry in ipairs(masked) do
+        entry.Health.HP = CustomHealthAPI.Library.GetInfoOfHealth(entry.Health, "MaxHP")
+    end
+
+    local result = heal()
+
+    for _, entry in ipairs(masked) do
+        entry.Health.HP = entry.HP
+    end
+
+    return result
+end
+
+-- Wraps the healing in the API rather than editing it, keeping the vendored copy re-syncable; a Cement Heart keyed heal still repairs one
+local function hookRedHealing()
+    local originalTryHealingRedHP = CustomHealthAPI.Helper.TryHealingRedHP
+    local originalHealRedAnywhere = CustomHealthAPI.Helper.HealRedAnywhere
+
+    CustomHealthAPI.Helper.TryHealingRedHP = function(player, key, hpAddedByKey, overflowedHP, ignoreRoomForRedKeys)
+        if key == CEMENT_HEART.KEY then
+            return originalTryHealingRedHP(player, key, hpAddedByKey, overflowedHP, ignoreRoomForRedKeys)
+        end
+        return healPastCementHearts(player, function()
+            return originalTryHealingRedHP(player, key, hpAddedByKey, overflowedHP, ignoreRoomForRedKeys)
+        end)
+    end
+
+    CustomHealthAPI.Helper.HealRedAnywhere = function(player, hp)
+        return healPastCementHearts(player, function()
+            return originalHealRedAnywhere(player, hp)
+        end)
+    end
+end
+
+if type(CustomHealthAPI.Helper.TryHealingRedHP) == "function" and type(CustomHealthAPI.Helper.HealRedAnywhere) == "function" then
+    hookRedHealing()
+end
 
 --#endregion
 
 --#region Sprite and collision setup
 
--- entities2.xml's registration doesn't reliably apply (other mods share this variant), so sprite/collision are set directly in Lua
+-- the registration in entities2.xml doesn't reliably apply (other mods share this variant), so sprite/collision are set directly in Lua
 local CEMENT_HEART_ANM2 = {
     [CEMENT_HEART.SUBTYPE_SINGLE] = "gfx/cement_heart_pickup.anm2",
     [CEMENT_HEART.SUBTYPE_DOUBLE] = "gfx/cement_heart_pickup_double.anm2",
@@ -97,7 +160,7 @@ function CEMENT_HEART.FixPickupSprite(_, pickup)
     InitCementHeartPickup(pickup)
 end
 
--- Falls back to initializing here too, in case MC_POST_PICKUP_INIT doesn't have SubType set yet
+-- Initializes here too in case SubType was unset at pickup init, then settles into the idle loop
 function CEMENT_HEART.OnPickupUpdate(_, pickup)
     if not CEMENT_HEART_ANM2[pickup.SubType] then return end
 
@@ -106,7 +169,6 @@ function CEMENT_HEART.OnPickupUpdate(_, pickup)
         return
     end
 
-    -- Once the spawn-in animation finishes, settle into the idle loop
     local sprite = pickup:GetSprite()
     if sprite:IsPlaying("Appear") and sprite:IsFinished("Appear") then
         sprite:Play("Idle", true)
@@ -148,7 +210,7 @@ end
 
 --#region Nehemiah-track completion reward
 
--- Once every Hard-mode/Greed-mode Nehemiah Unlock has been earned, Soul Hearts get a 10% chance to spawn as a Cement Heart instead (see unlockmanager.lua's POR:IsNehemiahTrackComplete)
+-- Once the Nehemiah track is complete, Soul Hearts have a 10% chance to spawn as a Cement Heart
 local SOUL_HEART_REPLACE_CHANCE = 0.10
 
 function CEMENT_HEART.OnHeartSelection(_, pickup, variant, subType)

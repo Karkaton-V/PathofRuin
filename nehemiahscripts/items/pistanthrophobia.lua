@@ -20,8 +20,7 @@ function POR.PistanthrophobiaEvaluateCache(_, player)
     player.Damage = player.Damage + DAMAGE_PER_ENEMY * countRoomEnemies()
 end
 
--- Forces a damage re-evaluation for any player holding the item; recalculates live on enemies
--- spawning/dying rather than waiting on the next unrelated cache trigger
+-- Forces a damage re-evaluation for any player holding the item, recalculating live as enemies spawn or die rather than waiting on the next unrelated cache trigger
 function POR.RefreshPistanthrophobia()
     POR:ForEachPlayer(function(player)
         if player:HasCollectible(PISTANTHROPHOBIA_ITEM_ID) then
@@ -45,6 +44,5 @@ function POR.PistanthrophobiaRenderAura(_, player, renderOffset)
     if player:GetPlayerType() == TAINTED_NEHEMIAH_TYPE then return end
 
     AURA_SPRITE:Update()
-    -- Nudged down from center so the glow sits underneath Isaac, roughly at his feet
     AURA_SPRITE:Render(Isaac.WorldToRenderPosition(player.Position) + renderOffset + Vector(0, 32), Vector.Zero, Vector.Zero)
 end

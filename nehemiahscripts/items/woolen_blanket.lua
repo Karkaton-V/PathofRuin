@@ -1,7 +1,7 @@
 local game = Game()
 
 WOOLENBLANKET_ITEM_ID = Isaac.GetItemIdByName("Woolen Blanket") -- item id of Woolen Blanket
--- Costume is fully automatic: costumes2.xml's <costume id="..." type="passive"> matches items.xml's <passive id="...">
+-- Costume is fully automatic: the <costume id="..." type="passive"> entry in costumes2.xml matches the <passive id="..."> entry in items.xml
 
 -- Reduces the first hit each floor to exactly half a heart
 function POR.WoolenBlanketTakeDamage(_, entity, amount, damageFlags, source, countdownFrames)

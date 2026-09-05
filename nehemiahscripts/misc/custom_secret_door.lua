@@ -6,7 +6,15 @@ POR.SecretDoor = SECRET_DOOR
 local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
 
 local REQUIRED_BOMB_HITS = 2
-local doorStates = {} -- keyed by "listIndex_slot" -> { sprite, bombHits, wasOpen, needsGating }
+local BOMB_PROXIMITY = 90 -- same range used to match an explosion to a door
+local doorStates = {} -- keyed by "listIndex_slot" -> { sprite, bombHits, wasOpen, needsGating, oneShotArmed }
+
+-- Predicates run against every live bomb; any match arms nearby doors to break in a single blast, and compat files may append more
+SECRET_DOOR.OneShotBombTests = {
+    function(bomb)
+        return bomb.Variant == BombVariant.BOMB_GIGA or bomb:HasTearFlags(TearFlags.TEAR_GIGA_BOMB)
+    end,
+}
 
 -- True if any player in the run is currently Tainted Nehemiah
 local function isTaintedNehemiahPresent()
@@ -32,6 +40,11 @@ local function shouldSkinDoor(door)
     return isTaintedNehemiahPresent() and (isSecretEntryDoor(door) or isInSecretRoom())
 end
 
+-- The resting open frame for the side being looked at, since the doorway is drawn differently from within the secret room than from the approach to it
+local function openedAnim()
+    return isInSecretRoom() and "OpenedInside" or "Opened"
+end
+
 -- Doors bombed from inside a secret/super secret room only need 1 hit; from outside, the full amount
 local function requiredHitsFor()
     return isInSecretRoom() and 1 or REQUIRED_BOMB_HITS
@@ -41,7 +54,7 @@ local function doorKey(door)
     return tostring(game:GetLevel():GetCurrentRoomDesc().ListIndex) .. "_" .. tostring(door.Slot)
 end
 
--- Maps the door's wall direction to a sprite rotation; UP is the artwork's baseline (0 degrees)
+-- Maps the wall direction on the door to a sprite rotation; UP is the artwork baseline (0 degrees)
 local DIRECTION_ROTATION = {
     [Direction.UP] = 0,
     [Direction.DOWN] = 180,
@@ -73,27 +86,46 @@ local function getDoorState(door)
         if isSecretEntryDoor(door) then
             sprite:Play("Hidden", true)
         elseif door:IsOpen() then
-            sprite:Play("Opened", true)
+            sprite:Play(openedAnim(), true)
         else
             sprite:Play("Closed", true)
         end
 
-        -- If this is the only door in the room, never gate it, so the player is never trapped
-        local isOnlyDoor = isInSecretRoom() and countRoomDoors() <= 1
-        data = { sprite = sprite, bombHits = 0, wasOpen = door:IsOpen(), needsGating = (not door:IsOpen()) and not isOnlyDoor }
+        local isOnlyDoor = isInSecretRoom() and countRoomDoors() <= 1 -- the only door in a room is never gated, so the player cannot be trapped
+        data = { sprite = sprite, bombHits = 0, wasOpen = door:IsOpen(), needsGating = (not door:IsOpen()) and not isOnlyDoor, oneShotArmed = false }
         doorStates[key] = data
     end
     return data
 end
 
--- Blocks a bomb's mere contact from opening the door; only an actual explosion counts
+-- Arms any nearby gated door while a one-shot bomb is still live, since the bomb entity is gone by the time the explosion effect spawns
+function SECRET_DOOR.OnBombUpdate(_, bomb)
+    local isOneShot = false
+    for _, test in ipairs(SECRET_DOOR.OneShotBombTests) do
+        if test(bomb) then
+            isOneShot = true
+            break
+        end
+    end
+    if not isOneShot then return end
+
+    local room = game:GetRoom()
+    for slot = DoorSlot.NO_DOOR_SLOT + 1, DoorSlot.NUM_DOOR_SLOTS - 1 do
+        local door = room:GetDoor(slot)
+        if door and shouldSkinDoor(door) and bomb.Position:Distance(door.Position) < BOMB_PROXIMITY then
+            getDoorState(door).oneShotArmed = true
+        end
+    end
+end
+
+-- Blocks the mere contact of a bomb from opening the door; only an actual explosion counts
 function SECRET_DOOR.OnBombGridCollision(_, bomb, gridIndex)
     local gridEntity = game:GetRoom():GetGridEntity(gridIndex)
     local door = gridEntity and gridEntity:ToDoor()
     if not door or not shouldSkinDoor(door) then return end
 
     local data = getDoorState(door)
-    if not data.needsGating or data.bombHits >= requiredHitsFor() then return end
+    if not data.needsGating or data.bombHits >= (data.oneShotArmed and 1 or requiredHitsFor()) then return end
 
     return false
 end
@@ -103,12 +135,12 @@ function SECRET_DOOR.OnEffectInit(_, effect)
     if effect.Variant ~= EffectVariant.BOMB_EXPLOSION then return end
 
     local room = game:GetRoom()
-    local required = requiredHitsFor()
     for slot = DoorSlot.NO_DOOR_SLOT + 1, DoorSlot.NUM_DOOR_SLOTS - 1 do
         local door = room:GetDoor(slot)
         if door and shouldSkinDoor(door) then
             local data = getDoorState(door)
-            if data.needsGating and data.bombHits < required and effect.Position:Distance(door.Position) < 90 then
+            local required = data.oneShotArmed and 1 or requiredHitsFor()
+            if data.needsGating and data.bombHits < required and effect.Position:Distance(door.Position) < BOMB_PROXIMITY then
                 data.bombHits = data.bombHits + 1
 
                 if data.bombHits >= required then
@@ -121,7 +153,7 @@ function SECRET_DOOR.OnEffectInit(_, effect)
     end
 end
 
--- Cancels the door's native sprite and draws our own instead
+-- Cancels the native door sprite and draws a custom one instead
 function SECRET_DOOR.OnDoorRender(_, door, offset)
     if not shouldSkinDoor(door) then return end
     local data = getDoorState(door)
@@ -130,11 +162,11 @@ function SECRET_DOOR.OnDoorRender(_, door, offset)
     return false
 end
 
--- Advances animations, syncs the sprite to open/closed state, and enforces the bomb gate (Close()/Busted don't affect physics, so CollisionClass is also forced solid)
+-- Advances animations and enforces the bomb gate; Close() alone leaves physics open, so CollisionClass is forced solid
 function SECRET_DOOR.OnDoorUpdate(_, door)
     if shouldSkinDoor(door) then
         local lockData = getDoorState(door)
-        if lockData.needsGating and lockData.bombHits < requiredHitsFor() then
+        if lockData.needsGating and lockData.bombHits < (lockData.oneShotArmed and 1 or requiredHitsFor()) then
             if door:IsOpen() then
                 door:Close(true)
                 door.Busted = false
@@ -150,10 +182,10 @@ function SECRET_DOOR.OnDoorUpdate(_, door)
     if sprite:IsFinished("Discovering") then
         sprite:Play("BrokenOnce", true)
     elseif sprite:IsFinished("BreakingOpen") then
-        sprite:Play("Opened", true)
+        sprite:Play(openedAnim(), true)
         door:Open()
     elseif sprite:IsFinished("Open") then
-        sprite:Play("Opened", true)
+        sprite:Play(openedAnim(), true)
     elseif sprite:IsFinished("Close") then
         sprite:Play("Closed", true)
     end

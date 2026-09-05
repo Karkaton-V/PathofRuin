@@ -5,8 +5,7 @@ local TEARS_DOWN = 0.4
 local RANDOM_STAT_BONUS = 0.15
 local RANDOM_STAT_COUNT = 3
 
--- Eligible pool for the 3 random +15% stats -- everything except Health, and excluding Angel/Devil/
--- Planetarium chance since those aren't cache-flag stats to begin with
+-- Eligible pool for the 3 random +15% stats: everything except Health, and excluding Angel/Devil/Planetarium chance since those are not cache-flag stats
 local STAT_CACHE_FLAGS = {
     CacheFlag.CACHE_DAMAGE,
     CacheFlag.CACHE_FIREDELAY,
@@ -43,7 +42,6 @@ function POR.MemoirEvaluateCache(_, player, cacheFlag)
         player.Damage = player.Damage - DAMAGE_DOWN
         if stats[CacheFlag.CACHE_DAMAGE] then player.Damage = player.Damage * (1 + RANDOM_STAT_BONUS) end
     elseif cacheFlag == CacheFlag.CACHE_FIREDELAY then
-        -- Tears stat <-> MaxFireDelay conversion: tears = 30 / (delay + 1)
         local tears = 30 / (player.MaxFireDelay + 1) - TEARS_DOWN
         if stats[CacheFlag.CACHE_FIREDELAY] then tears = tears * (1 + RANDOM_STAT_BONUS) end
         player.MaxFireDelay = 30 / math.max(tears, 0.2) - 1 -- clamped so delay never goes negative/infinite
@@ -58,8 +56,7 @@ function POR.MemoirEvaluateCache(_, player, cacheFlag)
     end
 end
 
--- Tear-repelling aura: re-triggers Windflower's Telekinesis trick on a timer instead of a standstill
--- check, so it never lapses (see dumb_luck.lua)
+-- Tear-repelling aura: re-triggers the Telekinesis trick from Windflower on a timer instead of a standstill check, so it never lapses (see dumb_luck.lua)
 local TELEKINESIS_REFRESH_FRAMES = 60 -- ~2 seconds at 30fps
 
 function POR.MemoirRefreshAura(_, player)

@@ -5,7 +5,7 @@ POR.Sealed = SEALED
 
 SEALED.KEY = "POR_Sealed"
 
-local SEAL_COLOR = Color(0.6, 0.25, 0.85, 1, 0, 0, 0) -- purple tint, doubles as AddSlowing's color
+local SEAL_COLOR = Color(0.6, 0.25, 0.85, 1, 0, 0, 0) -- purple tint, doubles as the AddSlowing color
 local SLOW_MULTIPLIER = 0.5
 local DAMAGE_MULTIPLIER = 0.5
 local FRAMES_PER_SECOND = 30
@@ -28,7 +28,7 @@ function SEALED.Apply(npc, source, durationSeconds)
     npc:AddSlowing(EntityRef(source), durationFrames, SLOW_MULTIPLIER, SEAL_COLOR)
 end
 
--- Restores the halved contact damage once Sealed's own duration elapses (native Slow expires on its own)
+-- Restores the halved contact damage once the Sealed duration elapses (native Slow expires unaided)
 function SEALED.OnNpcUpdate(_, npc)
     local sealedData = npc:GetData()[SEALED.KEY]
     if not sealedData then return end

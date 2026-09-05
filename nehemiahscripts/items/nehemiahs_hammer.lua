@@ -6,6 +6,9 @@ local swingOwner = nil
 local swingAnimating = false
 local swingEndDelay = 0
 local lastNumFired = 0
+local swingFrames = 0 -- frames the swing has been live, used by the failsafe below
+
+local SWING_TIMEOUT_FRAMES = 120 -- a swing this old is stuck, since a chargebar item can take the weapon slot and strand it forever
 
 local ROCK_CHECK_OFFSETS = {
     Vector(0, 0),
@@ -36,11 +39,28 @@ local function checkRocks(swingPlayer)
     end
 end
 
+-- Puts the weapon back the way it was, kept separate so every exit path can reach it rather than only the one that sees the swing finish
+local function endSwing()
+    local player = swingOwner
+
+    swingActive = false
+    swingAnimating = false
+    lastNumFired = 0
+    swingEndDelay = 0
+    swingFrames = 0
+    swingOwner = nil
+
+    if player and player:Exists() then
+        player:AddCacheFlags(CacheFlag.CACHE_WEAPON, true)
+        player:EvaluateItems()
+    end
+end
+
 function POR:NehemiahHammerUse(item, rng, player)
     swingActive = true
     swingOwner = player
+    swingFrames = 0
 
-    -- Eval cache to add the weapon
     player:AddCacheFlags(CacheFlag.CACHE_WEAPON, true)
     player:EvaluateItems()
 
@@ -68,8 +88,10 @@ function POR.NehemiahHammerSwapSprite(_, player)
         local mainEntity = weapon:GetMainEntity()
         if mainEntity then
             local sprite = mainEntity:GetSprite()
-            sprite:Load("gfx/nehemiahs_hammer.anm2", true)
-            sprite:Play("Idle", true)
+            if sprite:GetFilename() ~= "gfx/nehemiahs_hammer.anm2" then
+                sprite:Load("gfx/nehemiahs_hammer.anm2", true)
+                sprite:Play("Idle", true)
+            end
         end
     end
 end
@@ -78,31 +100,42 @@ end
 function POR.NehemiahHammerUpdate()
     if not swingActive or not swingOwner then return end
 
-    local weapon = swingOwner:GetWeapon(2)
-    if not weapon then return end
-    local mainEntity = weapon:GetMainEntity()
-    if not mainEntity then return end
-    local sprite = mainEntity:GetSprite()
-
-    local currentNumFired = swingOwner:GetActiveWeaponNumFired()
-
-    if not swingAnimating and currentNumFired > lastNumFired then
-        sprite:Play("SwingHammer", true)
-        swingAnimating = true
-        lastNumFired = currentNumFired
-        checkRocks(swingOwner)
+    if not swingOwner:Exists() then
+        endSwing()
+        return
     end
 
-    if swingAnimating and not sprite:IsPlaying("SwingHammer") then
-        swingEndDelay = swingEndDelay + 1
-        if swingEndDelay >= 1 then
-            swingActive = false
-            swingAnimating = false
-            lastNumFired = 0
-            swingEndDelay = 0
-            swingOwner:AddCacheFlags(CacheFlag.CACHE_WEAPON, true)
-            swingOwner:EvaluateItems()
-            swingOwner = nil
+    swingFrames = swingFrames + 1
+
+    local weapon = swingOwner:GetWeapon(2)
+    local mainEntity = weapon and weapon:GetMainEntity()
+    local sprite = mainEntity and mainEntity:GetSprite()
+
+    if sprite then
+        local currentNumFired = swingOwner:GetActiveWeaponNumFired()
+
+        if not swingAnimating and currentNumFired > lastNumFired then
+            sprite:Play("SwingHammer", true)
+            swingAnimating = true
+            lastNumFired = currentNumFired
+            checkRocks(swingOwner)
+        end
+
+        if swingAnimating and not sprite:IsPlaying("SwingHammer") then
+            swingEndDelay = swingEndDelay + 1
+            if swingEndDelay >= 1 then
+                endSwing()
+            end
+            return
         end
     end
+
+    if swingFrames >= SWING_TIMEOUT_FRAMES then
+        endSwing()
+    end
+end
+
+-- Ends any swing still live when the room changes, since the weapon it was watching does not survive the transition
+function POR.NehemiahHammerNewRoom()
+    if swingActive then endSwing() end
 end

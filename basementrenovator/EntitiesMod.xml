@@ -1,0 +1,5 @@
+<data>
+	<entity Metadata="1" Group="Events" ID="999" Image="nehemiah/Super Secret Shop Icon.png" Kind="Nehemiah" Name="Super Secret Shop Backdrop" Variant="3555" Subtype="0" NoBlockDoors="1">
+		<Gfx RoomGfx="Super Secret Shop" />
+	</entity>
+</data>

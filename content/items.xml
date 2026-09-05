@@ -22,10 +22,16 @@
     <trinket  id="16" name="Butterfly Wings" gfx="butterfly_wings.png" description="Lost and Found" />
 
     <!-- Starts Unlocked -->
-    <active   id="17" name="Bag O' Bombs" gfx="bomb_bag.png" description="Reusable Bomb Convertor" quality="3" maxcharges="0" chargetype="timed" />
+    <active   id="17" name="Bag O' Bombs" gfx="bomb_bag.png" description="Re-usable Bomb Convertor" quality="3" maxcharges="0" chargetype="timed" />
 
     <passive  id="18" name="Spike" gfx="spike.png" description="Spike Ball Bowling" quality="4" />
 
+    <!-- Currently Unobtainable  -->
+    <passive  id="19" name="Orpiment" gfx="orpiment.png" description="King of Poisons" quality="4" cache="tearflag, tearcolor" />
+    <passive  id="20" name="Ammoniac" gfx="ammoniac.png" description="Keeper's Bane" quality="4" />
+
+    <!-- Compat -->
+    <active   id="21" name="Nehemiah's Chisel" gfx="nehemiahs_chisel.png" description="I Can Fix It!" quality="3" maxcharges="180" chargetype="timed"/>
 
 </items>
 

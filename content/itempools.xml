@@ -8,7 +8,7 @@
         <Item Name="Gold Brick" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Woolen Blanket" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Old Brick" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Bag of Bombing" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Bag O' Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
     <Pool Name="boss">
         <Item Name="Happy Hour" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -26,6 +26,7 @@
         <Item Name="Nehemiah's Hammer" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Holy Smokes!" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="The Memoir" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Spike" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
     <Pool Name="library">
         <Item Name="Book of Ezra" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -56,7 +57,7 @@
     <Pool Name="greedShop">
         <Item Name="Gold Brick" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Woolen Blanket" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Bag of Bombing" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Bag O' Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
     <Pool Name="greedDevil">
         <Item Name="Pistanthrophobia" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -73,6 +74,7 @@
         <Item Name="Nehemiah's Hammer" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Holy Smokes!" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="The Memoir" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Spike" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
     <Pool Name="craneGame">
         <Item Name="Nehemiah's Hammer" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>

@@ -2,15 +2,30 @@
 
     <!-- Effects -->
     <entity name="Ezra's Moonlight" anm2path="moonlight.anm2" id="1000" variant="3555" />
-    <entity name="Spike Ball"       anm2path="ball_and_chain.anm2" id="1000" variant="3562" />
+    <!-- shadowSize matches collisionRadius, so the shadow reads as the ball's hitbox -->
+    <entity name="Spike Ball"       anm2path="ball_and_chain.anm2" id="1000" variant="3562"
+        collisionRadius="13" shadowSize="13" friction="1" collisionMass="3" numGridCollisionPoints="12" />
+    <entity name="Plasma Projectile" anm2path="plasma.anm2" id="1000" variant="3563" />
+
+    <!-- Familiars -->
+    <entity name="The Masons" anm2path="masons1.anm2" id="3" variant="3564"
+        baseHP="0" stageHP="0" boss="0" champion="0" collisionDamage="0"
+        collisionMass="3" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="12" />
 
     <!-- Rocks -->
-    <entity name="Throwing Boulder"             anm2path="rock_pickup.anm2"  id="1000" variant="3556" />
-    <entity name="Throwing Boulder (Tinted)"    anm2path="rock_pickup.anm2"  id="1000" variant="3557" />
-    <entity name="Throwing Boulder (Golden)"    anm2path="rock_pickup.anm2"  id="1000" variant="3558" />
-    <entity name="Holding Boulder"              anm2path="rock_tear.anm2"    id="1000" variant="3559" />
-    <entity name="Holding Boulder (Tinted)"     anm2path="rock_tear.anm2"    id="1000" variant="3560" />
-    <entity name="Holding Boulder (Golden)"     anm2path="rock_tear.anm2"    id="1000" variant="3561" />
+    <!-- shadowSize matches collisionRadius, so each shadow reads as that boulder's hitbox -->
+    <entity name="Throwing Boulder"             anm2path="rock_pickup.anm2"  id="1000" variant="3556"
+        collisionRadius="13" shadowSize="13" friction="1" collisionMass="3" numGridCollisionPoints="12" />
+    <entity name="Throwing Boulder (Tinted)"    anm2path="rock_pickup.anm2"  id="1000" variant="3557"
+        collisionRadius="13" shadowSize="13" friction="1" collisionMass="3" numGridCollisionPoints="12" />
+    <entity name="Throwing Boulder (Golden)"    anm2path="rock_pickup.anm2"  id="1000" variant="3558"
+        collisionRadius="13" shadowSize="13" friction="1" collisionMass="3" numGridCollisionPoints="12" />
+    <entity name="Holding Boulder"              anm2path="rock_tear.anm2"    id="1000" variant="3559"
+        collisionRadius="13" shadowSize="13" friction="1" collisionMass="3" numGridCollisionPoints="12" />
+    <entity name="Holding Boulder (Tinted)"     anm2path="rock_tear.anm2"    id="1000" variant="3560"
+        collisionRadius="13" shadowSize="13" friction="1" collisionMass="3" numGridCollisionPoints="12" />
+    <entity name="Holding Boulder (Golden)"     anm2path="rock_tear.anm2"    id="1000" variant="3561"
+        collisionRadius="13" shadowSize="13" friction="1" collisionMass="3" numGridCollisionPoints="12" />
 
 
     <!-- Cards -->

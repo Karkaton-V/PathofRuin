@@ -3,8 +3,7 @@ local game = POR.game
 local CHALLENGE = {}
 POR.SecretRoomChallenge = CHALLENGE
 
--- ===== Weighted waves =====
--- Random enemy count between min/max; each spawn is a weighted pick from `pool` proportional to its 1-based rank (last entry most likely). Entries are {EntityType, Variant, SubType}.
+-- Weighted waves: random count between min and max, each pick weighted by rank; entries are {EntityType, Variant, SubType}
 CHALLENGE.WEIGHTED_WAVES = {
     BASEMENT = { min = 1, max = 4, pool = { -- Basement/Cellar/Burning Basement
         {15, 2, 0},   -- I.Blob
@@ -139,8 +138,7 @@ CHALLENGE.WEIGHTED_WAVES = {
     VOID = { min = 2, max = 2, pool = {} },
 }
 
--- ===== Fixed-composition waves =====
--- Always spawns exactly this list, no randomness involved. Entries are {EntityType, Variant, SubType, Count}.
+-- Fixed waves: always spawns exactly this list; entries are {EntityType, Variant, SubType, Count}
 CHALLENGE.FIXED_WAVES = {
     CATHEDRAL = {
         {227, 1, 0, 1}, -- Holy Bony
@@ -153,8 +151,7 @@ CHALLENGE.FIXED_WAVES = {
     },
 }
 
--- ===== "Not yet encountered this run" waves =====
--- Picks `count` unique entries not yet fought this run, topping up with already-seen entries so the room is never impossible to clear. Entries are {EntityType, Variant, SubType}.
+-- Unseen waves: picks `count` entries not yet fought this run, topped up with seen ones; entries are {EntityType, Variant, SubType}
 CHALLENGE.UNSEEN_WAVES = {
     CHEST = { count = 2, pool = {
         {51, 1, 0}, -- Super Envy
@@ -217,7 +214,7 @@ local function roomKey()
     return game:GetLevel():GetCurrentRoomDesc().ListIndex
 end
 
--- Resolves the current floor to a CHALLENGE.*_WAVES key, accounting for Repentance's alt-path floors (Downpour/Mines/Mausoleum/Corpse) which share a LevelStage with their normal-path counterpart and are only distinguishable via StageType
+-- Resolves the current floor to a CHALLENGE.*_WAVES key, allowing for alt path floors that share a LevelStage with the normal counterpart
 local function currentFloorKey()
     local level = game:GetLevel()
     local stage, stageType = level:GetStage(), level:GetStageType()
@@ -272,7 +269,7 @@ local function restoreDoors(wasOpen)
     end
 end
 
--- Weighted pick: an entry's pick chance is proportional to its 1-based rank (last entry most likely)
+-- Weighted pick: the pick chance for an entry is proportional to the 1-based rank (last entry most likely)
 local function weightedPick(pool)
     local totalWeight = #pool * (#pool + 1) / 2
     local roll = math.random() * totalWeight
@@ -286,8 +283,7 @@ local function weightedPick(pool)
     return pool[#pool]
 end
 
--- Picks up to `def.count` unique pool entries not yet in seenBosses, topping up with already-seen
--- entries if there aren't enough unseen ones
+-- Picks up to `def.count` unique pool entries not yet in seenBosses, topping up with already-seen entries when there are not enough unseen ones
 local function pickUnseen(def)
     local unseen, seen = {}, {}
     for _, entry in ipairs(def.pool) do
@@ -316,8 +312,7 @@ local function spawnEntry(entType, variant, subType)
     return GetPtrHash(npc)
 end
 
--- Builds and spawns the current floor's wave, returning the spawned entities' ptr hashes, or nil if
--- nothing is defined/spawnable for this floor
+-- Builds and spawns the wave for the current floor, returning the ptr hashes for the spawned entities, or nil when nothing is defined or spawnable for this floor
 local function spawnFloorWave(key)
     local weighted = CHALLENGE.WEIGHTED_WAVES[key]
     if weighted and #weighted.pool > 0 then
@@ -354,7 +349,7 @@ local function spawnFloorWave(key)
     return nil
 end
 
--- Drops a Cracked Key at the room's center
+-- Drops a Cracked Key at the center of the room
 local function spawnCrackedKey()
     local room = game:GetRoom()
     local pos = room:FindFreePickupSpawnPosition(room:GetCenterPos(), 40)

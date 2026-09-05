@@ -1,0 +1,7 @@
+<data>
+	<room Name="Super Secret Shop" >
+		<Gfx BGPrefix="nehemiah/SSShop">
+			<Entity ID="1000" Image="nehemiah/rocks_ssshop.png" />
+		</Gfx>
+	</room>
+</data>

@@ -1,9 +1,9 @@
 local game = Game()
 
 GOLDENAPPLE_ITEM_ID = Isaac.GetItemIdByName("Golden Apple") -- item id of Golden Apple
--- Costume is fully automatic: costumes2.xml's <costume id="..." type="passive"> matches items.xml's <passive id="...">
+-- Costume is fully automatic: the <costume id="..." type="passive"> entry in costumes2.xml matches the <passive id="..."> entry in items.xml
 
-local INVINCIBILITY_FRAMES = 500 -- ~10 seconds, using this project's empirically-tuned ~50fps conversion
+local INVINCIBILITY_FRAMES = 500 -- ~10 seconds, using the empirically-tuned ~50fps conversion
 
 -- Total effective HP across red/soul/black and bone hearts, in half-heart units
 local function getTotalHealth(player)
@@ -15,17 +15,15 @@ function POR.GoldenAppleTakeDamage(_, entity, amount, damageFlags, source, count
     local player = entity:ToPlayer()
     if not player then return end
 
-    if player:HasInvincibility() then return false end -- still within a previous save's i-frames
+    if player:HasInvincibility() then return false end -- still within the i-frames from a previous save
 
     if not player:HasCollectible(GOLDENAPPLE_ITEM_ID) then return end
     if amount < getTotalHealth(player) then return end -- not fatal; let it through normally
 
-    -- Fatal hit: grant the golden heart + a half soul heart (1 unit), then let the damage proceed
     player:AddGoldenHearts(1)
     player:AddSoulHearts(1)
 
     player:SetMinDamageCooldown(INVINCIBILITY_FRAMES) -- native invincibility + vanilla flicker animation
     player:UseActiveItem(CollectibleType.COLLECTIBLE_MIDAS_TOUCH, UseFlag.USE_NOANNOUNCER | UseFlag.USE_NOANIM | UseFlag.USE_OWNED)
     player:RemoveCollectible(GOLDENAPPLE_ITEM_ID)
-    -- no return: damage proceeds and consumes the golden heart
 end

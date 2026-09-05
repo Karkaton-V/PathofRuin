@@ -1,0 +1,45 @@
+<achievements gfxroot="gfx/ui/achievement/">
+
+	<!-- Characters -->
+	<achievement name="POR_Nehemiah"  gfx="0a.nehemiah.png" gfxback="redish_paper.png"/>
+	<achievement name="POR_Condemned" gfx="0b.nehemiah.png" gfxback="redish_paper.png" />
+
+	<!-- Unlocks -->
+	<achievement name="POR_RCards"      	gfx="1.radiant_cards.png" 	  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_Masons"     		gfx="2.the_masons.png" 		  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_HappyHour"   	gfx="3.happy_hour.png" 		   	 gfxback="redish_paper.png"/>
+	<achievement name="POR_GoldenApple" 	gfx="4.golden_apple.png" 	  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_HolySmokes"    	gfx="5.holy_smokes.png" 	  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_WoolenBlanket"   gfx="6.woolen_blanket.png"    	 gfxback="redish_paper.png"/>
+	<achievement name="POR_NehemiahsHammer" gfx="7.nehemiahs_hammer.png"  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_DumbLuck"        gfx="8.dumb_luck.png" 		  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_OilyBranch" 		gfx="9.oily_branch.png" 	  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_Memoir" 			gfx="10.the_memoir.png" 	  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_ButterflyWings" 	gfx="11.butterfly_wings.png"  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_OldBrick" 		gfx="12.old_brick.png" 		  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_GoldBrick" 		gfx="13.gold_brick.png" 	  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_Graceful" 		gfx="14.graceful_charity.png" 	 gfxback="redish_paper.png"/>
+	<achievement name="POR_Cement" 			gfx="15.cement_hearts.png" 	  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_CursedRing" 		gfx="16.cursed_ring.png" 	  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_KClubs" 			gfx="17.king_of_clubs.png" 	  	 gfxback="redish_paper.png"/>
+	<achievement name="POR_SoulNehemiah" 	gfx="18.soul_of_nehemiah.png" 	 gfxback="redish_paper.png"/>
+	<achievement name="POR_Disgraceful" 	gfx="19.disgraceful_charity.png" gfxback="redish_paper.png"/>
+	<achievement name="POR_BookEzra" 		gfx="20.book_of_ezra.png" 		 gfxback="redish_paper.png"/>
+	<achievement name="POR_Magician" 		gfx="21.radiant_magician.png" 	 gfxback="redish_paper.png"/>
+	<achievement name="POR_Piss" 			gfx="22.pistanthrophobia.png" 	 gfxback="redish_paper.png"/>
+
+	<!-- Challenges -->
+	<achievement name="POR_BetaTest"     gfx="999a.beta_test.png" 	  	 	gfxback="redish_paper.png"/>
+	<achievement name="POR_NehemiahPill" gfx="999b.nehemiah_pill.png" 	 	gfxback="redish_paper.png"/>
+	<achievement name="POR_MaskCurse"    gfx="999c.curse_mask.png" 	  	 	gfxback="redish_paper.png"/>
+	<achievement name="POR_Chariot"      gfx="999d.chariot.png" 	  	 	gfxback="redish_paper.png"/>
+	<achievement name="POR_SecretEar"    gfx="999e.ear_secret.png" 	  	 	gfxback="redish_paper.png"/>
+	<achievement name="POR_Hermit"       gfx="999f.hermit.png" 	  	  	 	gfxback="redish_paper.png"/>
+	<achievement name="POR_Injustice"    gfx="999g.injustice.png" 	  	 	gfxback="redish_paper.png"/>
+	<achievement name="POR_MJustice"     gfx="999h.misprint_justice.png" 	gfxback="redish_paper.png"/>
+	<achievement name="POR_Revenge"      gfx="999i.revenge.png" 		 	gfxback="redish_paper.png"/>
+	<achievement name="POR_MHierophant"  gfx="999j.misprint_hierophant.png" gfxback="redish_paper.png"/>
+	<achievement name="POR_WhoHammer"    gfx="999k.who_hammer.png" 			gfxback="redish_paper.png"/>
+	<achievement name="POR_Spike"        gfx="999l.spike.png" 				gfxback="redish_paper.png"/>
+
+</achievements>

@@ -1,5 +1,5 @@
 CURSEDRING_ITEM_ID = Isaac.GetItemIdByName("Cursed Ring") -- item id of Cursed Ring
--- Costume is fully automatic: costumes2.xml's <costume id="..." type="passive"> matches items.xml's <passive id="...">
+-- Costume is fully automatic: the <costume id="..." type="passive"> entry in costumes2.xml matches the <passive id="..."> entry in items.xml
 
 local SEAL_BASE_DURATION = 8 -- seconds, before adding Luck
 

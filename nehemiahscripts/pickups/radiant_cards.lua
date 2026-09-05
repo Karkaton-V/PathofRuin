@@ -3,7 +3,7 @@ local game = Game()
 local RADIANT_CARDS = {}
 POR.RadiantCards = RADIANT_CARDS
 
--- Card ids, looked up by their "hud" attribute in pocketitems.xml
+-- Card ids, looked up by the "hud" attribute in pocketitems.xml
 RADIANT_CARDS.FOOL_ID       = Isaac.GetCardIdByName("FFool")
 RADIANT_CARDS.MAGICIAN_ID   = Isaac.GetCardIdByName("FMagician")
 RADIANT_CARDS.PRIESTESS_ID  = Isaac.GetCardIdByName("FHighPriestess")
@@ -27,7 +27,7 @@ RADIANT_CARDS.SUN_ID        = Isaac.GetCardIdByName("FSun")
 RADIANT_CARDS.JUDGEMENT_ID  = Isaac.GetCardIdByName("FJudgement")
 RADIANT_CARDS.WORLD_ID      = Isaac.GetCardIdByName("FWorld")
 
--- Re-applies each card's HUD icon from ui_cardfronts.anm2, in case the native hud= link desyncs
+-- Re-applies the HUD icon for each card from ui_cardfronts.anm2, in case the native hud= link desyncs
 local function SetCardFront(cardId, animName)
     if not cardId or cardId == 0 then return end
     local cardConfig = Isaac.GetItemConfig():GetCard(cardId)
@@ -92,7 +92,7 @@ function RADIANT_CARDS:Magician(player)
     player:EvaluateItems()
 end
 
--- Applies the Magician's range/tears bonus while active
+-- Applies the Magician range/tears bonus while active
 function RADIANT_CARDS.MagicianCache(player, cacheFlag)
     if not player:GetData().POR_MagicianActive then return end
 
@@ -103,7 +103,7 @@ function RADIANT_CARDS.MagicianCache(player, cacheFlag)
     end
 end
 
--- Clears the Magician's Continuum, range, and tears bonus
+-- Clears the Magician Continuum, range, and tears bonus
 function RADIANT_CARDS.ClearMagician(player)
     local pData = player:GetData()
     if pData.POR_MagicianActive then
@@ -131,7 +131,7 @@ function RADIANT_CARDS:Empress(player)
     player:GetData().POR_EmpressActive = true
 end
 
--- Clears the Empress's Abaddon
+-- Clears the Empress Abaddon
 function RADIANT_CARDS.ClearEmpress(player)
     local pData = player:GetData()
     if pData.POR_EmpressActive then
@@ -174,7 +174,7 @@ function RADIANT_CARDS:Lovers(player)
     local pos = room:FindFreePickupSpawnPosition(player.Position, 40)
     Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, CollectibleType.COLLECTIBLE_HEART, pos, Vector.Zero, player)
 end
--- Gives Leo (without its costume) and Mars for the room; pre-grant SpriteScale is snapshotted and force-restored since Leo's size boost isn't a costume layer
+-- Gives Leo (without the costume) and Mars for the room; pre-grant SpriteScale is snapshotted and force-restored since the Leo size boost isn't a costume layer
 function RADIANT_CARDS:Chariot(player)
     local pData = player:GetData()
     pData.POR_ChariotBaseScale = player.SpriteScale
@@ -185,7 +185,7 @@ function RADIANT_CARDS:Chariot(player)
     pData.POR_ChariotActive = true
 end
 
--- Defensively keeps Leo's costume suppressed and its size increase reverted each tick, in case either reapplies on its own
+-- Defensively keeps the Leo costume suppressed and the size increase reverted each tick, in case either reapplies unprompted
 function RADIANT_CARDS.ChariotSuppressCostume(player)
     local pData = player:GetData()
     if pData.POR_ChariotActive then
@@ -196,7 +196,7 @@ function RADIANT_CARDS.ChariotSuppressCostume(player)
     end
 end
 
--- Clears the Chariot's Leo and Mars
+-- Clears the Chariot Leo and Mars
 function RADIANT_CARDS.ClearChariot(player)
     local pData = player:GetData()
     if pData.POR_ChariotActive then
@@ -360,7 +360,7 @@ function RADIANT_CARDS:World(player)
     Isaac.GridSpawn(GridEntityType.GRID_TRAPDOOR, 0, pos, true)
 end
 
--- Maps each card id to its handler function
+-- Maps each card id to the handler function
 local CARD_HANDLERS = {
     [RADIANT_CARDS.FOOL_ID]       = RADIANT_CARDS.Fool,
     [RADIANT_CARDS.MAGICIAN_ID]   = RADIANT_CARDS.Magician,
@@ -386,7 +386,7 @@ local CARD_HANDLERS = {
     [RADIANT_CARDS.WORLD_ID]      = RADIANT_CARDS.World,
 }
 
--- Dispatches to the matching card's effect stub on use
+-- Dispatches to the effect stub for the matching card on use
 function RADIANT_CARDS.UseCard(card, player)
     local handler = CARD_HANDLERS[card]
     if handler then
@@ -402,7 +402,7 @@ function RADIANT_CARDS.ClearRoomBuffs(player)
     RADIANT_CARDS.ClearDeath(player)
 end
 
--- entities2.xml's card entries are disabled, so the world-pickup sprite is set manually here instead.
+-- the card entries in entities2.xml are disabled, so the world-pickup sprite is set manually here instead.
 local IS_RADIANT_CARD = {}
 for _, id in ipairs({
     RADIANT_CARDS.FOOL_ID, RADIANT_CARDS.MAGICIAN_ID, RADIANT_CARDS.PRIESTESS_ID, RADIANT_CARDS.EMPRESS_ID,
@@ -415,8 +415,7 @@ for _, id in ipairs({
     IS_RADIANT_CARD[id] = true
 end
 
--- Loads the sprite and restores collision physics manually, since dynamically-assigned CardType ids
--- never match an entities2.xml entry and would otherwise get zeroed (walk-through) collision.
+-- Loads the sprite and restores collision physics manually, since dynamically-assigned CardType ids never match an entities2.xml entry and would otherwise get zeroed walk-through collision
 local function InitCardPickup(pickup)
     pickup:GetSprite():Load("gfx/radiant_cards.anm2", true)
     pickup:GetSprite():Play("Appear", true)

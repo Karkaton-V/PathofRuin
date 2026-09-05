@@ -43,7 +43,7 @@ local STAT_MULT = 1.1 -- 10% all stats
 local STAT_CACHE_FLAGS = CacheFlag.CACHE_DAMAGE | CacheFlag.CACHE_FIREDELAY | CacheFlag.CACHE_SPEED
     | CacheFlag.CACHE_RANGE | CacheFlag.CACHE_SHOTSPEED | CacheFlag.CACHE_LUCK | CacheFlag.CACHE_TEARFLAG
 
--- Grants a 10% all-stats boost and a random worm trinket's effect, both lasting only the current room
+-- Grants a 10% all-stats boost and the effect of a random worm trinket, both lasting only the current room
 function POR:HappyHourUse(_, rng, player)
     local pData = player:GetData()
     pData.POR_HappyHourActive = true
@@ -55,7 +55,7 @@ function POR:HappyHourUse(_, rng, player)
     return true
 end
 
--- Applies the flat 10% all-stats boost, plus the chosen worm's specific effect, while Happy Hour is active
+-- Applies the flat 10% all-stats boost, plus the specific effect for the chosen worm, while Happy Hour is active
 function POR.HappyHourEvaluateCache(_, player, cacheFlag)
     local pData = player:GetData()
     if not pData.POR_HappyHourActive then return end

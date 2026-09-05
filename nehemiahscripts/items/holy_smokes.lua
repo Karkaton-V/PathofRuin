@@ -8,20 +8,19 @@ function POR.HolySmokesAngelChance(_, chance)
     return chance + ANGEL_CHANCE_BONUS
 end
 
--- Burn aura radius matches holy_smokes_item.anm2's glow sprite
+-- Burn aura radius matches the glow sprite in holy_smokes_item.anm2
 local AURA_RADIUS = 96
 local BURN_DURATION = 30 -- frames; matches the docs' own 1-tick-per-second example
 local BURN_DAMAGE = 1
 
+-- Burns every enemy inside the aura each frame, letting FindInRadius do the radius and enemy filtering natively rather than scanning the whole room
 function POR.HolySmokesBurnAura(_, player)
     if not player:HasCollectible(HOLYSMOKES_ITEM_ID) then return end
 
-    for _, ent in ipairs(Isaac.GetRoomEntities()) do
+    for _, ent in ipairs(Isaac.FindInRadius(player.Position, AURA_RADIUS, EntityPartition.ENEMY)) do
         local npc = ent:ToNPC()
         if npc and npc:IsActiveEnemy() and npc:IsVulnerableEnemy() then
-            if npc.Position:Distance(player.Position) <= AURA_RADIUS then
-                npc:AddBurn(EntityRef(player), BURN_DURATION, BURN_DAMAGE)
-            end
+            npc:AddBurn(EntityRef(player), BURN_DURATION, BURN_DAMAGE)
         end
     end
 end
@@ -36,6 +35,5 @@ function POR.HolySmokesRenderAura(_, player, renderOffset)
     if not player:HasCollectible(HOLYSMOKES_ITEM_ID) then return end
 
     AURA_SPRITE:Update()
-    -- Nudged down from center so the glow sits underneath Isaac, roughly at his feet
     AURA_SPRITE:Render(Isaac.WorldToRenderPosition(player.Position) + renderOffset + Vector(0, 48), Vector.Zero, Vector.Zero)
 end

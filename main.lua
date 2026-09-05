@@ -10,20 +10,27 @@ POR.game = Game()
 
 -- Includes
 -- -- Third-party libraries
--- Must load first: patches EntityPlayer's health methods, so everything else can use them normally.
+-- Must load first: patches the EntityPlayer health methods, so everything else can use them normally.
 include("sharedscripts.APIs.customhealthapi.core")
 
 -- -- Base Case
 -- -- -- Helpers
 -- NOTE: custom_save_compiler must be first; it sets POR.SaveCompiler as a side effect
-POR_CustomSaveCompiler  = include("sharedscripts.custom_save_compiler")
+POR_CustomSaveCompiler  = include("sharedscripts.APIs.custom_save_compiler")
 POR.SaveCallbacks       = POR.SaveCompiler.SaveCallbacks
-POR_CustomSaveCreator   = include("sharedscripts.custom_save_creator")
-POR_ScrumMaster         = include("sharedscripts.custom_scrum_master_schedule")
-POR_Incrementor         = include("sharedscripts.custom_incrementor")
-POR_UnlockManager       = include("sharedscripts.unlockmanager")
+POR_CustomSaveCreator   = include("sharedscripts.APIs.custom_save_creator")
+POR_ScrumMaster         = include("sharedscripts.APIs.custom_scrum_master_schedule")
+POR_Incrementor         = include("sharedscripts.APIs.custom_incrementor")
+POR_UnlockManager       = include("sharedscripts.APIs.unlocks.unlockmanager")
+POR_CharacterUnlocks    = include("sharedscripts.APIs.unlocks.character_unlock_handling")
 POR_BombBag             = include("sharedscripts.items.bomb_bag")
+POR_ChargeBarStacking   = include("sharedscripts.APIs.chargebar_stacking")
+POR_OrangeSkin          = include("sharedscripts.APIs.orange_skin")
+POR_ShopRaid            = include("sharedscripts.APIs.shop_raid")
+POR_Challenges          = include("sharedscripts.APIs.challenges")
 POR_Spike               = include("sharedscripts.items.spike")
+POR_Orpiment            = include("sharedscripts.items.orpiment")
+POR_Ammoniac            = include("sharedscripts.items.ammoniac")
 POR_SecretDoor          = include("nehemiahscripts.misc.custom_secret_door")
 POR_Sealed              = include("nehemiahscripts.misc.sealed")
 
@@ -34,6 +41,7 @@ POR_NehemiahCharacter   = include("nehemiahscripts.characters.nehemiah")
 
 -- -- -- Compat
 POR_NehemiahCompat      = include("sharedscripts.compat.eid")
+POR_PogCompat           = include("sharedscripts.compat.pog")
 
 -- -- -- Entities
 POR_MoonlightEntity     = include("nehemiahscripts.entities.ezras_moonlight")
@@ -53,6 +61,15 @@ POR_HolySmokes          = include("nehemiahscripts.items.holy_smokes")
 POR_OldBrick            = include("nehemiahscripts.items.old_brick")
 POR_GoldBrick           = include("nehemiahscripts.items.gold_brick")
 POR_Memoir              = include("nehemiahscripts.items.memoir")
+POR_Masons              = include("nehemiahscripts.items.masons")
+
+-- Loaded after the files they hook into, so the bomb tests, raid reward override and raid boss swap attach to tables that already exist
+POR_FiendFolioCompat    = include("sharedscripts.compat.fiendfolio")
+POR_GodsGambitCompat    = include("sharedscripts.compat.godsgambit")
+POR_NehemiahsChisel     = include("nehemiahscripts.compat.nehemiahs_chisel")
+
+-- TEMPORARY: registers the "porcostume" console command used to diagnose the invisible Ammoniac costume, delete this line and sharedscripts/debug once that is resolved
+POR_CostumeProbe        = include("sharedscripts.debug.costume_probe")
 
 POR_DumbLuck            = include("nehemiahscripts.trinkets.dumb_luck")
 POR_OilyBranch          = include("nehemiahscripts.trinkets.oily_branch")
@@ -62,7 +79,7 @@ POR_ButterflyWings      = include("nehemiahscripts.trinkets.butterfly_wings")
 POR_RadiantCards        = include("nehemiahscripts.pickups.radiant_cards")
 POR_OtherCards          = include("nehemiahscripts.pickups.other_cards")
 
--- Must load after RadiantCards/OtherCards; reads their card id tables
+-- Must load after RadiantCards/OtherCards; reads the card id tables
 POR_CardPool            = include("nehemiahscripts.pickups.card_pool")
 POR_CementHeart         = include("nehemiahscripts.pickups.cement_heart")
 POR_Runes               = include("nehemiahscripts.pickups.runes")
@@ -101,8 +118,7 @@ POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.BookofNehemiahUse,  BOOKO
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.HappyHourUse,       HAPPYHOUR_ITEM_ID)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.GoldBrickUse,       GOLDBRICK_ITEM_ID)
 
--- Rock / Boulder
--- PickupUpdate/ProjectileUpdate registered once per kind since Normal/Tinted/Golden are separate variants and AddCallback's variant filter only matches one at a time
+-- Rock / Boulder, registered once per kind since Normal/Tinted/Golden are separate variants and the filter matches one at a time
 POR:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, POR.ROCKTABLE.BedSleptCheck,      PickupVariant.PICKUP_BED)
 POR:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE,   POR.ROCKTABLE.PickupUpdate,        POR.ROCK_VARIANT)
 POR:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE,   POR.ROCKTABLE.PickupUpdate,        POR.ROCK_VARIANT_TINTED)
@@ -133,9 +149,30 @@ POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,       POR.EzrasMoonlight.OnEvalu
 POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,       POR.NehemiahHammerEvaluateCache, CacheFlag.CACHE_WEAPON)
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE,   POR.NehemiahHammerSwapSprite)
 POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.NehemiahHammerUpdate)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,        POR.NehemiahHammerNewRoom)
 
 -- Book of Ezra
 POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,       POR.BookofEzraGreedDeath)
+POR:AddCallback(ModCallbacks.MC_PRE_ROOM_ENTITY_SPAWN, POR.BookofEzraGraveEntity)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL,       POR.BookofEzraNewLevel)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL,       POR.ShopRaid.OnNewLevel)
+
+POR:AddCallback(ModCallbacks.MC_POST_GAME_STARTED,    POR.Challenges.OnGameStarted)
+POR:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, POR.Challenges.SyncChallengeUnlocks)
+POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,       POR.BookofNehemiahGreedDeath)
+POR:AddCallback(ModCallbacks.MC_POST_MODS_LOADED,     POR.BookofNehemiahLoadRooms)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,        POR.BookofNehemiahNewRoom)
+POR:AddCallback(ModCallbacks.MC_PRE_GRID_ENTITY_DOOR_RENDER,  POR.BookofNehemiahDoorRender)
+POR:AddCallback(ModCallbacks.MC_POST_GRID_ENTITY_DOOR_UPDATE, POR.BookofNehemiahDoorUpdate)
+POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.ShopRaid.OnUpdate)
+
+-- The Masons
+POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,       POR.MasonsEvaluateCache, CacheFlag.CACHE_FAMILIARS)
+POR:AddCallback(ModCallbacks.MC_FAMILIAR_INIT,        POR.MasonsFamiliarInit,   MASONS_VARIANT)
+POR:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE,      POR.MasonsFamiliarUpdate, MASONS_VARIANT)
+POR:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, POR.MasonsAddCollectible)
+POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.MasonsUpdate)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,        POR.MasonsNewRoom)
 
 -- Cursed Ring
 POR:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION,    POR.CursedRingSeal)
@@ -218,7 +255,8 @@ POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL,        POR.RadiantCards.OnNewLev
 -- Runes (Soul of Nehemiah)
 POR:AddCallback(ModCallbacks.MC_USE_CARD,              POR.SoulOfNehemiahUse, Isaac.GetCardIdByName("SoulOfNehemiah"))
 
--- Secret Door (Tainted Nehemiah's Secret/Super Secret Room reveal)
+-- Secret Door (the Secret/Super Secret Room reveal for Tainted Nehemiah)
+POR:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE,             POR.SecretDoor.OnBombUpdate)
 POR:AddCallback(ModCallbacks.MC_PRE_BOMB_GRID_COLLISION,      POR.SecretDoor.OnBombGridCollision)
 POR:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT,             POR.SecretDoor.OnEffectInit)
 POR:AddCallback(ModCallbacks.MC_PRE_GRID_ENTITY_DOOR_RENDER,  POR.SecretDoor.OnDoorRender)
@@ -242,9 +280,29 @@ POR:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, POR.OnAddCollectibleBirthr
 POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,       POR.OnNpcDeathGrantBossUnlock)
 POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.OnUpdateCheckBossRushClear)
 POR:AddCallback(ModCallbacks.MC_POST_GAME_STARTED,    POR.OnGameStartedApplyUnlockGates)
+POR:AddCallback(ModCallbacks.MC_POST_GAME_STARTED,    POR.SyncUnlockAchievements)
+
+POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,       POR.CharacterUnlocks.OnGideonDeath, 907) -- Great Gideon
+
+-- Nehemiah's Chisel is only present alongside the Tainted Treasure Rooms mod, so every hook is guarded on the compat table
+if POR.NehemiahsChisel then
+    POR:AddCallback(ModCallbacks.MC_POST_GAME_STARTED,  POR.NehemiahsChisel.OnGameStarted)
+    POR:AddCallback(ModCallbacks.MC_USE_ITEM,           POR.NehemiahsChiselUse, NEHEMIAHSCHISEL_ITEM_ID)
+    POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,     POR.NehemiahsChisel.OnEvaluateCache, CacheFlag.CACHE_WEAPON)
+    POR:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE,  POR.NehemiahsChisel.OnKnifeUpdate)
+    POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,      POR.NehemiahsChisel.OnNewRoom)
+end
+POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,        POR.CharacterUnlocks.OnNewRoom)
+POR:AddCallback(ModCallbacks.MC_POST_SLOT_INIT,       POR.CharacterUnlocks.OnSlotInit,   SlotVariant.HOME_CLOSET_PLAYER)
+POR:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE,     POR.CharacterUnlocks.OnSlotUpdate, SlotVariant.HOME_CLOSET_PLAYER)
 
 -- Bomb Bag
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,             POR.BombBagUse, BOMBBAG_ITEM_ID)
+
+-- Orange Skin
+POR:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_ADDED,   POR.OrangeSkinCollectibleChanged)
+POR:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, POR.OrangeSkinCollectibleChanged)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,                    POR.OrangeSkinNewRoom)
 
 -- Spike
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE,   POR.SpikePlayerUpdate)
@@ -252,6 +310,24 @@ POR:AddCallback(ModCallbacks.MC_POST_RENDER,          POR.SpikeBarRender)
 POR:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE,   POR.SpikeEffectUpdate, SPIKE_VARIANT)
 POR:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE,    POR.SpikeBrimstoneRecolor, LaserVariant.THICK_RED)
 POR:AddCallback(ModCallbacks.MC_PRE_LASER_COLLISION,  POR.SpikeBrimstonePetrify, LaserVariant.THICK_RED)
+
+-- Ammoniac
+POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE,   POR.AmmoniacPlayerUpdate)
+POR:AddCallback(ModCallbacks.MC_POST_RENDER,          POR.AmmoniacBarRender)
+POR:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE,   POR.AmmoniacEffectUpdate,         PLASMA_VARIANT)
+POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,       POR.AmmoniacBrimstoneFireDelay,   CacheFlag.CACHE_FIREDELAY)
+POR:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE,    POR.AmmoniacBrimstoneSkin,        LaserVariant.THICK_RED)
+POR:AddCallback(ModCallbacks.MC_PRE_LASER_COLLISION,  POR.AmmoniacBrimstoneStatus,      LaserVariant.THICK_RED)
+POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE,   POR.AmmoniacBrimstoneCostume)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,        POR.AmmoniacBrimstoneCostumeNewRoom)
+
+-- Orpiment
+POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,       POR.OrpimentEvaluateCache, CacheFlag.CACHE_TEARFLAG)
+POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,       POR.OrpimentEvaluateCache, CacheFlag.CACHE_TEARCOLOR)
+POR:AddCallback(ModCallbacks.MC_PRE_TEAR_COLLISION,   POR.OrpimentTearCollision)
+POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,       POR.OrpimentNpcDeath)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,        POR.OrpimentClearPoisonedOnNewRoom)
+POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.OrpimentUpdateGasClouds)
 
 -- Save Creator
 POR:AddPriorityCallback(ModCallbacks.MC_POST_NEW_LEVEL, CallbackPriority.LATE, POR.OnNewLevelApplyCacheFlags)
@@ -284,7 +360,7 @@ POR.ExtraCallbacks = {
         end,
     },
 
-    -- Called before Nehemiah's hitbox is generated; return {Hitbox, Direction} array + optional true to suppress original
+    -- Called before the Nehemiah hitbox is generated; return {Hitbox, Direction} array + optional true to suppress original
     NEHEMIAH_PRE_HITBOX_GENERATE = {
         Name = "NEHEMIAH_PRE_HITBOX_GENERATE",
         Functions = {},
@@ -346,7 +422,7 @@ POR.ExtraCallbackPriority = {
     LATEST   = 4,
 }
 
--- Returns a set table with keys equal to the given list's values, all set to true
+-- Returns a set table with keys equal to the values in the given list, all set to true
 ---@param list any[]
 ---@return {[any]: boolean?}
 ---@function

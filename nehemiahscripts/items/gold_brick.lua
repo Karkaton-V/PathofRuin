@@ -1,7 +1,7 @@
 GOLDBRICK_ITEM_ID = Isaac.GetItemIdByName("Gold Brick") -- item id of Gold Brick
 
 local PETRIFY_CHANCE = 0.5
-local GOLD_DUST_COUNT = 8 -- matches a golden boulder's impact burst (nehemiahs_boulder.lua)
+local GOLD_DUST_COUNT = 8 -- matches the impact burst on a golden boulder (nehemiahs_boulder.lua)
 local GOLD_TEAR_COLOR = Color(1, 0.85, 0.3, 1, 0, 0, 0)
 
 -- Grants golden rock tears for the rest of the room
@@ -27,8 +27,7 @@ function POR:GoldBrickFireTear(tear)
     tear:GetData().POR_GoldBrickTear = true
 end
 
--- Same dust burst + gold-and-freeze combo as a golden boulder's impact (nehemiahs_boulder.lua);
--- FLAG_MIDAS_FREEZE is the native flag Midas' Touch uses, covering both the petrify and the gold-ify
+-- Same dust burst and gold-freeze combo as the impact on a golden boulder (nehemiahs_boulder.lua); FLAG_MIDAS_FREEZE is the flag on Midas' Touch, covering both the petrify and the gold-ify
 local function applyGoldEffect(enemy, position, player)
     for _ = 1, GOLD_DUST_COUNT do
         local velAngle = math.random() * 360
@@ -51,8 +50,7 @@ function POR:GoldBrickTearCollision(tear, collider)
     applyGoldEffect(npc, tear.Position, player)
 end
 
--- Expires when the room (or floor) changes -- plain dot-function, since ForEachPlayer calls it
--- positionally as func(player, index) rather than via colon self-binding
+-- Expires when the room or floor changes; a plain dot-function, since ForEachPlayer calls it positionally as func(player, index) rather than via colon self-binding
 function POR.ClearGoldBrick(player)
     local pData = player:GetData()
     if pData.POR_GoldBrickActive then
