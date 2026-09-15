@@ -1,7 +1,7 @@
 local game = Game()
 
 BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra") -- item id of Book of Ezra
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 local doorsClosedForGreed = false -- tracks whether the raid is still waiting for Greed to die
 local builtGideonDungeon = false -- true only for a dungeon this mod built, so a legitimate Great Gideon visit is left untouched
 local raidingPlayer = nil -- the player who started the raid, remembered for the Member Card check on the Greed death
@@ -76,10 +76,13 @@ end
 function POR:BookofEzraGreedDeath(npc)
     if POR.ShopRaid.IsRaidBoss(npc) and doorsClosedForGreed then
         doorsClosedForGreed = false
+
+        local inRaidRoom = POR.ShopRaid.IsInRaidRoom() -- read before Finish, which clears the room it was tracking
         POR.ShopRaid.Finish()
 
         local player = raidingPlayer
         raidingPlayer = nil
+        if not inRaidRoom then return end
         if not player or not player:Exists() then
             game:GetRoom():TrySpawnSecretShop(true)
             return

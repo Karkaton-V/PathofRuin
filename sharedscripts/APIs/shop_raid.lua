@@ -8,6 +8,9 @@ local RAID_MUSIC = Music.MUSIC_BOSS -- the sins are minibosses and use the stand
 local raidActive = false -- true between the raid starting and the boss dying, while the boss track is held
 local previousMusic = nil -- whatever was playing before the raid, restored once it ends
 local floorRaided = false -- true once a shop on this floor has been raided, so the trick is worth one shop per floor
+local raidRoomIndex = nil -- ListIndex of the sealed room, so leaving it can be told apart from moving around inside it
+local removedTrapdoors = {} -- grid indices the raid cleared, kept so an abandoned fight can put them back
+local pendingRestore = nil -- ListIndex of a room still owed its doors and trapdoors after a fight was abandoned
 
 -- Boss the raid summons; compat files may swap this table and IsRaidBoss follows
 RAID.Boss = {
@@ -20,6 +23,11 @@ RAID.Boss = {
 function RAID.IsRaidBoss(npc)
     return npc.Type == RAID.Boss.Type
        and (npc.Variant == RAID.Boss.Variant or npc.Variant == RAID.Boss.SuperVariant)
+end
+
+-- ListIndex of the room the player is standing in, which identifies a room across re-entries
+local function currentRoomIndex()
+    return game:GetLevel():GetCurrentRoomDesc().ListIndex
 end
 
 -- Closes every door in the room
@@ -55,15 +63,52 @@ function RAID.ClearShop()
     end
 end
 
--- Clears any trapdoor already in the room, so the Member Card trapdoor in the shop cannot be used to walk out of the raid or sit beside the reward
+-- True while the player is standing in the room a raid sealed, so callers can refuse to alter a room the fight was never in
+function RAID.IsInRaidRoom()
+    return raidRoomIndex ~= nil and currentRoomIndex() == raidRoomIndex
+end
+
+-- Clears any trapdoor in the current room so the Member Card trapdoor cannot be used to walk out of the raid, returning the indices it took
 function RAID.ClearTrapdoors()
     local room = game:GetRoom()
+    local cleared = {}
+
     for index = 0, room:GetGridSize() - 1 do
         local grid = room:GetGridEntity(index)
         if grid and grid:GetType() == GridEntityType.GRID_TRAPDOOR then
+            cleared[#cleared + 1] = index
             room:RemoveGridEntity(index, 0, false)
         end
     end
+    return cleared
+end
+
+-- Puts back the doors and trapdoors a raid sealed away, run on returning to a room whose fight was abandoned
+function RAID.RestoreRoom()
+    RAID.OpenAllDoors()
+
+    local room = game:GetRoom()
+    for _, index in ipairs(removedTrapdoors) do
+        if not room:GetGridEntity(index) then
+            Isaac.GridSpawn(GridEntityType.GRID_TRAPDOOR, 0, room:GetGridPosition(index), true)
+        end
+    end
+
+    removedTrapdoors = {}
+    pendingRestore = nil
+    raidRoomIndex = nil
+end
+
+-- Hands the music back to whatever was playing before the raid and stops the boss track being reasserted
+local function releaseMusic()
+    if not raidActive then return end
+    raidActive = false
+
+    local music = MusicManager()
+    if previousMusic then
+        music:Fadein(previousMusic, 0.1)
+    end
+    previousMusic = nil
 end
 
 -- True while this floor still has the shop raid going spare, checked by the books before they seal a room
@@ -80,9 +125,11 @@ end
 function RAID.Begin(player, forceSuperGreed)
     local room = game:GetRoom()
     floorRaided = true
+    raidRoomIndex = currentRoomIndex()
+    pendingRestore = nil
 
     RAID.ClearShop()
-    RAID.ClearTrapdoors()
+    removedTrapdoors = RAID.ClearTrapdoors()
     RAID.CloseAllDoors()
 
     local isSuper = forceSuperGreed or game:GetLevel():GetStage() >= LevelStage.STAGE5
@@ -106,18 +153,34 @@ function RAID.OnUpdate()
     end
 end
 
--- Ends the raid: unseals the room and hands the music back to whatever was playing beforehand
-function RAID.Finish()
-    RAID.OpenAllDoors()
+-- Drops a raid the player has been taken out of and repays the sealed room on returning, since the boss death that would normally end it can no longer be seen
+function RAID.OnNewRoom()
+    local index = currentRoomIndex()
 
-    if not raidActive then return end
-    raidActive = false
-
-    local music = MusicManager()
-    if previousMusic then
-        music:Fadein(previousMusic, 0.1)
+    if raidActive and raidRoomIndex ~= nil and index ~= raidRoomIndex then
+        pendingRestore = raidRoomIndex
+        releaseMusic()
     end
-    previousMusic = nil
+
+    if pendingRestore ~= nil and index == pendingRestore then
+        RAID.RestoreRoom()
+    end
+end
+
+-- Ends the raid, unsealing right away when the player is still in the room and otherwise leaving the room owed a restore
+function RAID.Finish()
+    if raidRoomIndex ~= nil and currentRoomIndex() ~= raidRoomIndex then
+        pendingRestore = raidRoomIndex
+        releaseMusic()
+        return
+    end
+
+    RAID.OpenAllDoors()
+    releaseMusic()
+
+    removedTrapdoors = {}
+    pendingRestore = nil
+    raidRoomIndex = nil
 end
 
 return RAID

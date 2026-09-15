@@ -1,0 +1,8 @@
+<sounds root="sfx/">
+    <sound name="CreakyWall">
+        <sample weight="1" path="creaky_wall.mp3"/>
+    </sound>
+    <sound name="CollapsingBasement">
+        <sample weight="1" path="collapsing-basement.wav"/>
+    </sound>
+</sounds>

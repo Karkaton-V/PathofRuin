@@ -61,6 +61,8 @@ local function kindSheet(kindData)
     return kindData.Sheet
 end
 
+BOULDER.KindSheet = kindSheet -- exposed so debug/compat_probe.lua reports the sheet this file would actually pick rather than a copy of the rule
+
 -- All pickup/projectile variants across all 3 kinds, for room-cap counting across the whole set
 BOULDER.ALL_PICKUP_VARIANTS = { BOULDER.PICKUP_VARIANT, BOULDER.PICKUP_VARIANT_GOLDEN, BOULDER.PICKUP_VARIANT_TINTED }
 BOULDER.ALL_PROJECTILE_VARIANTS = { BOULDER.PROJECTILE_VARIANT, BOULDER.PROJECTILE_VARIANT_GOLDEN, BOULDER.PROJECTILE_VARIANT_TINTED }
@@ -75,7 +77,7 @@ local TINTED_PICKUP_TABLE = {
 }
 
 local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 
 -- Anyone but Nehemiah gets a weaker boulder: half damage, no fragment burst, and thinner golden and tinted payouts
 local OUTSIDER_DAMAGE_MULT = 0.5
@@ -117,8 +119,8 @@ BOULDER.SPRITE_VARIANTS = {
     ScarredWomb = 18,
     BlueWomb = 19, -- the Hush floor
     Corpse = 20,
-    Sheol = 21,
-    Cathedral = 22,
+    Cathedral = 21,
+    Sheol = 22,
     Chest = 23, -- Greed/Greedier
     DarkRoom = 24,
     Home = 25,

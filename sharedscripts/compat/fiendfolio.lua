@@ -1,6 +1,6 @@
 -- Compat with Fiend Folio, guarded on the FiendFolio global so the file no-ops when that mod is absent, same pattern as compat/eid.lua
 if FiendFolio then
-    local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+    local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 
     -- Copper Bombs break the secret doors for The Condemned in one blast, matching the giga bomb test already registered in custom_secret_door.lua
     table.insert(POR.SecretDoor.OneShotBombTests, function(bomb)

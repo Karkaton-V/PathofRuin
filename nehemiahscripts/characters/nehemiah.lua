@@ -1,12 +1,27 @@
 local game = POR.game
 
 local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 local NEHEMIAH_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiah_addon.anm2")
 local NEHEMIAHB_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/nehemiahb_addon.anm2")
 local NEHEMIAHSHAMMER_ITEM_ID = Isaac.GetItemIdByName("Nehemiah's Hammer")
 local BOOKOFEZRA_ITEM_ID = Isaac.GetItemIdByName("Book of Ezra")
 local BOOKOFNEHEMIAH_ITEM_ID = Isaac.GetItemIdByName("Book of Nehemiah")
+
+-- Lost art per character, keyed by player type; the Lost Curse leaves the type alone, so a live lookup still identifies them
+local LOST_SHEETS = {}
+if NEHEMIAH_TYPE and NEHEMIAH_TYPE > 0 then
+    LOST_SHEETS[NEHEMIAH_TYPE] = "gfx/characters/costumes_nehemiah/NehemiahLost.png"
+end
+if TAINTED_NEHEMIAH_TYPE and TAINTED_NEHEMIAH_TYPE > 0 then
+    LOST_SHEETS[TAINTED_NEHEMIAH_TYPE] = "gfx/characters/costumes_nehemiahb/CondemnedLost.png"
+end
+
+-- Sheet each character wears while the Lost curse is on them, since white fire and the Missing Poster both repaint the player as The Lost
+local LOST_SHEETS = {
+    [NEHEMIAH_TYPE] = "gfx/characters/costumes_nehemiah/NehemiahLost.png",
+    [TAINTED_NEHEMIAH_TYPE] = "gfx/characters/costumes_nehemiahb/CondemnedLost.png",
+}
 
 -- Character Inits
 --- @param player EntityPlayer
@@ -43,6 +58,97 @@ function POR:TaintedNehemiahInit(player)
     pool:RemoveCollectible(PISTANTHROPHOBIA_ITEM_ID)
 
     CustomHealthAPI.Library.AddHealth(player, POR.CementHeart.KEY, POR.CementHeart.MAX_HP) -- replaces the vanilla armor players.xml no longer grants
+end
+
+-- True for the two layers that carry the body art, which is all the Lost curse repaints
+local function isSkinLayer(layer)
+    local name = layer:GetName():lower()
+    return name:sub(1, 4) == "body" or name:sub(1, 4) == "head"
+end
+
+-- Paints the skin layers with a sheet, remembering what each one wore so the swap can be undone exactly
+local function wearSheet(sprite, pData, sheet)
+    local originals = pData.POR_LostSheetOriginals or {}
+    local changed = false
+
+    for _, layer in ipairs(sprite:GetAllLayers()) do
+        if isSkinLayer(layer) and layer:GetSpritesheetPath() ~= sheet then
+            local id = layer:GetLayerID()
+            originals[id] = originals[id] or layer:GetSpritesheetPath()
+            sprite:ReplaceSpritesheet(id, sheet)
+            changed = true
+        end
+    end
+
+    pData.POR_LostSheetOriginals = originals
+    return changed
+end
+
+-- Puts back the sheets recorded before the curse, which the anm2 default cannot supply since a character's skin is applied over it at runtime
+local function dropSheet(sprite, pData)
+    local originals = pData.POR_LostSheetOriginals
+    if not originals then return false end
+
+    for id, path in pairs(originals) do
+        sprite:ReplaceSpritesheet(id, path)
+    end
+
+    pData.POR_LostSheetOriginals = nil
+    return true
+end
+
+-- Gives each Nehemiah his own Lost art while the curse is on him, rather than the shared white sprite the effect would otherwise apply
+function POR.NehemiahLostSheet(_, player)
+    local sheet = LOST_SHEETS[player:GetPlayerType()]
+    if not sheet then return end
+
+    local sprite = player:GetSprite()
+    local pData = player:GetData()
+    local cursed = player:GetEffects():HasNullEffect(NullItemID.ID_LOST_CURSE)
+    local changed = cursed and wearSheet(sprite, pData, sheet) or (not cursed and dropSheet(sprite, pData))
+
+    if changed then
+        sprite:LoadGraphics()
+    end
+end
+
+-- The Lost sheet a player should be wearing, remembering the character on the way past so a Missing Poster swap can still be traced back to them
+local function lostSheetFor(player)
+    local sheet = LOST_SHEETS[player:GetPlayerType()]
+
+    if sheet then
+        player:GetData().POR_LostSheet = sheet
+        if player:GetEffects():HasNullEffect(NullItemID.ID_LOST_CURSE) then return sheet end
+        return nil
+    end
+
+    if player:GetPlayerType() == PlayerType.PLAYER_THELOST then
+        return player:GetData().POR_LostSheet
+    end
+    return nil
+end
+
+-- Repaints the skin layers with the character's own Lost art, comparing case and separator insensitively so an already applied sheet is not reloaded every frame
+function POR.NehemiahLostSkin(_, player)
+    local sheet = lostSheetFor(player)
+    if not sheet then return end
+
+    local sprite = player:GetSprite()
+    local target = sheet:lower()
+    local changed = false
+
+    for _, layer in ipairs(sprite:GetAllLayers()) do
+        local name = layer:GetName():lower()
+        local current = (layer:GetSpritesheetPath():lower():gsub("\\", "/"))
+        if (name:sub(1, 4) == "body" or name:sub(1, 4) == "head") and current ~= target then
+            sprite:ReplaceSpritesheet(layer:GetLayerID(), sheet)
+            changed = true
+        end
+    end
+
+    if changed then
+        sprite:LoadGraphics()
+    end
 end
 
 -- Swaps Book of Ezra for Book of Nehemiah once Tainted Nehemiah picks up Birthright

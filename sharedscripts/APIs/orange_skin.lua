@@ -76,22 +76,56 @@ local function resolveOrangePath(item)
     return orangePathCache[item.ID]
 end
 
--- Repaints the head and body layers on the player, the part that actually turns Isaac orange; other layers have no orange art
-local function refreshPlayerSkin(player, orange)
-    local sprite = player:GetSprite()
+-- True for the two layers that carry the skin; the rest of a character sprite has no orange art
+local function isSkinLayer(layer)
+    local name = layer:GetName():lower()
+    return name:sub(1, 4) == "body" or name:sub(1, 4) == "head"
+end
+
+-- Repaints the skin layers orange, remembering the sheet each one already wore so the swap can be undone exactly
+local function applyOrangeLayers(sprite, originals)
     local changed = false
 
     for _, layer in ipairs(sprite:GetAllLayers()) do
-        local name = layer:GetName():lower()
-        if name:sub(1, 4) == "body" or name:sub(1, 4) == "head" then
-            local default = layer:GetDefaultSpritesheetPath()
-            local sheet = orange and orangeVariantPath(default) or default
+        if isSkinLayer(layer) then
+            local current = layer:GetSpritesheetPath()
+            local sheet = orangeVariantPath(current)
 
-            if sheet and layer:GetSpritesheetPath() ~= sheet then
-                sprite:ReplaceSpritesheet(layer:GetLayerID(), sheet)
+            if sheet and current ~= sheet then
+                local id = layer:GetLayerID()
+                originals[id] = originals[id] or current
+                sprite:ReplaceSpritesheet(id, sheet)
                 changed = true
             end
         end
+    end
+    return changed
+end
+
+-- Puts back the exact sheets recorded at swap time, which the anm2 default cannot supply since a character's skin is applied over it at runtime
+local function restoreOrangeLayers(sprite, originals)
+    local changed = false
+
+    for id, path in pairs(originals) do
+        sprite:ReplaceSpritesheet(id, path)
+        changed = true
+    end
+    return changed
+end
+
+-- Repaints the head and body layers on the player, doing nothing at all when there is no recorded swap to undo
+local function refreshPlayerSkin(player, orange)
+    local sprite = player:GetSprite()
+    local pData = player:GetData()
+    local changed = false
+
+    if orange then
+        local originals = pData.POR_OrangeSkinOriginals or {}
+        changed = applyOrangeLayers(sprite, originals)
+        pData.POR_OrangeSkinOriginals = originals
+    elseif pData.POR_OrangeSkinOriginals then
+        changed = restoreOrangeLayers(sprite, pData.POR_OrangeSkinOriginals)
+        pData.POR_OrangeSkinOriginals = nil
     end
 
     if changed then

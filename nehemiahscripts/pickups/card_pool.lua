@@ -56,8 +56,8 @@ local CARD_REQUIRES = {
     [POR.OtherCards.DISGRACEFUL_CHARITY_ID] = { "UltraGreedier_Any" },
     [SOUL_OF_NEHEMIAH_ID]                   = { "Hush_Any", "BossRush_Any" },
 }
--- Every other Radiant Card (all but the Magician) falls back to the bulk Mom-lock
-local RADIANT_BULK_REQUIRES = { "Mom_Hard" }
+-- Every Radiant Card without a gate of its own falls back to the bulk Mom-lock; the Magician, Chariot and Hermit each carry their own instead
+local RADIANT_BULK_REQUIRES = { "MomHard" }
 
 -- Achievement each card unlock awards, published so unlockmanager.lua can grant them from the same flags gating the pool
 POR.CardUnlockAchievements = {
@@ -70,8 +70,8 @@ POR.CardUnlockAchievements = {
 }
 for _, id in ipairs({
     POR.RadiantCards.FOOL_ID, POR.RadiantCards.PRIESTESS_ID, POR.RadiantCards.EMPRESS_ID,
-    POR.RadiantCards.EMPEROR_ID, POR.RadiantCards.HIEROPHANT_ID, POR.RadiantCards.LOVERS_ID, POR.RadiantCards.CHARIOT_ID,
-    POR.RadiantCards.JUSTICE_ID, POR.RadiantCards.HERMIT_ID, POR.RadiantCards.FORTUNE_ID, POR.RadiantCards.STRENGTH_ID,
+    POR.RadiantCards.EMPEROR_ID, POR.RadiantCards.HIEROPHANT_ID, POR.RadiantCards.LOVERS_ID,
+    POR.RadiantCards.JUSTICE_ID, POR.RadiantCards.FORTUNE_ID, POR.RadiantCards.STRENGTH_ID,
     POR.RadiantCards.HANGED_ID, POR.RadiantCards.DEATH_ID, POR.RadiantCards.TEMPERANCE_ID, POR.RadiantCards.DEVIL_ID,
     POR.RadiantCards.TOWER_ID, POR.RadiantCards.STAR_ID, POR.RadiantCards.MOON_ID, POR.RadiantCards.SUN_ID,
     POR.RadiantCards.JUDGEMENT_ID, POR.RadiantCards.WORLD_ID,

@@ -3,7 +3,7 @@ local game = Game()
 local SECRET_DOOR = {}
 POR.SecretDoor = SECRET_DOOR
 
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 
 local REQUIRED_BOMB_HITS = 2
 local BOMB_PROXIMITY = 90 -- same range used to match an explosion to a door

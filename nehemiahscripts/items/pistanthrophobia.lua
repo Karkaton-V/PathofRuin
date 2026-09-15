@@ -37,7 +37,7 @@ AURA_SPRITE:Play("HeadDown", true)
 AURA_SPRITE.Scale = Vector(2, 2)
 
 -- T. Nehemiah is the only exception: keeps the stat effect, not the visual (see nehemiah.lua)
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 
 function POR.PistanthrophobiaRenderAura(_, player, renderOffset)
     if not player:HasCollectible(PISTANTHROPHOBIA_ITEM_ID) then return end

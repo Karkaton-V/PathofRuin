@@ -7,6 +7,11 @@ CEMENT_HEART.KEY = "CEMENT_HEART"
 CEMENT_HEART.SUBTYPE_SINGLE = 100
 CEMENT_HEART.SUBTYPE_DOUBLE = 101
 
+CEMENT_HEART.CLOT_SUBTYPE = 3565 -- above the 0-7 basegame range and the 907+ overlap block, so Custom Health API treats the clot as fully custom
+CEMENT_HEART.CLOT_ANM2 = "gfx/cement_heart_clot.anm2"
+CEMENT_HEART.CLOT_SHEET = "gfx/familiars/cement_clot.png" -- swapped by compat/slime_clots.lua when the slime replacement mod is loaded
+CEMENT_HEART.CLOT_LAYERS = 2 -- body and head in cement_heart_clot.anm2; the head carries every frame, so replacing layer 0 alone changes nothing
+
 --#region Registration
 
 -- cement_heart_ui.anm2 frames already match the RED-kind convention in the API (16x16, pivot 8,8).
@@ -25,6 +30,7 @@ CustomHealthAPI.Library.RegisterRedHealth(CEMENT_HEART.KEY, {
     },
     SortOrder = -10, -- < RED_HEART (0), so the Cement Heart overlay lands on the left-most heart
     AddPriority = 10, -- > RED_HEART (0), < ROTTEN_HEART (100)
+    SumptoriumSubType = CEMENT_HEART.CLOT_SUBTYPE,
     HealFlashRO = 150 / 255,
     HealFlashGO = 150 / 255,
     HealFlashBO = 150 / 255,
@@ -67,6 +73,20 @@ function CEMENT_HEART.OnRenderHeart(player, playerSlot, healthIndex, info)
     end
 end
 CustomHealthAPI.Library.AddCallback(POR, CustomHealthAPI.Enums.Callbacks.PRE_HEALTH_RENDER, CustomHealthAPI.Enums.CallbackPriorities.EARLY, CEMENT_HEART.OnRenderHeart)
+
+-- Dresses a clot extracted from a Cement Heart, as the API spawns every clot on the vanilla Blood Baby sprite and never loads art of its own
+function CEMENT_HEART.OnClotInit(_, familiar, key)
+    if key ~= CEMENT_HEART.KEY then return end
+
+    local sprite = familiar:GetSprite()
+    sprite:Load(CEMENT_HEART.CLOT_ANM2, false)
+    for layer = 0, CEMENT_HEART.CLOT_LAYERS - 1 do
+        sprite:ReplaceSpritesheet(layer, CEMENT_HEART.CLOT_SHEET)
+    end
+    sprite:LoadGraphics()
+    sprite:Play("Idle", true)
+end
+CustomHealthAPI.Library.AddCallback(POR, CustomHealthAPI.Enums.Callbacks.POST_SUMPTORIUM_CLOT_INIT, CustomHealthAPI.Enums.CallbackPriorities.LATE, CEMENT_HEART.OnClotInit, CEMENT_HEART.KEY)
 
 --#endregion
 

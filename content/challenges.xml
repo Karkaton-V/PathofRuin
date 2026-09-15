@@ -1,12 +1,12 @@
 <challenges version="1">
 
-    <challenge name="[POR] BET4 T3ST"  playertype="The Condemned"  startingitems="619"  endstage="6"  roomfilter="4"  cursefilter="82"  secretpath="true" achievements="POR_BetaTest" unlockachievement="POR_NehemiahPill" />
+    <challenge name="[POR] BET4 T3ST"  playertype="Nehemiah-Tainted-"  startingitems="619"  endstage="6"  roomfilter="4"  cursefilter="82"  secretpath="true" achievements="POR_BetaTest" unlockachievement="POR_NehemiahPill" />
 
     <!-- Chariot!, Hermit!, MJustice!, MHierophant!, Spike -->
-    <challenge name="[POR] Curse of The Mask"  playertype="27"  startingitems="136,139,593,593" startingtrinkets="81"  endstage="8"  cursefilter="16"  achievements="POR_MaskCurse"  unlockachievement="POR_Chariot"  canshoot="false" />
-    <challenge name="[POR] Ear For Secrets"  playertype="The Condemned"  startingitems="463,589"  endstage="10" roomfilter="4"  cursefilter="16"  achievements="POR_SecretEar"  unlockachievement="POR_Hermit" />
+    <challenge name="[POR] Curse of The Mask"  playertype="27"  startingitems="139,593,593" startingtrinkets="81,186"  endstage="8"  cursefilter="16"  achievements="POR_MaskCurse"  unlockachievement="POR_Chariot"  canshoot="false" />
+    <challenge name="[POR] Ear For Secrets"  playertype="Nehemiah-Tainted-"  startingitems="463,589"  endstage="10" roomfilter="4"  cursefilter="16"  achievements="POR_SecretEar"  unlockachievement="POR_Hermit" />
     <challenge name="[POR] Scale of Injustice"  playertype="21"  startingitems="175,550"  endstage="6"  roomfilter="4"  cursefilter="16"  achievements="POR_Injustice"  unlockachievement="POR_MJustice" />
-    <challenge name="[POR] Revenge of the Abyss"  playertype="34"  startingitems="136,230"  endstage="11" roomfilter="4"  cursefilter="16"  achievements="POR_Revenge"  unlockachievement="POR_MHierophant"  canshoot="false" megasatan="true" />
+    <challenge name="[POR] Revenge of the Abyss"  playertype="34"  startingitems="230" startingtrinkets="186"  endstage="11" roomfilter="4"  cursefilter="16"  achievements="POR_Revenge"  unlockachievement="POR_MHierophant"  canshoot="false" megasatan="true" />
     <challenge name="[POR] Who Needs Hammers?"  playertype="Nehemiah"  startingitems="604,Spike"  endstage="8"  cursefilter="16"  achievements="POR_WhoHammer"  unlockachievement="POR_Spike"  canshoot="false" />
 
 </challenges>

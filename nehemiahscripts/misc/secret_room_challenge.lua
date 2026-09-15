@@ -198,7 +198,7 @@ local function isSecretRoomType(roomType)
     return roomType == RoomType.ROOM_SECRET or roomType == RoomType.ROOM_SUPERSECRET
 end
 
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 
 -- True if any Tainted Nehemiah in the run currently owns Book of Ezra or Book of Nehemiah
 local function hasBookOwner()

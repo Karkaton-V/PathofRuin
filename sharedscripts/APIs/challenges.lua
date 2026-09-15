@@ -5,10 +5,9 @@ local game = POR.game
 local CHALLENGES = {}
 POR.Challenges = CHALLENGES
 
-local BETA_TEST_NAME = "[POR] BET4 T3ST"
-local BETA_TEST_SEED = "30M1 N1TS"
 local ABYSS_NAME = "[POR] Revenge of the Abyss"
 local ABYSS_CEMENT_HEARTS = 3
+local NO_HAMMER_NAME = "[POR] Who Needs Hammers?"
 
 -- Resolves a challenge name to the id, returning nil when the lookup is unavailable or the name is unknown
 local function challengeId(name)
@@ -25,25 +24,6 @@ local function inChallenge(name)
     return id ~= nil and Isaac.GetChallenge() == id
 end
 
--- Forces the run onto the fixed seed for the challenge, skipping the work when the seed already matches so the restart cannot loop
-local function forceSeed(target)
-    local seeds = game:GetSeeds()
-    if not seeds then return end
-
-    local current = type(seeds.GetStartSeedString) == "function" and seeds:GetStartSeedString() or nil
-    if current == target then return end
-
-    if type(Seeds) == "table" and type(Seeds.String2Seed) == "function" and type(seeds.SetStartSeed) == "function" then
-        local ok, seed = pcall(Seeds.String2Seed, target)
-        if ok and seed then
-            pcall(seeds.SetStartSeed, seeds, seed)
-            return
-        end
-    end
-
-    Isaac.ExecuteCommand("seed " .. target)
-end
-
 -- Hands every player the starting Cement Hearts for the challenge, granted as one call each the way the double pickup stacks them
 local function grantCementHearts(count)
     if not POR.CementHeart or not CustomHealthAPI then return end
@@ -54,7 +34,7 @@ local function grantCementHearts(count)
 end
 
 local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)
-local CONDEMNED_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local CONDEMNED_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 local HARD_MODE_MARK = 2 -- the value a completion mark holds once earned on hard, where 1 is the normal mode version of the same mark
 
 -- Lowest completion mark a character holds, so full marks on hard reads as 2 and any gap drops it lower; mirrors the Fiend Folio sweep, including the skip of the two unused ids
@@ -100,15 +80,30 @@ function CHALLENGES.SyncChallengeUnlocks()
     end
 end
 
+-- Takes back the pocket active Nehemiah is built around, applied on continues too since nehemiah.lua re-grants it on every player init
+local function removeNehemiahsHammer()
+    local hammer = Isaac.GetItemIdByName("Nehemiah's Hammer")
+    if not hammer or hammer <= 0 then return end
+
+    POR:ForEachPlayer(function(player)
+        if player:GetActiveItem(ActiveSlot.SLOT_POCKET) == hammer then
+            player:SetPocketActiveItem(CollectibleType.COLLECTIBLE_NULL, ActiveSlot.SLOT_POCKET, false)
+        end
+        if player:HasCollectible(hammer) then
+            player:RemoveCollectible(hammer)
+        end
+    end)
+end
+
 -- Applies the extra setup for each challenge on a fresh run, skipping continues so nothing is handed out twice
 function CHALLENGES.OnGameStarted(_, isContinued)
     CHALLENGES.SyncChallengeUnlocks()
 
-    if isContinued then return end
-
-    if inChallenge(BETA_TEST_NAME) then
-        forceSeed(BETA_TEST_SEED)
+    if inChallenge(NO_HAMMER_NAME) then
+        removeNehemiahsHammer()
     end
+
+    if isContinued then return end
 
     if inChallenge(ABYSS_NAME) then
         grantCementHearts(ABYSS_CEMENT_HEARTS)

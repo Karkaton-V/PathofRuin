@@ -56,7 +56,7 @@ if EID then
 
     -- Birthrights
     EID:addBirthright(Isaac.GetPlayerTypeByName("Nehemiah", false), "{{CementHeart}} Rock chunks thrown by Nehemiah have a chance to break up into blue spiders", "Nehemiah")
-    EID:addBirthright(Isaac.GetPlayerTypeByName("The Condemned", true), "{{SoulofNehemiah}} Let loose the chains of fate and reclaim your rightful glory", "The Condemned")
+    EID:addBirthright(Isaac.GetPlayerTypeByName("Nehemiah", true), "{{SoulofNehemiah}} Let loose the chains of fate and reclaim your rightful glory", "The Condemned")
 
     -- Active Items
     EID:addCollectible(Isaac.GetItemIdByName("Happy Hour"), "{{ArrowUp}} All stats up +10%#Isaac is under the influence of a random worm", "Happy Hour")

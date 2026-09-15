@@ -6,7 +6,7 @@ local UNLOCKS = {}
 POR.CharacterUnlocks = UNLOCKS
 
 local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)
-local CONDEMNED_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local CONDEMNED_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 local NEHEMIAH_ACHIEVEMENT = "POR_Nehemiah"
 local CONDEMNED_ACHIEVEMENT = "POR_Condemned"
 

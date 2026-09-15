@@ -1,110 +1,102 @@
--- Ties vanilla boss deaths and Boss Rush completion to POR unlocks, persisted for the whole game via Mod:SaveData rather than per run
+-- Reads POR unlocks off the completion marks the two Nehemiahs hold, so the game's own save tracks them rather than a parallel boss-kill log
 
 local game = POR.game
-local json = require("json")
 
--- Boss-kill definitions keyed by unlock name; Variant is optional and omitting it matches any variant of that EntityType
-local BOSS_KILLS = {
-    Mom           = { Type = EntityType.ENTITY_MOM,         Variant = 0 },
-    Isaac         = { Type = EntityType.ENTITY_ISAAC,       Variant = 0 },
-    BlueBaby      = { Type = EntityType.ENTITY_ISAAC,       Variant = 1 },
-    Satan         = { Type = EntityType.ENTITY_SATAN },
-    TheLamb       = { Type = EntityType.ENTITY_THE_LAMB,    Variant = 10 },
-    MegaSatan     = { Type = EntityType.ENTITY_MEGA_SATAN_2 },
-    Hush          = { Type = EntityType.ENTITY_HUSH },
-    Delirium      = { Type = EntityType.ENTITY_DELIRIUM },
-    Beast         = { Type = EntityType.ENTITY_BEAST },
-    UltraGreed    = { Type = EntityType.ENTITY_ULTRA_GREED, Variant = 0 },
-    UltraGreedier = { Type = EntityType.ENTITY_ULTRA_GREED, Variant = 1 },
+local NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", false)
+local CONDEMNED_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
+
+-- Mark field each flag base reads; the two Greed bases carry their own Value because Greed mode has no hard variant, so the single Greed mark encodes Greed and Greedier instead of difficulty
+local FLAG_MARKS = {
+    Mom           = { Field = "MomsHeart" },
+    Isaac         = { Field = "Isaac" },
+    BlueBaby      = { Field = "BlueBaby" },
+    Satan         = { Field = "Satan" },
+    TheLamb       = { Field = "Lamb" },
+    MegaSatan     = { Field = "MegaSatan" },
+    BossRush      = { Field = "BossRush" },
+    Hush          = { Field = "Hush" },
+    Delirium      = { Field = "Delirium" },
+    Mother        = { Field = "Mother" },
+    Beast         = { Field = "Beast" },
+    UltraGreed    = { Field = "UltraGreed", Value = 1 },
+    UltraGreedier = { Field = "UltraGreed", Value = 2 },
 }
 
--- Mother needs a LevelStage check alongside the true second phase (Variant 10)
-local function isMotherKill(npc)
-    if npc.Type ~= EntityType.ENTITY_MOTHER or npc.Variant ~= 10 then return false end
-    local stage = game:GetLevel():GetStage()
-    return stage == LevelStage.STAGE4_1 or stage == LevelStage.STAGE4_2
+local HARD_MARK = 2 -- the value a completion mark only reaches on hard, which every unlock outside Greed mode requires
+
+-- Character each suffix reads; both demand the hard value, so the suffix picks the track rather than the difficulty despite the _Any name
+local FLAG_SUFFIXES = {
+    Hard = { PlayerType = NEHEMIAH_TYPE,  Value = HARD_MARK },
+    Any  = { PlayerType = CONDEMNED_TYPE, Value = HARD_MARK },
+}
+
+-- Completion marks for one character, memoised per lookup pass so a multi flag requirement costs one read per character
+local function markSet(cache, playerType)
+    if cache[playerType] == nil then
+        local ok, marks = pcall(Isaac.GetCompletionMarks, playerType)
+        cache[playerType] = (ok and type(marks) == "table") and marks or false
+    end
+    return cache[playerType] or nil
 end
 
--- True if the current run is Hard mode or Greed/Greedier mode
-local function isHardOrGreedRun()
-    return game.Difficulty == Difficulty.DIFFICULTY_HARD or game:IsGreedMode()
+local MOM_HARD_FLAG = "MomHard" -- Mom herself, who has no completion mark of her own, so this one flag is tracked rather than read
+
+-- True once Mom has been beaten on hard, taken from the persistent save because the mark set jumps straight from nothing to Mom's Heart
+local function momHardMet()
+    local save = POR:GameSave()
+    return save ~= nil and save.POR_MomHard == true
 end
 
-local UnlockData = {}
+-- Records a hard mode Mom kill, the one unlock in this mod that no completion mark can supply
+function POR.OnMomDeathRecordHardKill(_, npc)
+    if npc.Variant ~= 0 then return end
+    if game.Difficulty ~= Difficulty.DIFFICULTY_HARD then return end
 
--- Loaded once at mod load, since unlocks persist across the whole game
-if POR:HasData() then
-    local ok, loaded = pcall(json.decode, POR:LoadData())
-    if ok and loaded then
-        UnlockData = loaded
-    end
-end
-POR.UnlockData = UnlockData
+    local save = POR:GameSave()
+    if not save or save.POR_MomHard then return end
 
--- Sets <name>_Any (and <name>_Hard, if the current run qualifies) the first time each is earned
-local function grantUnlock(name)
-    local changed = false
-    if not UnlockData[name .. "_Any"] then
-        UnlockData[name .. "_Any"] = true
-        changed = true
-    end
-    if isHardOrGreedRun() and not UnlockData[name .. "_Hard"] then
-        UnlockData[name .. "_Hard"] = true
-        changed = true
-    end
-    if changed then
-        POR:SaveData(json.encode(UnlockData))
-        POR.SyncUnlockAchievements()
-    end
+    save.POR_MomHard = true
+    POR.SyncUnlockAchievements()
 end
 
--- AND-checks a list of unlock flag names against UnlockData, used by the item/trinket consumer in this file and by the pool gating in card_pool.lua
+-- True once one flag's mark has reached the value it needs on the character its suffix names; an unrecognised flag fails closed
+local function flagMet(flag, cache)
+    if flag == MOM_HARD_FLAG then return momHardMet() end
+
+    local base, suffix = tostring(flag):match("^(.+)_(%a+)$")
+    local mark = base and FLAG_MARKS[base]
+    local rule = suffix and FLAG_SUFFIXES[suffix]
+    if not mark or not rule or not rule.PlayerType or rule.PlayerType <= 0 then return false end
+
+    local marks = markSet(cache, rule.PlayerType)
+    if not marks then return false end
+
+    return (marks[mark.Field] or 0) >= (mark.Value or rule.Value)
+end
+
+-- AND-checks a list of unlock flag names against the marks, used by the item/trinket consumer in this file and by the pool gating in card_pool.lua
 function POR:UnlockMet(requiresList)
+    if type(Isaac.GetCompletionMarks) ~= "function" then return false end
+
+    local cache = {}
     for _, flag in ipairs(requiresList) do
-        if not UnlockData[flag] then return false end
+        if not flagMet(flag, cache) then return false end
     end
     return true
 end
 
--- AND-checks the boss flags on a definition and the prerequisite achievement together, since a challenge reward is gated on an achievement no boss kill ever sets
+-- AND-checks the mark flags on a definition and the prerequisite achievement together, since a challenge reward is gated on an achievement no mark ever sets
 function POR:UnlockDefMet(def)
     if def.Requires and not POR:UnlockMet(def.Requires) then return false end
     if def.RequiresAchievement and not (POR.AchievementUnlocked and POR.AchievementUnlocked(def.RequiresAchievement)) then return false end
     return true
 end
 
-function POR.OnNpcDeathGrantBossUnlock(_, npc)
-    if isMotherKill(npc) then
-        grantUnlock("Mother")
-        return
-    end
-
-    for name, def in pairs(BOSS_KILLS) do
-        if npc.Type == def.Type and (def.Variant == nil or npc.Variant == def.Variant) then
-            grantUnlock(name)
-        end
-    end
-end
-
--- Boss Rush checks whether the room has been cleared instead of number of bosses killed
-local bossRushCleared = false
-function POR.OnUpdateCheckBossRushClear()
-    local room = game:GetRoom()
-    if room:GetType() ~= RoomType.ROOM_BOSSRUSH then
-        bossRushCleared = false
-        return
-    end
-    if bossRushCleared or not room:IsClear() then return end
-
-    bossRushCleared = true
-    grantUnlock("BossRush")
-end
-
 --#region Collectible / trinket unlocks; ids are looked up by name so this file has no load order dependency
 
--- Item -> unlock requirement (AND of flags); locked items are pulled from the pool at the start of every run until every required flag is set
+-- Item -> unlock requirement (AND of flags); locked items are pulled from the pool at the start of every run until every requirement is met
 POR.ItemUnlocks = {
-    -- Nehemiah Unlocks (Hard mode / Greed / Greedier only)
+    -- Nehemiah Unlocks; the _Hard suffix reads Nehemiah's own marks, earned on hard
     [Isaac.GetItemIdByName("Happy Hour")]        = { Requires = { "Isaac_Hard" },      Achievement = "POR_HappyHour" },
     [Isaac.GetItemIdByName("Golden Apple")]      = { Requires = { "Satan_Hard" },      Achievement = "POR_GoldenApple" },
     [Isaac.GetItemIdByName("Holy Smokes!")]      = { Requires = { "BlueBaby_Hard" },   Achievement = "POR_HolySmokes" },
@@ -113,14 +105,15 @@ POR.ItemUnlocks = {
     [Isaac.GetItemIdByName("The Memoir")]        = { Requires = { "Delirium_Hard" },   Achievement = "POR_Memoir" },
     [Isaac.GetItemIdByName("Old Brick")]         = { Requires = { "Beast_Hard" },      Achievement = "POR_OldBrick" },
     [Isaac.GetItemIdByName("Gold Brick")]        = { Requires = { "UltraGreed_Hard" }, Achievement = "POR_GoldBrick" },
+    [Isaac.GetItemIdByName("The Masons")]        = { Requires = { "Mom_Hard" },        Achievement = "POR_Masons" },
 
-    -- Tainted Nehemiah Unlocks (any difficulty)
+    -- Tainted Nehemiah Unlocks; the _Any suffix reads The Condemned's marks, also earned on hard
     [Isaac.GetItemIdByName("Cursed Ring")] = { Requires = { "Isaac_Any", "BlueBaby_Any", "Satan_Any", "TheLamb_Any" }, Achievement = "POR_CursedRing" },
     [Isaac.GetItemIdByName("Book of Ezra")] = { Requires = { "Delirium_Any" }, Achievement = "POR_BookEzra" },
     -- Pool gate only; the guaranteed start of run grant for Tainted Nehemiah bypasses the pool in nehemiah.lua
     [Isaac.GetItemIdByName("Pistanthrophobia")] = { Requires = { "Beast_Any" }, Achievement = "POR_Piss" },
 
-    -- Challenge reward, gated on the achievement the challenge awards rather than on a boss kill, so no Achievement field grants it back
+    -- Challenge reward, gated on the achievement the challenge awards rather than on a mark, so no Achievement field grants it back
     [Isaac.GetItemIdByName("Spike")] = { RequiresAchievement = "POR_Spike" },
 }
 
@@ -130,7 +123,7 @@ POR.TrinketUnlocks = {
     [Isaac.GetTrinketIdByName("Butterfly Wings")] = { Requires = { "Mother_Hard" }, Achievement = "POR_ButterflyWings" },
 }
 
--- Grants every achievement whose unlock flags are already set, reading the same tables that gate the pools so the two can never disagree
+-- Grants every achievement whose requirement is already met, reading the same tables that gate the pools so the two can never disagree
 function POR.SyncUnlockAchievements()
     if not POR.UnlockAchievement then return end
 
@@ -163,7 +156,7 @@ function POR.OnGameStartedApplyUnlockGates()
 end
 --#endregion
 
---#region "Complete the Nehemiah track" master reward; Every _Hard flag from the Nehemiah Unlocks list; Mom's Heart is explicitly excluded per spec
+--#region "Complete the Nehemiah track" master reward; every _Hard flag from the Nehemiah Unlocks list; Mom's Heart is explicitly excluded per spec
 local NEHEMIAH_COMPLETION_FLAGS = {
     "Mom_Hard", "Isaac_Hard", "Satan_Hard", "BlueBaby_Hard", "TheLamb_Hard", "MegaSatan_Hard",
     "BossRush_Hard", "Hush_Hard", "Delirium_Hard", "Mother_Hard", "Beast_Hard",

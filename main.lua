@@ -33,6 +33,7 @@ POR_Orpiment            = include("sharedscripts.items.orpiment")
 POR_Ammoniac            = include("sharedscripts.items.ammoniac")
 POR_SecretDoor          = include("nehemiahscripts.misc.custom_secret_door")
 POR_Sealed              = include("nehemiahscripts.misc.sealed")
+POR_BetaTimer           = include("nehemiahscripts.challenges.beta_timer")
 
 -- -- Nehemiah
 -- -- -- Characters
@@ -68,8 +69,11 @@ POR_FiendFolioCompat    = include("sharedscripts.compat.fiendfolio")
 POR_GodsGambitCompat    = include("sharedscripts.compat.godsgambit")
 POR_NehemiahsChisel     = include("nehemiahscripts.compat.nehemiahs_chisel")
 
--- TEMPORARY: registers the "porcostume" console command used to diagnose the invisible Ammoniac costume, delete this line and sharedscripts/debug once that is resolved
+-- TEMPORARY: registers the "porcostume" console command used to diagnose the invisible Ammoniac costume, delete this line once that is resolved
 POR_CostumeProbe        = include("sharedscripts.debug.costume_probe")
+
+-- Registers the nehemiah_ and nehemiaht_ console commands that toggle completion marks
+POR_CompletionCommands  = include("sharedscripts.debug.completion_commands")
 
 POR_DumbLuck            = include("nehemiahscripts.trinkets.dumb_luck")
 POR_OilyBranch          = include("nehemiahscripts.trinkets.oily_branch")
@@ -83,6 +87,12 @@ POR_OtherCards          = include("nehemiahscripts.pickups.other_cards")
 POR_CardPool            = include("nehemiahscripts.pickups.card_pool")
 POR_CementHeart         = include("nehemiahscripts.pickups.cement_heart")
 POR_Runes               = include("nehemiahscripts.pickups.runes")
+
+-- Loaded after cement_heart.lua, since it overwrites the clot spritesheet that file registers
+POR_SlimeClotsCompat    = include("sharedscripts.compat.slime_clots")
+
+-- TEMPORARY: registers the "porcompat" console command used to check which other mods the compat gates can see, delete once those are confirmed
+POR_CompatProbe         = include("sharedscripts.debug.compat_probe")
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Initializes Save Handler
@@ -112,6 +122,8 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, mod.PostRender)
 -- Callbacks
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT,  POR.NehemiahInit)
 POR:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT,  POR.TaintedNehemiahInit)
+POR:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, POR.NehemiahLostSkin)
+POR:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, POR.NehemiahLostSheet)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.NehemiahHammerUse,  NEHEMIAHSHAMMER_ITEM_ID)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.BookofEzraUse,      BOOKOFEZRA_ITEM_ID)
 POR:AddCallback(ModCallbacks.MC_USE_ITEM,          POR.BookofNehemiahUse,  BOOKOFNEHEMIAH_ITEM_ID)
@@ -158,6 +170,9 @@ POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL,       POR.BookofEzraNewLevel)
 POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL,       POR.ShopRaid.OnNewLevel)
 
 POR:AddCallback(ModCallbacks.MC_POST_GAME_STARTED,    POR.Challenges.OnGameStarted)
+POR:AddCallback(ModCallbacks.MC_POST_RENDER,          POR.BetaTimer.OnRender)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL,       POR.BetaTimer.OnNewLevel)
+POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.BetaTimer.OnUpdate)
 POR:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, POR.Challenges.SyncChallengeUnlocks)
 POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,       POR.BookofNehemiahGreedDeath)
 POR:AddCallback(ModCallbacks.MC_POST_MODS_LOADED,     POR.BookofNehemiahLoadRooms)
@@ -165,6 +180,7 @@ POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,        POR.BookofNehemiahNewRoom)
 POR:AddCallback(ModCallbacks.MC_PRE_GRID_ENTITY_DOOR_RENDER,  POR.BookofNehemiahDoorRender)
 POR:AddCallback(ModCallbacks.MC_POST_GRID_ENTITY_DOOR_UPDATE, POR.BookofNehemiahDoorUpdate)
 POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.ShopRaid.OnUpdate)
+POR:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,        POR.ShopRaid.OnNewRoom)
 
 -- The Masons
 POR:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,       POR.MasonsEvaluateCache, CacheFlag.CACHE_FAMILIARS)
@@ -276,11 +292,11 @@ POR:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL,       POR.SecretRoomChallenge.On
 -- Nehemiah character
 POR:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, POR.OnAddCollectibleBirthrightSwap)
 
--- Unlock Manager
-POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,       POR.OnNpcDeathGrantBossUnlock)
-POR:AddCallback(ModCallbacks.MC_POST_UPDATE,          POR.OnUpdateCheckBossRushClear)
+-- Unlock Manager, which reads completion marks, so the achievement sweep runs whenever a mark is earned rather than on a boss death
 POR:AddCallback(ModCallbacks.MC_POST_GAME_STARTED,    POR.OnGameStartedApplyUnlockGates)
 POR:AddCallback(ModCallbacks.MC_POST_GAME_STARTED,    POR.SyncUnlockAchievements)
+POR:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, POR.SyncUnlockAchievements)
+POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,       POR.OnMomDeathRecordHardKill, EntityType.ENTITY_MOM)
 
 POR:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,       POR.CharacterUnlocks.OnGideonDeath, 907) -- Great Gideon
 

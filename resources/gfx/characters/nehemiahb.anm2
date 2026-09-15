@@ -1,10 +1,10 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="4/2/2026 4:24:30 PM" Version="166" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="9/15/2026 11:01:38 AM" Version="167" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="costumes\characterb_nehemiah.png" Id="0"/>
-			<Spritesheet Path="costumes\ghost.png" Id="1"/>
-			<Spritesheet Path="costumes\characterb_nehemiah_extra.png" Id="2"/>
+			<Spritesheet Path="costumes_nehemiahb\ghostNB.png" Id="1"/>
+			<Spritesheet Path="costumes_nehemiahb\characterb_nehemiah_extra.png" Id="2"/>
 		</Spritesheets>
 		<Layers>
 			<Layer Name="glow" Id="0" SpritesheetId="0"/>

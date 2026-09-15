@@ -1,7 +1,7 @@
 local game = Game()
 
 BOOKOFNEHEMIAH_ITEM_ID = Isaac.GetItemIdByName("Book of Nehemiah") -- item id of Book of Nehemiah
-local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("The Condemned", true)
+local TAINTED_NEHEMIAH_TYPE = Isaac.GetPlayerTypeByName("Nehemiah", true)
 local doorsClosedForGreed = false -- tracks whether the raid is still waiting for Super Greed to die
 local raidingPlayer = nil -- the player who started the raid, remembered for the luck check on the Super Greed death
 
@@ -229,10 +229,13 @@ end
 function POR:BookofNehemiahGreedDeath(npc)
     if POR.ShopRaid.IsRaidBoss(npc) and doorsClosedForGreed then
         doorsClosedForGreed = false
+
+        local inRaidRoom = POR.ShopRaid.IsInRaidRoom() -- read before Finish, which clears the room it was tracking
         POR.ShopRaid.Finish()
 
         local player = raidingPlayer
         raidingPlayer = nil
+        if not inRaidRoom then return end
         if not player or not player:Exists() then return end
 
         POR.ShopRaid.ClearTrapdoors()
